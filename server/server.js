@@ -12,9 +12,20 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Improved CORS configuration
+// Improved CORS configuration: allow localhost in dev and a single production origin
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: '*', // Allow all origins for development - restrict in production
+  origin: function (origin, callback) {
+    // Allow non-browser requests (no origin), e.g., Postman/cURL
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-auth-token', 'Authorization'],
   credentials: true,

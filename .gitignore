@@ -1,5 +1,26 @@
 # Dependencies
 node_modules/
+
+# Build outputs
+build/
+dist/
+
+# Env and secrets
+.env*
+
+# Logs and coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vercel
+.idea/
+.vscode/
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
