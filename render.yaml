@@ -15,6 +15,11 @@ services:
         value: "18"
       - key: JWT_SECRET
         generateValue: true
+      # Allow using a single DATABASE_URL for external providers
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSL
+        value: "true"
       - key: DB_HOST
         sync: false
       - key: DB_PORT
@@ -26,10 +31,10 @@ services:
       - key: DB_PASSWORD
         sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: "https://cicl.vercel.app"
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_REDIRECT_URI
-        sync: false
+        value: "https://cicl.onrender.com/api/auth/google/callback"
