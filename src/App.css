@@ -1,0 +1,455 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+  background-color: #f8fafc;
+  color: #475569;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Auth Forms */
+.auth-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #0ea5e9;
+}
+
+.lead {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #64748b;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #0ea5e9;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #0284c7;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.btn-success {
+  background-color: #0ea5e9;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background-color: #0284c7;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.btn-danger {
+  background-color: #f87171;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background-color: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: #0ea5e9;
+  border: 1px solid #0ea5e9;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0ea5e9;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  color: #0ea5e9;
+  border: 1px solid #0ea5e9;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #0ea5e9;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.alert {
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.alert-danger {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Form Controls - Fixed positioning and non-resizable */
+.form-control {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #475569;
+  background-color: #fff;
+  resize: none; /* Prevent resizing */
+  position: relative; /* Fixed positioning */
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.15);
+  outline: 0;
+}
+
+.form-control::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+/* Textarea specific styles */
+textarea.form-control {
+  resize: none !important; /* Force no resize */
+  overflow-y: auto;
+  min-height: 80px;
+}
+
+/* Input field containers */
+.form-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+/* Prevent dragging of form elements */
+input, textarea, select {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.auth-redirect {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.auth-redirect a {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+
+.auth-redirect a:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+/* Text Colors - Consistent with Navigation Bar */
+h1, h2, h3, h4, h5, h6 {
+  color: #0ea5e9;
+}
+
+.text-primary {
+  color: #0ea5e9 !important;
+}
+
+.text-secondary {
+  color: #64748b !important;
+}
+
+.text-dark {
+  color: #475569 !important;
+}
+
+.border-bottom {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Form Labels */
+.form-label {
+  color: #475569;
+  font-weight: 600;
+}
+
+/* Card Headers */
+.card-header {
+  background-color: #0ea5e9 !important;
+  color: white !important;
+}
+
+/* Navigation and Links */
+.nav-link {
+  color: #0ea5e9;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #0284c7;
+}
+
+/* Dashboard */
+.dashboard-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-info {
+  margin-bottom: 30px;
+}
+
+.user-info h4 {
+  margin-bottom: 15px;
+  color: #0ea5e9;
+}
+
+.user-info p {
+  margin-bottom: 10px;
+}
+
+/* Message Styles */
+.message {
+  position: relative;
+}
+
+.message:hover .message-actions {
+  opacity: 1 !important;
+}
+
+.hover-visible {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.z-index-dropdown {
+  z-index: 1000;
+}
+
+/* Landing Page Styles */
+.landing-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 20px;
+}
+
+.landing-content {
+  max-width: 800px;
+  text-align: center;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.landing-title {
+  font-size: 2.5rem;
+  color: #0ea5e9;
+  margin-bottom: 20px;
+}
+
+.landing-description {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin-bottom: 40px;
+}
+
+.landing-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.landing-btn {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #0ea5e9;
+  border: 2px solid #0ea5e9;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background-color: #0ea5e9;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+}
+
+/* Layout Styles */
+.full-width-container {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.content-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  margin-left: 84px;
+  width: calc(100% - 84px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 84px;
+  height: 100vh;
+  background-color: #0ea5e9;
+  z-index: 1000;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgba(14, 165, 233, 0.1);
+}
+
+.sidebar .nav-link {
+  color: white !important;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
+}
+
+/* Sidebar active link styles */
+.sidebar .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar .nav-link.active:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Sidebar hover effects */
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Responsive sidebar */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+    overflow: hidden;
+  }
+  
+  .sidebar:hover {
+    width: 250px;
+    overflow: visible;
+  }
+  
+  .content-area {
+    margin-left: 60px;
+  }
+  
+  .sidebar:hover + .content-area {
+    margin-left: 250px;
+  }
+}
+
+.sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.notification-panel {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+}
+
+/* Adjust content area to account for fixed sidebar */
+/* This rule is now redundant as it's been moved to the main .content-area rule */

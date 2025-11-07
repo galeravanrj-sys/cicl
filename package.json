@@ -1,0 +1,92 @@
+{
+  "name": "cicl",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@mui/icons-material": "^7.1.0",
+    "@mui/material": "^7.1.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "bootstrap": "^5.3.6",
+    "chart.js": "^4.4.9",
+    "cors": "^2.8.5",
+    "docx": "^9.5.1",
+    "dotenv": "^16.5.0",
+    "emoji-picker-react": "^4.12.2",
+    "express": "^5.1.0",
+    "firebase": "^11.7.1",
+    "google-auth-library": "^10.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
+    "pg": "^8.15.6",
+    "react": "^19.1.0",
+    "react-bootstrap": "^2.10.10",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.9.1",
+    "react-scripts": "5.0.1",
+    "simplebar-react": "^3.3.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "start:full": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "cd frontend && npm start",
+    "build": "react-scripts build",
+    "test": "npm run test:main",
+    "test:frontend": "cd frontend && npm test",
+    "test:server": "cd server && npm test",
+    "test:main": "vitest run src/test/ --passWithNoTests",
+    "test:watch": "concurrently \"npm run test:frontend -- --watch\" \"npm run test:server -- --watch\" \"npm run test:main -- --watch\"",
+    "test:coverage": "node test-runner.js --coverage",
+    "test:ci": "node test-runner.js --fail-fast --coverage",
+    "test:component": "node test-runner.js --component",
+    "eject": "cd frontend && npm run eject",
+    "server": "cd server && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "proxy": "http://localhost:5000",
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "concurrently": "^8.0.0",
+    "jsdom": "^27.0.0",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
+  }
+}
