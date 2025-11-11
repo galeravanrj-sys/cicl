@@ -12,9 +12,14 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
-const oauth2Client = (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET)
-  ? new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI)
-  : null;
+const inferProto = (req) => {
+  const xf = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  return xf || req.protocol || 'https';
+};
+const getRedirectUri = (req) => {
+  return GOOGLE_REDIRECT_URI || `${inferProto(req)}://${req.get('host')}/api/auth/google/callback`;
+};
+const createOAuthClient = (redirectUri) => new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
 
 const router = express.Router();
 
@@ -264,10 +269,12 @@ router.post('/forgot-password', async (req, res) => {
 module.exports = router;
 
 // Google OAuth routes
-if (oauth2Client) {
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   // Initiate Google OAuth flow
   router.get('/google', (req, res) => {
     try {
+      const redirectUri = getRedirectUri(req);
+      const oauth2Client = createOAuthClient(redirectUri);
       // Carry remember flag through OAuth state
       const remember = req.query.remember === '0' ? '0' : '1';
       const state = encodeURIComponent(JSON.stringify({ remember }));
@@ -276,8 +283,10 @@ if (oauth2Client) {
         prompt: 'consent',
         scope: [
           'https://www.googleapis.com/auth/userinfo.email',
-          'https://www.googleapis.com/auth/userinfo.profile'
+          'https://www.googleapis.com/auth/userinfo.profile',
+          'openid'
         ],
+        redirect_uri: redirectUri,
         state
       });
       return res.redirect(url);
@@ -290,6 +299,8 @@ if (oauth2Client) {
   // Google OAuth callback handler
   router.get('/google/callback', async (req, res) => {
     try {
+      const redirectUri = getRedirectUri(req);
+      const oauth2Client = createOAuthClient(redirectUri);
       const { code } = req.query;
       if (!code) {
         return res.status(400).json({ message: 'Authorization code missing' });

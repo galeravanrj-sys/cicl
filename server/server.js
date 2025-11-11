@@ -11,6 +11,8 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+// Behind Render/Vercel proxies, trust X-Forwarded-* headers for correct protocol/host
+app.set('trust proxy', 1);
 
 // Improved CORS configuration: allow localhost in dev and a single production origin
 const allowedOrigins = [
