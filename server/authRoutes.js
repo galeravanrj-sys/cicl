@@ -378,7 +378,9 @@ if (oauth2Client) {
       });
       return res.redirect(`${baseUrl}${redirectPath}?${query.toString()}`);
     } catch (error) {
-      console.error('Google callback error:', error && error.message ? error.message : error);
+      const msg = error && error.message ? error.message : String(error);
+      const details = error && error.response && error.response.data ? error.response.data : undefined;
+      console.error('Google callback error:', msg, details ? `| details: ${JSON.stringify(details)}` : '');
       return res.status(500).json({ message: 'Google authentication failed' });
     }
   });

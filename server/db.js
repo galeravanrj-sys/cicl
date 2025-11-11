@@ -17,10 +17,16 @@ const logEnvPresence = () => {
 };
 if (process.env.NODE_ENV === 'production') logEnvPresence();
 
+const hostLooksLikeUrl = (s) => typeof s === 'string' && /:\/\//.test(s);
+
 let pool;
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL || process.env.DB_URL || hostLooksLikeUrl(process.env.DB_HOST)) {
+  const connectionString = process.env.DATABASE_URL || process.env.DB_URL || process.env.DB_HOST;
+  if (hostLooksLikeUrl(process.env.DB_HOST) && !process.env.DATABASE_URL && !process.env.DB_URL) {
+    console.warn('[DB CONFIG] Detected full connection string in DB_HOST; using it as connectionString. Consider moving it to DATABASE_URL.');
+  }
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
     ssl: useSsl(),
   });
 } else {
