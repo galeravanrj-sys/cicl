@@ -115,6 +115,37 @@ server.listen(PORT, () => {
   console.log(`HTTP Server running on port ${PORT}`);
 });
 
+// Ensure base schema exists before enforcing indexes/tables
+async function ensureBaseSchema() {
+  try {
+    const existsRes = await db.query(`
+      SELECT 
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='users') AS has_users,
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='cases') AS has_cases
+    `);
+    const { has_users, has_cases } = existsRes.rows[0] || {};
+    if (has_users && has_cases) {
+      return; // base tables present
+    }
+    const fs = require('fs');
+    const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
+    if (!fs.existsSync(schemaPath)) {
+      console.warn('Schema file not found, skipping base schema application:', schemaPath);
+      return;
+    }
+    const sql = fs.readFileSync(schemaPath, 'utf8');
+    const client = await db.getClient();
+    try {
+      await client.query(sql);
+      console.log('✅ Applied base schema from schema.sql');
+    } finally {
+      client.release();
+    }
+  } catch (e) {
+    console.error('❌ Failed to apply base schema:', e.message);
+  }
+}
+
 // Database index migration: enforce case-insensitive name uniqueness
 async function ensureUniqueNameIndex() {
   try {
@@ -150,5 +181,7 @@ async function ensureActiveSessionsTable() {
 }
 
 // Execute migration at startup
-ensureUniqueNameIndex();
-ensureActiveSessionsTable();
+ensureBaseSchema().then(() => {
+  ensureUniqueNameIndex();
+  ensureActiveSessionsTable();
+});
