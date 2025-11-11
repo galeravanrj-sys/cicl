@@ -2,29 +2,34 @@
 // Provides comprehensive, well-structured CSV exports with enhanced organization and readability
 // Designed for professional data analysis and reporting
 
+// Strict date-only normalizer used across CSV exports
+const toDateOnly = (value) => {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  // If already like YYYY-MM-DD (with or without trailing time), take the date part
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/);
+  if (m) return m[1];
+  // US-style MM/DD/YYYY
+  const us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/);
+  if (us) {
+    const mm = us[1].padStart(2, '0');
+    const dd = us[2].padStart(2, '0');
+    const yyyy = us[3];
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  // Numbers: treat as epoch ms if number; else attempt Date parse
+  const d = typeof value === 'number' ? new Date(value) : new Date(s);
+  if (isNaN(d.getTime())) return s;
+  return d.toISOString().split('T')[0];
+};
+
 export const generateCaseReportCSV = (caseData) => {
   // Enhanced helper to clean and format text for CSV with better handling
   const formatTextForCSV = (text) => {
     if (!text) return '';
     let s = String(text).trim();
     // Force date-only for common date-like strings
-    const isoDate = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*Z?)?$/);
-    const usDate = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/); // e.g., 2/1/2017
-    if (isoDate) {
-      s = isoDate[1];
-    } else if (usDate) {
-      // Normalize MM/DD/YYYY -> YYYY-MM-DD
-      const mm = usDate[1].padStart(2, '0');
-      const dd = usDate[2].padStart(2, '0');
-      const yyyy = usDate[3];
-      s = `${yyyy}-${mm}-${dd}`;
-    } else {
-      // Fallback: try parsing anything that looks like a date
-      const maybeDate = new Date(s);
-      if (!isNaN(maybeDate.getTime())) {
-        s = maybeDate.toISOString().split('T')[0];
-      }
-    }
+    s = toDateOnly(s);
     const cleanText = s
       .replace(/"/g, '""')
       .replace(/\r\n/g, ' ')
@@ -35,17 +40,7 @@ export const generateCaseReportCSV = (caseData) => {
 
   // Professional date formatting for Excel compatibility (date-only, timezone-agnostic)
   const formatDateForExcel = (dateString) => {
-    if (!dateString) return '';
-    // If input looks like ISO or plain date, prefer the date part without constructing a Date
-    const m = String(dateString).match(/^\d{4}-\d{2}-\d{2}/);
-    if (m) return m[0];
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return String(dateString);
-      return date.toISOString().split('T')[0];
-    } catch {
-      return String(dateString);
-    }
+    return toDateOnly(dateString);
   };
 
   // Enhanced boolean formatting with clear indicators
