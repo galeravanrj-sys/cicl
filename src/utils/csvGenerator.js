@@ -15,16 +15,18 @@ export const generateCaseReportCSV = (caseData) => {
     return `"${cleanText}"`;
   };
 
-  // Professional date formatting for Excel compatibility
+  // Professional date formatting for Excel compatibility (date-only, timezone-agnostic)
   const formatDateForExcel = (dateString) => {
     if (!dateString) return '';
+    // If input looks like ISO or plain date, prefer the date part without constructing a Date
+    const m = String(dateString).match(/^\d{4}-\d{2}-\d{2}/);
+    if (m) return m[0];
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      // Use ISO format for better Excel compatibility
+      if (isNaN(date.getTime())) return String(dateString);
       return date.toISOString().split('T')[0];
-    } catch (error) {
-      return dateString;
+    } catch {
+      return String(dateString);
     }
   };
 
@@ -358,8 +360,11 @@ export const generateAllCasesCSV = (casesData) => {
   };
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    const d = new Date(dateString);
-    return isNaN(d.getTime()) ? String(dateString) : d.toISOString().split('T')[0];
+    const s = String(dateString);
+    const m = s.match(/^\d{4}-\d{2}-\d{2}/);
+    if (m) return m[0];
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toISOString().split('T')[0];
   };
   const calcAge = (birthdate) => {
     if (!birthdate) return '';
@@ -388,7 +393,8 @@ export const generateAllCasesCSV = (casesData) => {
 
   // Compose CSV lines: header block + overview table
   const lines = [];
-  lines.push(`CICL All Cases Export,${new Date().toISOString()}`);
+  // Use date-only to avoid showing timezone/UTC markers in the header
+  lines.push(`CICL All Cases Export,${new Date().toISOString().split('T')[0]}`);
   lines.push('');
   lines.push(`Summary,Total Cases,${casesData.length}`);
   // Status summary
