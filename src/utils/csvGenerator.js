@@ -7,10 +7,23 @@ export const generateCaseReportCSV = (caseData) => {
   const formatTextForCSV = (text) => {
     if (!text) return '';
     let s = String(text).trim();
-    // If the string looks like an ISO timestamp or date, coerce to YYYY-MM-DD
-    const isoMatch = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*Z?)?$/);
-    if (isoMatch) {
-      s = isoMatch[1];
+    // Force date-only for common date-like strings
+    const isoDate = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*Z?)?$/);
+    const usDate = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/); // e.g., 2/1/2017
+    if (isoDate) {
+      s = isoDate[1];
+    } else if (usDate) {
+      // Normalize MM/DD/YYYY -> YYYY-MM-DD
+      const mm = usDate[1].padStart(2, '0');
+      const dd = usDate[2].padStart(2, '0');
+      const yyyy = usDate[3];
+      s = `${yyyy}-${mm}-${dd}`;
+    } else {
+      // Fallback: try parsing anything that looks like a date
+      const maybeDate = new Date(s);
+      if (!isNaN(maybeDate.getTime())) {
+        s = maybeDate.toISOString().split('T')[0];
+      }
     }
     const cleanText = s
       .replace(/"/g, '""')
