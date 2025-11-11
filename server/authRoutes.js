@@ -21,6 +21,30 @@ const getRedirectUri = (req) => {
 };
 const createOAuthClient = (redirectUri) => new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
 
+// Helper to fetch Google profile via OIDC id_token or userinfo endpoint
+async function getGoogleProfile(oauth2Client, tokens) {
+  // Prefer verifying ID token if present
+  if (tokens && tokens.id_token) {
+    const ticket = await oauth2Client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    return {
+      email: payload.email,
+      given_name: payload.given_name,
+      family_name: payload.family_name,
+      name: payload.name,
+      picture: payload.picture,
+    };
+  }
+  // Fallback: call userinfo endpoint with access token
+  const profileRes = await axios.get('https://openidconnect.googleapis.com/v1/userinfo', {
+    headers: { Authorization: `Bearer ${tokens.access_token}` }
+  });
+  return profileRes.data;
+}
+
 const router = express.Router();
 
 // Add this new route for diagnostic purposes
@@ -306,14 +330,12 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
         return res.status(400).json({ message: 'Authorization code missing' });
       }
 
-      const { tokens } = await oauth2Client.getToken(code);
+      // Explicitly pass redirect_uri to avoid mismatch issues
+      const { tokens } = await oauth2Client.getToken({ code, redirect_uri: redirectUri });
       oauth2Client.setCredentials(tokens);
 
-      // Fetch user profile
-      const profileRes = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${tokens.access_token}` }
-      });
-      const profile = profileRes.data;
+      // Fetch user profile (OIDC preferred)
+      const profile = await getGoogleProfile(oauth2Client, tokens);
 
       const email = profile.email;
       const firstName = profile.given_name || '';
