@@ -6,12 +6,17 @@ export const generateCaseReportCSV = (caseData) => {
   // Enhanced helper to clean and format text for CSV with better handling
   const formatTextForCSV = (text) => {
     if (!text) return '';
-    const cleanText = String(text)
+    let s = String(text).trim();
+    // If the string looks like an ISO timestamp or date, coerce to YYYY-MM-DD
+    const isoMatch = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*Z?)?$/);
+    if (isoMatch) {
+      s = isoMatch[1];
+    }
+    const cleanText = s
       .replace(/"/g, '""')
       .replace(/\r\n/g, ' ')
       .replace(/\n/g, ' ')
-      .replace(/\r/g, ' ')
-      .trim();
+      .replace(/\r/g, ' ');
     return `"${cleanText}"`;
   };
 
