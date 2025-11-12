@@ -28,7 +28,12 @@ export const generateCaseReportCSV = (caseData) => {
   const formatTextForCSV = (text) => {
     if (!text) return '';
     let s = String(text).trim();
-    // Force date-only for common date-like strings
+    // Normalize embedded date-like tokens inside free text
+    // ISO-like tokens: 2020-01-02T00:00:00.000Z -> 2020-01-02
+    s = s.replace(/(\d{4}-\d{2}-\d{2})[T\s][0-9:.+\-Z]+/g, '$1');
+    // US-style tokens: 2/1/2017 -> 2017-02-01
+    s = s.replace(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (_, mm, dd, yyyy) => `${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`);
+    // If the entire string is a date, enforce date-only
     s = toDateOnly(s);
     const cleanText = s
       .replace(/"/g, '""')
