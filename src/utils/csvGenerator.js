@@ -17,10 +17,8 @@ const toDateOnly = (value) => {
     const yyyy = us[3];
     return `${yyyy}-${mm}-${dd}`;
   }
-  // Numbers: treat as epoch ms if number; else attempt Date parse
-  const d = typeof value === 'number' ? new Date(value) : new Date(s);
-  if (isNaN(d.getTime())) return s;
-  return d.toISOString().split('T')[0];
+  // No generic Date parsing; leave non-matching strings untouched
+  return s;
 };
 
 export const generateCaseReportCSV = (caseData) => {
@@ -376,14 +374,7 @@ export const generateAllCasesCSV = (casesData) => {
       .trim();
     return `"${clean}"`;
   };
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const s = String(dateString);
-    const m = s.match(/^\d{4}-\d{2}-\d{2}/);
-    if (m) return m[0];
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? s : d.toISOString().split('T')[0];
-  };
+  const formatDate = (dateString) => toDateOnly(dateString);
   const calcAge = (birthdate) => {
     if (!birthdate) return '';
     const d = new Date(birthdate);
