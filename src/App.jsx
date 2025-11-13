@@ -14,6 +14,7 @@ import Program from './components/Program';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Notifications from './components/Notifications';
+import AfterCare from './components/AfterCare';
 
 import CaseDetailsPage from './components/CaseDetailsPage';
 import Layout from './components/Layout';
@@ -161,6 +162,16 @@ function App() {
                     <PrivateRoute>
                       <Layout>
                         <ArchivedCases />
+                      </Layout>
+                    </PrivateRoute>
+                  } 
+                />
+                <Route 
+                  path="/after-care" 
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <AfterCare />
                       </Layout>
                     </PrivateRoute>
                   } 

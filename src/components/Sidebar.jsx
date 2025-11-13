@@ -221,6 +221,20 @@ const Sidebar = () => {
         {isAdmin && (
           <li className="w-100 mb-3 text-center">
             <Link 
+              to="/after-care"
+              className={`nav-link text-white w-100 ${isActiveLink('/after-care') ? 'active' : ''}`} 
+              style={navLinkStyle}
+            >
+              <div style={iconStyle}>
+                <i className="fas fa-hands-helping"></i>
+              </div>
+              <div style={labelStyle}>After Care</div>
+            </Link>
+          </li>
+        )}
+        {isAdmin && (
+          <li className="w-100 mb-3 text-center">
+            <Link 
               to="/program"
               className={`nav-link text-white w-100 ${isActiveLink('/program') ? 'active' : ''}`} 
               style={navLinkStyle}
