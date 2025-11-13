@@ -142,52 +142,89 @@ const AfterCare = () => {
   }, [lastUpdate]);
 
   return (
-    <div className="container-fluid">
-      <div className="d-flex align-items-center justify-content-between mb-3">
-        <h2 className="mb-0">After Care</h2>
-        <div className="text-muted">Total: {totalItems}</div>
-      </div>
+    <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      <h2 className="mb-4 border-bottom pb-3 text-dark">After Care ({totalItems})</h2>
 
-      <div className="card">
+      {/* Cases Table */}
+      <div className="card border-0 rounded-4 shadow-sm">
         <div className="card-body p-0">
           <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="bg-light">
+            <table className="table table-hover mb-0">
+              <thead style={{ backgroundColor: '#f8f9fa' }}>
                 <tr>
-                  <th className="px-4 py-3 fw-bold">Name</th>
-                  <th className="px-4 py-3 fw-bold">Age</th>
-                  <th className="px-4 py-3 fw-bold">Program</th>
-                  <th className="px-4 py-3 fw-bold">Status</th>
-                  <th className="px-4 py-3 fw-bold">Last Updated</th>
-                  <th className="px-4 py-3 fw-bold">Actions</th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-user me-2 text-primary"></i>Name
+                  </th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-birthday-cake me-2 text-primary"></i>Age
+                  </th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-briefcase me-2 text-primary"></i>Program
+                  </th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-tags me-2 text-primary"></i>Status
+                  </th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-calendar me-2 text-primary"></i>Last Updated
+                  </th>
+                  <th className="px-4 py-3 text-dark fw-bold">
+                    <i className="fas fa-cogs me-2 text-primary"></i>Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center py-5 text-muted">
-                      No After Care cases.
+                    <td colSpan="6" className="text-center py-5">
+                      <i className="fas fa-hands-helping fa-3x mb-3 text-muted"></i>
+                      <br />
+                      <span className="text-muted">No After Care cases.</span>
                     </td>
                   </tr>
                 ) : (
                   pageItems.map((c, idx) => (
-                    <tr key={c.id || idx}>
+                    <tr 
+                      key={c.id || idx}
+                      style={{ borderBottom: '1px solid #eee', transition: 'background-color 0.2s ease' }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
                       <td className="px-4 py-3">
-                        <div className="fw-semibold">{c.name || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'No Name'}</div>
+                        <div className="d-flex align-items-center">
+                          <div 
+                            className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                            style={{ width: '40px', height: '40px', fontSize: '16px', fontWeight: 'bold' }}
+                          >
+                            {(c.name || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'N').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="fw-semibold text-dark">{c.name || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'No Name'}</div>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-4 py-3">{c.age || 'N/A'}</td>
-                      <td className="px-4 py-3">{c.program || c.programType || 'N/A'}</td>
                       <td className="px-4 py-3">
-                        <span className="badge bg-secondary">After Care</span>
+                        <span 
+                          className="badge rounded-pill px-3 py-2"
+                          style={{ backgroundColor: '#1e3a8a', color: 'white', fontSize: '12px', fontWeight: '500' }}
+                        >
+                          {c.age || 'N/A'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="badge bg-info text-dark px-3 py-2 rounded-pill">
+                          <i className="fas fa-briefcase me-1"></i>
+                          {c.program || c.programType || 'No Program'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="badge bg-secondary text-white px-3 py-2 rounded-pill">After Care</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-dark">
                           <i className="fas fa-calendar-alt me-2 text-muted"></i>
                           {formatDate(c.lastUpdated)}
                         </div>
-                        <small className="text-muted">
-                          {formatTime(c.lastUpdated)}
-                        </small>
+                        <small className="text-muted">{formatTime(c.lastUpdated)}</small>
                       </td>
                       <td className="px-4 py-3">
                         <button
