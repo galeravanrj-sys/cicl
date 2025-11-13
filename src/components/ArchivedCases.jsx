@@ -203,6 +203,8 @@ const ArchivedCases = () => {
 
       updateCase(updatedCase);
       alert('Case moved to After Care successfully');
+      // Navigate to After Care page for immediate feedback
+      navigate('/after-care', { state: { triggerRefresh: true } });
     } catch (err) {
       console.error('Error moving case to After Care:', err);
       alert(err.response?.data?.message || 'Failed to move case to After Care');

@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useCases } from '../context/CaseContext';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { API_BASE } from '../utils/apiBase';
+import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 
 const AfterCare = () => {
-  const { allCases, fetchAllCases, lastUpdate } = useCases();
+  const { allCases, fetchAllCases, lastUpdate, updateCase } = useCases();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const navigate = useNavigate();
@@ -49,6 +52,90 @@ const AfterCare = () => {
   const handlePageChange = (p) => setCurrentPage(p);
   const handleItemsPerPageChange = (n) => { setItemsPerPage(n); setCurrentPage(1); };
   const handleViewCase = (caseId) => navigate(`/case-details/${caseId}`);
+
+  const handleDischarge = async (caseItem) => {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required');
+        return;
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token,
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
+      if (!fullDetails) {
+        alert('Unable to fetch full case details.');
+        return;
+      }
+
+      const updatedCaseData = {
+        firstName: fullDetails.first_name,
+        lastName: fullDetails.last_name,
+        middleName: fullDetails.middle_name,
+        sex: fullDetails.sex,
+        birthdate: fullDetails.birthdate,
+        status: 'archived',
+        religion: fullDetails.religion,
+        address: fullDetails.address,
+        sourceOfReferral: fullDetails.source_of_referral,
+        caseType: fullDetails.case_type,
+        programType: fullDetails.program_type,
+        problemPresented: fullDetails.problem_presented,
+        briefHistory: fullDetails.brief_history,
+        economicSituation: fullDetails.economic_situation,
+        medicalHistory: fullDetails.medical_history,
+        familyBackground: fullDetails.family_background,
+        clientDescription: fullDetails.client_description,
+        parentsDescription: fullDetails.parents_description,
+        recommendation: fullDetails.recommendation,
+        assessment: fullDetails.assessment,
+        checklist: fullDetails.checklist,
+        lastUpdated: new Date().toISOString()
+      };
+
+      const response = await axios.put(
+        `${API_BASE}/cases/${caseItem.id}`,
+        updatedCaseData,
+        config
+      );
+
+      const calculateAge = (birthdate) => {
+        if (!birthdate) return 'N/A';
+        const today = new Date();
+        const birth = new Date(birthdate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+          age -= 1;
+        }
+        return age;
+      };
+
+      const updatedCase = {
+        id: response.data.id,
+        name: `${response.data.first_name} ${response.data.last_name}`,
+        age: calculateAge(response.data.birthdate),
+        programType: response.data.program_type,
+        status: 'archived',
+        lastUpdated: response.data.last_updated || response.data.updated_at || new Date().toISOString(),
+        profile_picture: response.data.profile_picture
+      };
+
+      updateCase(updatedCase);
+      alert('Case discharged successfully');
+      navigate('/archived-cases', { state: { triggerRefresh: true } });
+    } catch (err) {
+      console.error('Error discharging case from After Care:', err);
+      alert(err.response?.data?.message || 'Failed to discharge case');
+    }
+  };
 
   useEffect(() => {
     console.log('AfterCare: update', lastUpdate);
@@ -108,6 +195,13 @@ const AfterCare = () => {
                           onClick={() => handleViewCase(c.id)}
                         >
                           <i className="fas fa-eye me-1"></i>View Details
+                        </button>
+                        <button
+                          className="btn btn-warning btn-sm ms-2"
+                          title="Discharge"
+                          onClick={() => handleDischarge(c)}
+                        >
+                          <i className="fas fa-sign-out-alt me-1"></i>Discharge
                         </button>
                       </td>
                     </tr>
