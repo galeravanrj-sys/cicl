@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
+import { PDFDocument } from 'pdf-lib';
 
 export const generateCaseReportPDF = (caseData) => {
   const doc = new jsPDF();
@@ -616,9 +617,111 @@ export const generateCaseReportPDF = (caseData) => {
   return doc;
 };
 
-export const downloadCaseReportPDF = (caseData) => {
-  const doc = generateCaseReportPDF(caseData);
+const buildTemplateData = (c) => ({
+  first_name: c.firstName || c.first_name || '',
+  middle_name: c.middleName || c.middle_name || '',
+  last_name: c.lastName || c.last_name || '',
+  sex: c.sex || '',
+  birthdate: c.birthdate || '',
+  age: c.age || '',
+  civil_status: c.status || '',
+  religion: c.religion || '',
+  address: c.address || '',
+  barangay: c.barangay || '',
+  municipality: c.municipality || '',
+  province: c.province || '',
+  referral_source: c.sourceOfReferral || c.source_of_referral || '',
+  referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
+  case_type: c.caseType || c.programType || c.program_type || '',
+  admission_month: c.admissionMonth || c.admission_month || '',
+  admission_year: c.admissionYear || c.admission_year || '',
+  assigned_house_parent: c.assignedHouseParent || '',
+
+  father_name: c.fatherName || c.father_name || '',
+  father_age: c.fatherAge || c.father_age || '',
+  father_education: c.fatherEducation || c.father_education || '',
+  father_occupation: c.fatherOccupation || c.father_occupation || '',
+  father_other_skills: c.fatherOtherSkills || c.father_other_skills || '',
+  father_address: c.fatherAddress || c.father_address || '',
+  father_income: c.fatherIncome || c.father_income || '',
+  father_living: typeof c.fatherLiving === 'boolean' ? (c.fatherLiving ? 'Yes' : 'No') : (c.fatherLiving || ''),
+
+  mother_name: c.motherName || c.mother_name || '',
+  mother_age: c.motherAge || c.mother_age || '',
+  mother_education: c.motherEducation || c.mother_education || '',
+  mother_occupation: c.motherOccupation || c.mother_occupation || '',
+  mother_other_skills: c.motherOtherSkills || c.mother_other_skills || '',
+  mother_address: c.motherAddress || c.mother_address || '',
+  mother_income: c.motherIncome || c.mother_income || '',
+  mother_living: typeof c.motherLiving === 'boolean' ? (c.motherLiving ? 'Yes' : 'No') : (c.motherLiving || ''),
+
+  guardian_name: c.guardianName || c.guardian_name || '',
+  guardian_relation: c.guardianRelation || c.guardian_relation || '',
+  guardian_age: c.guardianAge || c.guardian_age || '',
+  guardian_education: c.guardianEducation || c.guardian_education || '',
+  guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+  guardian_address: c.guardianAddress || c.guardian_address || '',
+
+  married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
+  live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
+  civil_marriage: typeof c.civilMarriage === 'boolean' ? (c.civilMarriage ? 'Yes' : 'No') : (c.civilMarriage || ''),
+  separated: typeof c.separated === 'boolean' ? (c.separated ? 'Yes' : 'No') : (c.separated || ''),
+  marriage_date_place: c.marriageDatePlace || c.marriage_date_place || '',
+
+  brief_description: c.briefDescription || '',
+  problem_presented: c.problemPresented || c.problem_presented || '',
+  brief_history: c.briefHistory || c.brief_history || '',
+  economic_situation: c.economicSituation || c.economic_situation || '',
+  medical_history: c.medicalHistory || c.medical_history || '',
+  family_background: c.familyBackground || c.family_background || '',
+  assessment: c.assessment || '',
+  recommendation: c.recommendation || ''
+});
+
+export const downloadCaseReportPDF = async (caseData) => {
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.pdf';
+
+  // Try template-based fill with pdf-lib first
+  try {
+    const res = await fetch(templateUrl);
+    if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+    const ab = await res.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab);
+    const form = pdfDoc.getForm();
+    const data = buildTemplateData(caseData);
+
+    // Fill matching fields, ignore missing ones
+    Object.entries(data).forEach(([key, val]) => {
+      try {
+        const field = form.getTextField?.(key) || form.getFieldMaybe?.(key) || form.getField?.(key);
+        if (field && typeof field.setText === 'function') {
+          field.setText(String(val ?? ''));
+        }
+      } catch (_) {
+        // tolerate missing fields
+      }
+    });
+    // Flatten filled fields to regular content
+    try { form.flatten(); } catch (_) {}
+
+    const out = await pdfDoc.save();
+    const blob = new Blob([out], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return;
+  } catch (err) {
+    console.warn('Template-based PDF render failed, falling back to generated PDF:', err);
+  }
+
+  // Fallback: previous jsPDF-based full case report
+  const doc = generateCaseReportPDF(caseData);
   doc.save(fileName);
 };
 
