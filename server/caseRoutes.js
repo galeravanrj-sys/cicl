@@ -107,22 +107,32 @@ router.get('/:id', auth, async (req, res) => {
   try {
     // Get main case data
     const caseResult = await db.query('SELECT * FROM cases WHERE id = $1', [req.params.id]);
-    
+
     if (caseResult.rows.length === 0) {
       return res.status(404).json({ message: 'Case not found' });
     }
-    
+
     const caseData = caseResult.rows[0];
-    
+
     // Get related data from all tables
-    const [lifeSkillsResult, vitalSignsResult, educationalResult, sacramentalResult, agenciesResult] = await Promise.all([
+    const [
+      lifeSkillsResult,
+      vitalSignsResult,
+      educationalResult,
+      sacramentalResult,
+      agenciesResult,
+      familyMembersResult,
+      extendedFamilyResult
+    ] = await Promise.all([
       db.query('SELECT * FROM life_skills WHERE case_id = $1 ORDER BY date_completed DESC', [req.params.id]),
       db.query('SELECT * FROM vital_signs WHERE case_id = $1 ORDER BY date_recorded DESC', [req.params.id]),
       db.query('SELECT * FROM educational_attainment WHERE case_id = $1 ORDER BY level', [req.params.id]),
       db.query('SELECT * FROM sacramental_records WHERE case_id = $1 ORDER BY date_received', [req.params.id]),
-      db.query('SELECT * FROM agencies_persons WHERE case_id = $1 ORDER BY name', [req.params.id])
+      db.query('SELECT * FROM agencies_persons WHERE case_id = $1 ORDER BY name', [req.params.id]),
+      db.query('SELECT * FROM family_members WHERE case_id = $1 ORDER BY relation, name', [req.params.id]),
+      db.query('SELECT * FROM extended_family WHERE case_id = $1 ORDER BY relationship, name', [req.params.id])
     ]);
-    
+
     // Combine all data
     const completeCase = {
       ...caseData,
@@ -130,16 +140,18 @@ router.get('/:id', auth, async (req, res) => {
       vitalSigns: vitalSignsResult.rows,
       educationalAttainment: educationalResult.rows,
       sacramentalRecords: sacramentalResult.rows,
-      agencies: agenciesResult.rows
+      agencies: agenciesResult.rows,
+      familyMembers: familyMembersResult.rows,
+      extendedFamily: extendedFamilyResult.rows
     };
-    
+
     res.json(completeCase);
   } catch (err) {
     console.error('Case fetch error:', err.message);
     console.error('Full error:', err);
     console.error('Stack trace:', err.stack);
-    res.status(500).json({ 
-      message: 'Server error', 
+    res.status(500).json({
+      message: 'Server error',
       error: err.message,
       details: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
