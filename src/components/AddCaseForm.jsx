@@ -3,7 +3,6 @@ import axios from 'axios';
 import { API_HOST } from '../utils/apiBase';
 import CaseDetailsForm from './CaseDetailsForm';
 import { downloadCaseReportPDF } from '../utils/pdfGenerator';
-import { downloadCaseReportWord } from '../utils/wordGenerator';
 import { downloadCaseReportCSV } from '../utils/csvGenerator';
 
 // Create a configured axios instance with authentication
@@ -136,11 +135,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
     e.preventDefault();
     const data = buildCaseDataForExport();
     try { downloadCaseReportPDF(data); } catch (err) { console.error('PDF export failed:', err); }
-  };
-  const handleExportWord = (e) => {
-    e.preventDefault();
-    const data = buildCaseDataForExport();
-    try { downloadCaseReportWord(data); } catch (err) { console.error('Word export failed:', err); }
   };
   const handleExportCSV = (e) => {
     e.preventDefault();
@@ -1720,9 +1714,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
           <div className="d-flex gap-2">
             <button type="button" className="btn btn-outline-secondary" onClick={handleExportPDF}>
               <i className="fas fa-file-pdf me-2"></i> Export PDF
-            </button>
-            <button type="button" className="btn btn-outline-secondary" onClick={handleExportWord}>
-              <i className="fas fa-file-word me-2"></i> Export Word
             </button>
             <button type="button" className="btn btn-outline-secondary" onClick={handleExportCSV}>
               <i className="fas fa-file-csv me-2"></i> Export CSV

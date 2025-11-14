@@ -1044,6 +1044,38 @@ export const downloadCaseReportWord = async (caseData) => {
   const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.docx';
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
 
+  // Normalize data for cleaner output in templates and dynamic DOCX
+  const formatLongDate = (dateVal) => {
+    if (!dateVal) return '';
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return String(dateVal);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  const computeAge = (birthdate) => {
+    if (!birthdate) return '';
+    const bd = new Date(birthdate);
+    if (isNaN(bd.getTime())) return '';
+    const today = new Date();
+    let age = today.getFullYear() - bd.getFullYear();
+    const m = today.getMonth() - bd.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+    return age;
+  };
+  const capitalize = (s) => {
+    if (!s && s !== 0) return '';
+    const t = String(s);
+    return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+  };
+  const normalized = {
+    ...caseData,
+    birthdate: formatLongDate(caseData.birthdate),
+    dateOfReferral: formatLongDate(caseData.dateOfReferral || caseData.date_of_referral),
+    age: caseData.age ?? computeAge(caseData.birthdate),
+    sex: capitalize(caseData.sex || ''),
+    presentAddress: (caseData.presentAddress || caseData.present_address || '').toString().trim(),
+    provincialAddress: (caseData.provincialAddress || caseData.provincial_address || '').toString().trim(),
+  };
+
   const buildTemplateData = (c) => ({
     // Common identity fields (add more keys as your template supports)
     first_name: c.firstName || c.first_name || '',
@@ -1124,7 +1156,29 @@ export const downloadCaseReportWord = async (caseData) => {
     const ab = await res.arrayBuffer();
     const zip = new PizZip(ab);
     const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-    doc.setData(buildTemplateData(caseData));
+    const base = buildTemplateData(normalized);
+    const withAliases = {
+      ...base,
+      'First Name': base.first_name,
+      'Middle Name': base.middle_name,
+      'Last Name': base.last_name,
+      'Nickname': base.nickname,
+      'Sex': base.sex,
+      'Birthdate': base.birthdate,
+      'Birthplace': base.birthplace,
+      'Age': base.age,
+      'Religion': base.religion,
+      'Nationality': base.nationality,
+      'Address': base.address,
+      'Present Address': base.present_address,
+      'Provincial Address': base.provincial_address,
+      'Date of Referral': base.date_of_referral,
+      'Address & Tel.': base.address_and_tel,
+      'Relation to Client': base.relation_to_client,
+      'Case Type': base.case_type,
+      'Assigned House Parent': base.assigned_house_parent,
+    };
+    doc.setData(withAliases);
     // If the template has no tags, render() still passes; tags remain as-is.
     doc.render();
     const out = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
@@ -1142,7 +1196,7 @@ export const downloadCaseReportWord = async (caseData) => {
     console.error('Template-based Word render failed, falling back to dynamic DOCX:', err);
     // Fallback: dynamically generate a professional DOCX without template
     try {
-      const doc = generateCaseReportWord(caseData);
+      const doc = generateCaseReportWord(normalized);
       const buffer = await Packer.toBlob(doc);
       const url = window.URL.createObjectURL(buffer);
       const link = document.createElement('a');

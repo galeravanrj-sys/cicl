@@ -4,7 +4,7 @@ import { isArchivedStatus, getArchivedDisplayText } from '../utils/statusHelpers
 import Pagination from './Pagination';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
-import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
+// Removed Word export imports
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -238,17 +238,7 @@ const ArchivedCases = () => {
     await downloadCaseReportPDF(caseData);
   };
 
-  // Export single case to Word
-  const exportSingleCaseToWord = async (caseItem) => {
-    try {
-      const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
-      const caseData = fullDetails || caseItem;
-      await downloadCaseReportWord(caseData);
-    } catch (err) {
-      console.error('Error generating Word document:', err);
-      alert('Failed to generate Word document. Please try again.');
-    }
-  };
+  // Removed single case Word export
 
   // Export single case to CSV
   const exportSingleCaseToCSV = async (caseItem) => {
@@ -282,29 +272,7 @@ const ArchivedCases = () => {
     })();
   };
 
-  // Word Export Function for all archived cases
-  const exportToWord = async () => {
-    if (filteredArchivedCases.length === 0) {
-      alert('No archived cases to export');
-      return;
-    }
-
-    try {
-      console.log('Starting consolidated Word export for archived cases...');
-      const fullCases = await Promise.all(
-        filteredArchivedCases.map(async (c) => {
-          const details = await fetchCaseDetailsForExport(c.id);
-          return details || c;
-        })
-      );
-      await downloadAllCasesWord(fullCases);
-      console.log('Archived cases summary Word exported successfully');
-      alert(`Successfully exported ${fullCases.length} archived cases summary as Word`);
-    } catch (error) {
-      console.error('Error exporting Word documents:', error);
-      alert('Error exporting Word documents. Please try again.');
-    }
-  };
+  // Removed Word export for all archived cases
 
   // CSV Export Function using centralized utility
   const exportToCSV = async () => {
@@ -383,11 +351,6 @@ const ArchivedCases = () => {
             <li>
               <button className="dropdown-item" onClick={exportToPDF}>
                 <i className="fas fa-file-pdf me-2"></i>Export All to PDF
-              </button>
-            </li>
-            <li>
-              <button className="dropdown-item" onClick={exportToWord}>
-                <i className="fas fa-file-word me-2"></i>Export All to Word
               </button>
             </li>
             <li>
@@ -616,16 +579,7 @@ const ArchivedCases = () => {
                                 </button>
                               </li>
                               <li>
-                                <button 
-                                  className="dropdown-item" 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    exportSingleCaseToWord(caseItem);
-                                  }}
-                                >
-                                  <i className="fas fa-file-word me-2"></i>Word
-                                </button>
+                                {/* Word export removed */}
                               </li>
                               <li>
                                 <button 

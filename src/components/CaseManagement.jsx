@@ -4,7 +4,6 @@ import AddCaseForm from './AddCaseForm';
 import EditCaseForm from './EditCaseForm';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
-import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { API_BASE } from '../utils/apiBase';
@@ -89,30 +88,6 @@ const CaseManagement = () => {
     }
   };
 
-  // Handle Export All Word function
-  const handleExportAllWord = async () => {
-    if (sortedCases.length === 0) {
-      alert('No cases to export');
-      return;
-    }
-
-    try {
-      console.log('Starting Word export for all cases...');
-      
-      const fullCases = await Promise.all(
-        sortedCases.map(async (c) => {
-          const details = await fetchCaseDetailsForExport(c.id);
-          return details || c;
-        })
-      );
-      await downloadAllCasesWord(fullCases);
-      console.log('All cases summary Word exported successfully');
-      alert(`Successfully exported ${fullCases.length} cases summary as Word`);
-    } catch (error) {
-      console.error('Error exporting Word documents:', error);
-      alert('Error exporting Word documents. Please try again.');
-    }
-  };
 
   // Handle Export All CSV function
   const handleExportAllCSV = async () => {
@@ -140,16 +115,7 @@ const CaseManagement = () => {
 
   // Removed global "All Cases (Ignoring filters)" export handlers
 
-  const handleDownloadWord = async (caseItem) => {
-    try {
-      const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
-      const caseData = fullDetails || caseItem;
-      await downloadCaseReportWord(caseData);
-    } catch (err) {
-      console.error('Error generating Word document:', err);
-      alert('Failed to generate Word document. Please try again.');
-    }
-  };
+  // Removed Word export handlers
   
   // Helper functions for formatting and status
   const formatDate = (dateString) => {
@@ -450,14 +416,6 @@ const CaseManagement = () => {
                 <li>
                   <button 
                     className="dropdown-item" 
-                    onClick={handleExportAllWord}
-                  >
-                    <i className="fas fa-file-word me-2"></i>Export All as Word
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className="dropdown-item" 
                     onClick={handleExportAllCSV}
                   >
                     <i className="fas fa-file-csv me-2"></i>Export All as CSV
@@ -630,25 +588,13 @@ const CaseManagement = () => {
                                   }}
                                 >
                                   <i className="fas fa-file-pdf me-2"></i>Export as PDF
-                                </button>
-                              </li>
-                              <li>
-                                <button 
-                                  className="dropdown-item" 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleDownloadWord(caseItem);
-                                  }}
-                                >
-                                  <i className="fas fa-file-word me-2"></i>Export as Word
-                                </button>
-                              </li>
-                              <li>
-                                <button 
-                                  className="dropdown-item" 
-                                  onClick={(e) => {
-                                    e.preventDefault();
+                              </button>
+                            </li>
+                            <li>
+                              <button 
+                                className="dropdown-item" 
+                                onClick={(e) => {
+                                  e.preventDefault();
                                     e.stopPropagation();
                                     handleDownloadCSV(caseItem);
                                   }}

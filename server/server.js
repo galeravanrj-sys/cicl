@@ -4,6 +4,7 @@ const http = require('http');
 const path = require('path');
 const authRoutes = require('./authRoutes');
 const caseRoutes = require('./caseRoutes');
+const exportRoutes = require('./exportRoutes');
 
 const db = require('./db');
 
@@ -49,6 +50,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/cases', caseRoutes);
+app.use('/api/export', exportRoutes);
 
 // Serve React build statically
 const buildPath = path.join(__dirname, '..', 'build');

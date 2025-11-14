@@ -23,7 +23,9 @@
     "pg": "^8.15.6",
     "dotenv": "^16.5.0",
     "axios": "^1.9.0",
-    "google-auth-library": "^10.4.0"
+    "google-auth-library": "^10.4.0",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^22.13.1"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^3.2.4",

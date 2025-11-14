@@ -72,18 +72,7 @@ vi.mock('../utils/pdfGenerator', () => ({
   downloadAllCasesPDF: mockDownloadAllCasesPDF,
 }));
 
-// Mock Word generator utilities
-const {
-  mockDownloadCaseReportWord,
-  mockDownloadAllCasesWord,
-} = vi.hoisted(() => ({
-  mockDownloadCaseReportWord: vi.fn(),
-  mockDownloadAllCasesWord: vi.fn(),
-}));
-vi.mock('../utils/wordGenerator', () => ({
-  downloadCaseReportWord: mockDownloadCaseReportWord,
-  downloadAllCasesWord: mockDownloadAllCasesWord,
-}));
+// Word export removed: no mocks needed
 
 // Mock CSV generator utilities
 const {
@@ -111,8 +100,6 @@ beforeEach(() => {
   mockFetchCaseDetailsForExport.mockReset();
   mockDownloadCaseReportPDF.mockReset();
   mockDownloadAllCasesPDF.mockReset();
-  mockDownloadCaseReportWord.mockReset();
-  mockDownloadAllCasesWord.mockReset();
   mockDownloadAllCasesCSV.mockReset();
   mockDownloadCaseReportCSV.mockReset();
   axios.put.mockReset();
@@ -263,23 +250,7 @@ describe('Discharged Cases - Single case export actions', () => {
     });
   });
 
-  it('exports a single discharged case to Word', async () => {
-    mockFetchCaseDetailsForExport.mockResolvedValueOnce({ id: 301, name: 'Case 301 (Full)', status: 'archived' });
-
-    render(
-      <MemoryRouter initialEntries={["/archived-cases"]}>
-        <ArchivedCases />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: /^Export$/i }));
-    fireEvent.click(screen.getByText(/^Word$/i));
-
-    await waitFor(() => {
-      expect(mockDownloadCaseReportWord).toHaveBeenCalledTimes(1);
-      expect(mockDownloadCaseReportWord).toHaveBeenCalledWith(expect.objectContaining({ id: 301 }));
-    });
-  });
+  // Word export removed
 
   it('exports a single discharged case to CSV (Excel)', async () => {
     mockFetchCaseDetailsForExport.mockResolvedValueOnce({ id: 301, name: 'Case 301 (Full)', status: 'archived' });
@@ -327,18 +298,7 @@ describe('Discharged Cases - Export All', () => {
     });
   });
 
-  it('exports all discharged cases to Word', async () => {
-    mockFetchCaseDetailsForExport.mockImplementation(async (id) => ({ id, name: `Full ${id}` }));
-
-    render(<MemoryRouter initialEntries={["/archived-cases"]}><ArchivedCases /></MemoryRouter>);
-
-    fireEvent.click(screen.getByRole('button', { name: /^Export All$/i }));
-    fireEvent.click(screen.getByText(/Export All to Word/i));
-
-    await waitFor(() => {
-      expect(mockDownloadAllCasesWord).toHaveBeenCalledTimes(1);
-    });
-  });
+  // Word export removed
 
   it('exports all discharged cases to CSV (Excel)', async () => {
     mockFetchCaseDetailsForExport.mockImplementation(async (id) => ({ id, name: `Full ${id}` }));

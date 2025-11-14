@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { downloadCaseReportPDF } from '../../src/utils/pdfGenerator';
-import { downloadCaseReportWord } from '../../src/utils/wordGenerator';
 import { downloadCaseReportCSV } from '../../src/utils/csvGenerator';
 
 const AddCaseForm = ({ onClose, onCaseAdded }) => {
@@ -28,10 +27,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
     e.preventDefault();
     try { downloadCaseReportPDF(buildCaseDataForExport()); } catch (err) { console.error('PDF export failed:', err); }
   };
-  const handleExportWord = (e) => {
-    e.preventDefault();
-    try { downloadCaseReportWord(buildCaseDataForExport()); } catch (err) { console.error('Word export failed:', err); }
-  };
   const handleExportCSV = (e) => {
     e.preventDefault();
     try { downloadCaseReportCSV(buildCaseDataForExport()); } catch (err) { console.error('CSV export failed:', err); }
@@ -44,9 +39,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
         <div className="d-flex gap-2">
           <button type="button" className="btn btn-outline-secondary" onClick={handleExportPDF}>
             <i className="fas fa-file-pdf me-2"></i> Export PDF
-          </button>
-          <button type="button" className="btn btn-outline-secondary" onClick={handleExportWord}>
-            <i className="fas fa-file-word me-2"></i> Export Word
           </button>
           <button type="button" className="btn btn-outline-secondary" onClick={handleExportCSV}>
             <i className="fas fa-file-csv me-2"></i> Export CSV

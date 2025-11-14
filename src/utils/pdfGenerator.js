@@ -631,6 +631,38 @@ export const generateCaseReportPDF = (caseData) => {
   return doc;
 };
 
+// Helpers to normalize data for cleaner output in templates and dynamic PDFs
+const formatLongDate = (dateVal) => {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return String(dateVal);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+const computeAge = (birthdate) => {
+  if (!birthdate) return '';
+  const bd = new Date(birthdate);
+  if (isNaN(bd.getTime())) return '';
+  const today = new Date();
+  let age = today.getFullYear() - bd.getFullYear();
+  const m = today.getMonth() - bd.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+  return age;
+};
+const capitalize = (s) => {
+  if (!s && s !== 0) return '';
+  const t = String(s);
+  return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+};
+const normalizeCaseData = (c = {}) => ({
+  ...c,
+  birthdate: formatLongDate(c.birthdate),
+  dateOfReferral: formatLongDate(c.dateOfReferral || c.date_of_referral),
+  age: c.age ?? computeAge(c.birthdate),
+  sex: capitalize(c.sex || ''),
+  presentAddress: (c.presentAddress || c.present_address || '').toString().trim(),
+  provincialAddress: (c.provincialAddress || c.provincial_address || '').toString().trim(),
+});
+
 const buildTemplateData = (c) => ({
   // Identity
   first_name: c.firstName || c.first_name || '',
@@ -710,6 +742,7 @@ const buildTemplateData = (c) => ({
 export const downloadCaseReportPDF = async (caseData) => {
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
   const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.pdf';
+  const normalized = normalizeCaseData(caseData || {});
 
   // Try template-based fill with pdf-lib first
   try {
@@ -718,13 +751,25 @@ export const downloadCaseReportPDF = async (caseData) => {
     const ab = await res.arrayBuffer();
     const pdfDoc = await PDFDocument.load(ab);
     const form = pdfDoc.getForm();
-    const data = buildTemplateData(caseData);
+    const data = buildTemplateData(normalized);
     // Fill matching fields by iterating existing form fields
     try {
       const fields = form.getFields();
+      const tryResolve = (n) => {
+        if (data[n] !== undefined) return data[n];
+        const lower = String(n).toLowerCase();
+        if (data[lower] !== undefined) return data[lower];
+        const underscored = lower.replace(/\s+/g, '_');
+        if (data[underscored] !== undefined) return data[underscored];
+        const dashed = lower.replace(/\s+/g, '-');
+        if (data[dashed] !== undefined) return data[dashed];
+        const nospace = lower.replace(/[\s_-]+/g, '');
+        if (data[nospace] !== undefined) return data[nospace];
+        return undefined;
+      };
       for (const field of fields) {
         const name = field.getName();
-        const val = data[name];
+        const val = tryResolve(name);
         if (val === undefined || val === null) continue;
         const ctor = field.constructor?.name || '';
         try {
@@ -758,7 +803,7 @@ export const downloadCaseReportPDF = async (caseData) => {
     console.error('Template-based PDF render failed, falling back to dynamic PDF:', err);
     // Fallback: dynamically generate a professional PDF without template
     try {
-      const doc = generateCaseReportPDF(caseData);
+      const doc = generateCaseReportPDF(normalized);
       doc.save(fileName);
       return;
     } catch (fallbackErr) {
