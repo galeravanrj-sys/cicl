@@ -5,12 +5,37 @@ const db = require('./db');
 const crypto = require('crypto');
 const auth = require('./middleware/auth');
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 
 // Google OAuth2 Client setup
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3002';
+
+// SMTP configuration via environment variables
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_SECURE = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+
+let mailTransporter = null;
+let emailEnabled = false;
+try {
+  if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
+    mailTransporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+    emailEnabled = true;
+  }
+} catch (e) {
+  console.warn('Failed to configure SMTP transporter:', e.message);
+}
 
 const inferProto = (req) => {
   const xf = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
@@ -265,8 +290,11 @@ router.post('/forgot-password', async (req, res) => {
       [email]
     );
     
-    if (user.rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+    // Always respond success to avoid user enumeration, but only proceed if exists
+    const userExists = user.rows.length > 0;
+    if (!userExists) {
+      // Respond 200 for non-existent emails
+      return res.status(200).json({ message: 'Password reset email sent' });
     }
     
     // Generate a password reset token
@@ -279,14 +307,84 @@ router.post('/forgot-password', async (req, res) => {
       [token, expires, email]
     );
     
-    // In a real application, you would send an email with a link to reset the password
-    // For development, just log the token
-    console.log(`Password reset token for ${email}: ${token}`);
+    const resetUrl = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+    const mailOptions = {
+      from: SMTP_USER || 'no-reply@cicl.local',
+      to: email,
+      subject: 'Reset your CICL account password',
+      text: `You requested a password reset. Use the link below to set a new password.\n\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.`,
+      html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 1 hour.</p>`
+    };
+    
+    if (emailEnabled && mailTransporter) {
+      try {
+        await mailTransporter.sendMail(mailOptions);
+      } catch (e) {
+        console.warn('Failed to send reset email:', e.message);
+      }
+    } else {
+      console.log('Email sending disabled. Reset URL:', resetUrl);
+    }
     
     res.status(200).json({ message: 'Password reset email sent' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Validate reset token (unauthenticated)
+router.get('/reset-password/validate', async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).json({ message: 'Missing token' });
+
+    const result = await db.query(
+      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+    return res.json({ valid: true });
+  } catch (error) {
+    console.error('Validate reset token error:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset password (unauthenticated)
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    const userResult = await db.query(
+      'SELECT id FROM users WHERE reset_token = $1 AND reset_token_expires > NOW()',
+      [token]
+    );
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+    const userId = userResult.rows[0].id;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await db.query(
+      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+      [hashedPassword, userId]
+    );
+
+    return res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import LandingPage from './components/LandingPage';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import Dashboard from './components/Dashboard';
 import CaseManagement from './components/CaseManagement';
 import ArchivedCases from './components/ArchivedCases';
@@ -94,6 +95,7 @@ function App() {
                 <Route path="/register" element={<div className="app-container"><Register /></div>} />
                 <Route path="/login" element={<div className="app-container"><Login /></div>} />
                 <Route path="/forgot-password" element={<div className="app-container"><ForgotPassword /></div>} />
+                <Route path="/reset-password" element={<div className="app-container"><ResetPassword /></div>} />
                 
                 {/* Protected routes with full-width layout */}
                 <Route 

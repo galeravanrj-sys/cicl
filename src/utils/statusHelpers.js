@@ -7,7 +7,8 @@
  */
 export const isArchivedStatus = (status) => {
   const s = String(status || '').toLowerCase();
-  return ['archives', 'reintegrate', 'discharge', 'archived', 'after care', 'aftercare'].includes(s);
+  // Exclude After Care from archived/discharged classification
+  return ['archives', 'reintegrate', 'discharge', 'archived'].includes(s);
 };
 
 /**
