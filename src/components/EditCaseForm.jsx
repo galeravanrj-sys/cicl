@@ -928,7 +928,7 @@ const customInputStyle = {
                       <form onSubmit={saveLifeSkillsData} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}>
                         <div className="row">
                           <div className="col-md-6 mb-3">
-                            <label htmlFor="activity" className="form-label fw-semibold">Activity <span style={{color: 'red'}}>*</span>:</label>
+        <label htmlFor="activity" className="form-label fw-semibold">Activity:</label>
                             <input
                               type="text"
                               id="activity"
@@ -942,7 +942,7 @@ const customInputStyle = {
                             />
                           </div>
                           <div className="col-md-6 mb-3">
-                            <label htmlFor="dateCompleted" className="form-label fw-semibold">Date Completed <span style={{color: 'red'}}>*</span>:</label>
+        <label htmlFor="dateCompleted" className="form-label fw-semibold">Date Completed:</label>
                             <input
                               type="date"
                               id="dateCompleted"
@@ -957,7 +957,7 @@ const customInputStyle = {
                         </div>
                         <div className="row">
                           <div className="col-md-6 mb-3">
-                            <label htmlFor="performanceRating" className="form-label fw-semibold">Performance Rating <span style={{color: 'red'}}>*</span>:</label>
+        <label htmlFor="performanceRating" className="form-label fw-semibold">Performance Rating:</label>
                             <select
                               id="performanceRating"
                               name="performanceRating"
@@ -1024,7 +1024,7 @@ const customInputStyle = {
                       <form onSubmit={saveVitalSignsData} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}>
                         <div className="row">
                           <div className="col-md-6 mb-3">
-                            <label htmlFor="vitalSignsDate" className="form-label fw-semibold">Date <span style={{color: 'red'}}>*</span>:</label>
+        <label htmlFor="vitalSignsDate" className="form-label fw-semibold">Date:</label>
                             <input
                               type="date"
                               id="vitalSignsDate"

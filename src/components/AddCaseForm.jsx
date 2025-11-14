@@ -243,13 +243,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
 
   const handleNext = async (e) => {
     e.preventDefault();
-    
-    // Basic validation
-    if (!formData.firstName || !formData.lastName || !formData.sex || !formData.birthdate) {
-      setError('Please fill in all required fields');
-      return;
-    }
-    
+    // Proceed without front-end required field enforcement
     // Check for name uniqueness before proceeding to the next form
     try {
       setLoading(true);
@@ -409,7 +403,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
               <div className="card-body p-4">
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <label htmlFor="firstName" className="form-label fw-semibold">First Name <span style={{color: 'red'}}>*</span></label>
+                    <label htmlFor="firstName" className="form-label fw-semibold">First Name</label>
                     <input
                       type="text"
                       className="form-control form-control-lg"
@@ -419,12 +413,11 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       onChange={handleChange}
                       placeholder="Enter first name"
                       style={customInputStyle}
-                      required
                     />
                   </div>
                   
                   <div className="col-md-6 mb-3">
-                    <label htmlFor="lastName" className="form-label fw-semibold">Last Name <span style={{color: 'red'}}>*</span></label>
+                    <label htmlFor="lastName" className="form-label fw-semibold">Last Name</label>
                     <input
                       type="text"
                       className="form-control form-control-lg"
@@ -434,7 +427,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       onChange={handleChange}
                       placeholder="Enter last name"
                       style={customInputStyle}
-                      required
                     />
                   </div>
                 </div>
@@ -469,7 +461,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                   </div>
                   
                   <div className="col-md-4 mb-3">
-                    <label htmlFor="sex" className="form-label fw-semibold">Sex <span style={{color: 'red'}}>*</span></label>
+                    <label htmlFor="sex" className="form-label fw-semibold">Sex</label>
                     <select
                       className="form-select form-select-lg"
                       id="sex"
@@ -477,7 +469,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       value={formData.sex}
                       onChange={handleChange}
                       style={customSelectStyle}
-                      required
                     >
                       <option value="">Select gender</option>
                       <option value="Male">Male</option>
@@ -488,7 +479,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                 
                 <div className="row">
                   <div className="col-md-4 mb-3">
-                    <label htmlFor="birthdate" className="form-label fw-semibold">Birthdate <span style={{color: 'red'}}>*</span></label>
+                    <label htmlFor="birthdate" className="form-label fw-semibold">Birthdate</label>
                     <input
                       type="date"
                       className="form-control form-control-lg"
@@ -497,7 +488,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       value={formData.birthdate}
                       onChange={handleChange}
                       style={customInputStyle}
-                      required
                     />
                   </div>
                   
@@ -583,7 +573,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                 </div>
                 
                 <div className="mb-3">
-                  <label htmlFor="presentAddress" className="form-label fw-semibold">Present Address <span style={{color: 'red'}}>*</span></label>
+                  <label htmlFor="presentAddress" className="form-label fw-semibold">Present Address</label>
                   <textarea
                     className="form-control"
                     id="presentAddress"
@@ -593,13 +583,12 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                     rows="2"
                     placeholder="Enter present address"
                     style={customInputStyle}
-                    required
                   ></textarea>
                 </div>
                 
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <label htmlFor="sourceOfReferral" className="form-label fw-semibold">Source of Referral <span style={{color: 'red'}}>*</span></label>
+                    <label htmlFor="sourceOfReferral" className="form-label fw-semibold">Source of Referral</label>
                     <select
                       className="form-select form-select-lg"
                       id="sourceOfReferral"
@@ -607,7 +596,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       value={formData.sourceOfReferral}
                       onChange={handleChange}
                       style={customSelectStyle}
-                      required
                     >
                       <option value="">Select source</option>
                       <option value="Police">Police</option>
@@ -628,7 +616,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                           onChange={handleChange}
                           placeholder="Please specify"
                           style={customInputStyle}
-                          required
                         />
                       </div>
                     )}
@@ -679,7 +666,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                 </div>
                 
                 <div className="mb-3">
-                  <label htmlFor="caseType" className="form-label fw-semibold">Programs <span style={{color: 'red'}}>*</span></label>
+                  <label htmlFor="caseType" className="form-label fw-semibold">Programs</label>
                   <select
                     className="form-select form-select-lg"
                     id="caseType"
@@ -687,7 +674,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                     value={formData.caseType}
                     onChange={handleChange}
                     style={customSelectStyle}
-                    required
                   >
                     <option value="">Select program</option>
                     <option value="Children">Children</option>
@@ -698,7 +684,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                 </div>
                 
                 <div className="mb-3">
-                  <label htmlFor="assignedHome" className="form-label fw-semibold">Assigned Home <span style={{color: 'red'}}>*</span></label>
+                  <label htmlFor="assignedHome" className="form-label fw-semibold">Assigned Home</label>
                   <select
                     className="form-select"
                     id="assignedHome"
@@ -706,7 +692,6 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                     value={formData.assignedHouseParent}
                     onChange={handleChange}
                     style={customSelectStyle}
-                    required
                   >
                     <option value="">Select assigned home</option>
                     <option value="Blessed Rosalie Rendu">Blessed Rosalie Rendu</option>

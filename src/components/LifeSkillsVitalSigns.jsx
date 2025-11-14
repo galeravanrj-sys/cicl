@@ -295,7 +295,7 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
                     <div className="row">
                       {/* Activity Selection */}
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold text-primary">Activity <span style={{color: 'red'}}>*</span>:</label>
+            <label className="form-label fw-semibold text-primary">Activity:</label>
                         <input
                           type="text"
                           className="form-control"
@@ -310,7 +310,7 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
 
                       {/* Date Completed */}
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold text-primary">Date Completed <span style={{color: 'red'}}>*</span>:</label>
+            <label className="form-label fw-semibold text-primary">Date Completed:</label>
                         <input
                           type="date"
                           className="form-control"
@@ -324,7 +324,7 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
 
                       {/* Performance Rating */}
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold text-primary">Performance Rating <span style={{color: 'red'}}>*</span>:</label>
+            <label className="form-label fw-semibold text-primary">Performance Rating:</label>
                         <select
                           className="form-select"
                           name="performanceRating"
@@ -405,7 +405,7 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
                     <div className="row">
                       {/* Date */}
                       <div className="col-md-6 mb-3">
-                        <label className="form-label fw-semibold text-primary">Date <span style={{color: 'red'}}>*</span>:</label>
+            <label className="form-label fw-semibold text-primary">Date:</label>
                         <input
                           type="date"
                           className="form-control"
