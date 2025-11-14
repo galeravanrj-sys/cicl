@@ -917,18 +917,24 @@ router.get('/:id/vital-signs', auth, async (req, res) => {
 router.post('/:id/vital-signs', auth, async (req, res) => {
   try {
     const { date, bloodPressure, heartRate, temperature, weight, height, notes } = req.body;
-    const caseId = req.params.id;
+    const caseId = parseInt(req.params.id, 10);
+    const bp = bloodPressure ? String(bloodPressure).slice(0, 20).trim() : null;
+    const hr = heartRate !== undefined && heartRate !== null && `${heartRate}` !== '' ? parseInt(heartRate, 10) : null;
+    const temp = temperature !== undefined && temperature !== null && `${temperature}` !== '' ? Number(parseFloat(temperature).toFixed(1)) : null;
+    const wt = weight !== undefined && weight !== null && `${weight}` !== '' ? Number(parseFloat(weight).toFixed(1)) : null;
+    const ht = height !== undefined && height !== null && `${height}` !== '' ? parseInt(height, 10) : null;
+    const ns = notes || '';
     
     const result = await db.query(
       `INSERT INTO vital_signs (case_id, date_recorded, blood_pressure, heart_rate, temperature, weight, height, notes)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [caseId, date, bloodPressure || null, heartRate || null, temperature || null, weight || null, height || null, notes || '']
+      [caseId, date, bp, hr, temp, wt, ht, ns]
     );
     
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
@@ -937,13 +943,19 @@ router.put('/:id/vital-signs/:vitalId', auth, async (req, res) => {
   try {
     const { date, bloodPressure, heartRate, temperature, weight, height, notes } = req.body;
     const { id: caseId, vitalId } = req.params;
+    const bp = bloodPressure ? String(bloodPressure).slice(0, 20).trim() : null;
+    const hr = heartRate !== undefined && heartRate !== null && `${heartRate}` !== '' ? parseInt(heartRate, 10) : null;
+    const temp = temperature !== undefined && temperature !== null && `${temperature}` !== '' ? Number(parseFloat(temperature).toFixed(1)) : null;
+    const wt = weight !== undefined && weight !== null && `${weight}` !== '' ? Number(parseFloat(weight).toFixed(1)) : null;
+    const ht = height !== undefined && height !== null && `${height}` !== '' ? parseInt(height, 10) : null;
+    const ns = notes || '';
     
     const result = await db.query(
       `UPDATE vital_signs 
        SET date_recorded = $1, blood_pressure = $2, heart_rate = $3, temperature = $4, 
            weight = $5, height = $6, notes = $7, updated_at = CURRENT_TIMESTAMP
        WHERE id = $8 AND case_id = $9 RETURNING *`,
-      [date, bloodPressure || null, heartRate || null, temperature || null, weight || null, height || null, notes || '', vitalId, caseId]
+      [date, bp, hr, temp, wt, ht, ns, vitalId, caseId]
     );
     
     if (result.rows.length === 0) {
@@ -953,7 +965,7 @@ router.put('/:id/vital-signs/:vitalId', auth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 

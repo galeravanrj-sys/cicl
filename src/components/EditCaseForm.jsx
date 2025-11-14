@@ -147,11 +147,11 @@ const customInputStyle = {
 
       const vitalSignsPayload = {
         date: vitalSignsData.date,
-        bloodPressure: vitalSignsData.bloodPressure,
-        heartRate: vitalSignsData.heartRate ? parseInt(vitalSignsData.heartRate) : null,
-        temperature: vitalSignsData.temperature ? parseFloat(vitalSignsData.temperature) : null,
-        weight: vitalSignsData.weight ? parseFloat(vitalSignsData.weight) : null,
-        height: vitalSignsData.height ? parseInt(vitalSignsData.height) : null,
+        bloodPressure: vitalSignsData.bloodPressure ? String(vitalSignsData.bloodPressure).slice(0, 20).trim() : null,
+        heartRate: vitalSignsData.heartRate !== '' && vitalSignsData.heartRate !== null ? parseInt(vitalSignsData.heartRate, 10) : null,
+        temperature: vitalSignsData.temperature !== '' && vitalSignsData.temperature !== null ? Number(parseFloat(vitalSignsData.temperature).toFixed(1)) : null,
+        weight: vitalSignsData.weight !== '' && vitalSignsData.weight !== null ? Number(parseFloat(vitalSignsData.weight).toFixed(1)) : null,
+        height: vitalSignsData.height !== '' && vitalSignsData.height !== null ? parseInt(vitalSignsData.height, 10) : null,
         notes: vitalSignsData.notes
       };
 
@@ -1045,6 +1045,7 @@ const customInputStyle = {
                               onChange={handleVitalSignsChange}
                               className="form-control"
                               placeholder="120/80"
+                              maxLength={20}
                             />
                           </div>
                         </div>

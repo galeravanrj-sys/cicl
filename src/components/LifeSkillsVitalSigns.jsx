@@ -192,11 +192,11 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
 
       const payload = {
         date: vitalSignsData.date,
-        bloodPressure: vitalSignsData.bloodPressure,
-        heartRate: vitalSignsData.heartRate,
-        temperature: vitalSignsData.temperature,
-        weight: vitalSignsData.weight,
-        height: vitalSignsData.height,
+        bloodPressure: vitalSignsData.bloodPressure ? String(vitalSignsData.bloodPressure).slice(0, 20).trim() : null,
+        heartRate: vitalSignsData.heartRate !== '' && vitalSignsData.heartRate !== null ? parseInt(vitalSignsData.heartRate, 10) : null,
+        temperature: vitalSignsData.temperature !== '' && vitalSignsData.temperature !== null ? Number(parseFloat(vitalSignsData.temperature).toFixed(1)) : null,
+        weight: vitalSignsData.weight !== '' && vitalSignsData.weight !== null ? Number(parseFloat(vitalSignsData.weight).toFixed(1)) : null,
+        height: vitalSignsData.height !== '' && vitalSignsData.height !== null ? parseInt(vitalSignsData.height, 10) : null,
         notes: vitalSignsData.notes
       };
 
@@ -446,6 +446,7 @@ const LifeSkillsVitalSigns = ({ onClose, caseData }) => {
                             onChange={handleVitalSignsChange}
                             placeholder="120/80"
                             style={customInputStyle}
+                            maxLength={20}
                           />
                         </div>
                       )}
