@@ -21,7 +21,6 @@ async function main() {
   const addText = (name, x, y, w = 250, h = 18) => {
     const tf = form.createTextField(name);
     tf.setText('');
-    tf.enableReadOnly();
     tf.addToPage(page, { x, y: y - h + 2, width: w, height: h });
   };
   const addCheck = (name, label, x, y) => {
