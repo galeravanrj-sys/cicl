@@ -15,18 +15,32 @@ const PORT = process.env.PORT || 5000;
 // Behind Render/Vercel proxies, trust X-Forwarded-* headers for correct protocol/host
 app.set('trust proxy', 1);
 
-// Improved CORS configuration: allow localhost in dev and a single production origin
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
+// Improved CORS configuration: allow localhost in dev and production origins (Vercel)
+const staticAllowed = [
   'http://localhost:3000',
-  'http://127.0.0.1:3000'
-].filter(Boolean);
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://cicl.vercel.app'
+];
+const envAllowed = (process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
+const allowedOrigins = [...envAllowed, ...staticAllowed].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // non-browser clients
+  if (allowedOrigins.includes(origin)) return true;
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    if (host.endsWith('.vercel.app')) return true; // allow Vercel preview domains
+    if (host === 'localhost' || host === '127.0.0.1') return true;
+  } catch (_) {}
+  return false;
+};
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow non-browser requests (no origin), e.g., Postman/cURL
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (isAllowedOrigin(origin)) return callback(null, true);
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
