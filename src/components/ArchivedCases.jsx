@@ -466,12 +466,27 @@ const ArchivedCases = () => {
                     >
                       <td className="px-4 py-3">
                         <div className="d-flex align-items-center">
-                          <div 
-                            className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
-                            style={{ width: '40px', height: '40px', fontSize: '16px', fontWeight: 'bold' }}
-                          >
-                            {caseItem.name ? caseItem.name.charAt(0).toUpperCase() : 'N'}
-                          </div>
+                          {(() => {
+                            const pic = caseItem.profilePicture || caseItem.profile_picture;
+                            return pic ? (
+                              <img
+                                src={pic}
+                                alt={`${caseItem.name || 'Case'} profile`}
+                                className="rounded-circle me-3"
+                                style={{ width: '40px', height: '40px', objectFit: 'cover', border: '2px solid #e9ecef' }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div 
+                                className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                                style={{ width: '40px', height: '40px', fontSize: '16px', fontWeight: 'bold' }}
+                              >
+                                {caseItem.name ? caseItem.name.charAt(0).toUpperCase() : 'N'}
+                              </div>
+                            );
+                          })()}
                           <div>
                             <div className="fw-semibold text-dark">{caseItem.name || 'No Name'}</div>
                             {caseItem.admissionMonth && (
