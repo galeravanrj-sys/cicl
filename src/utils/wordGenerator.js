@@ -1122,50 +1122,63 @@ export const downloadCaseReportWord = async (caseData) => {
 
 // Professional consolidated Word export for all cases
 export const downloadAllCasesWord = async (casesData = []) => {
+  const primaryColor = '297db9';
+  const textColor = '2D3748';
+
+  const header = new Paragraph({
+    children: [ new TextRun({ text: 'All Cases', bold: true, size: 30, color: primaryColor }) ],
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 300 },
+  });
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return String(dateString);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+  const calcAge = (birthdate) => {
+    if (!birthdate) return 'N/A';
+    const bd = new Date(birthdate);
+    if (isNaN(bd.getTime())) return 'N/A';
+    const today = new Date();
+    let age = today.getFullYear() - bd.getFullYear();
+    const m = today.getMonth() - bd.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+    return String(age);
+  };
+
+  // Build a clean four-column table (Name, Age, Program, Last Updated)
+  const tableRows = [
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ text: 'Name', bold: true })] }),
+        new TableCell({ children: [new Paragraph({ text: 'Age', bold: true })] }),
+        new TableCell({ children: [new Paragraph({ text: 'Program', bold: true })] }),
+        new TableCell({ children: [new Paragraph({ text: 'Last Updated', bold: true })] }),
+      ],
+    }),
+    ...((casesData || []).map(c => new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ text: c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim() })] }),
+        new TableCell({ children: [new Paragraph({ text: String(c?.age ?? calcAge(c?.birthdate) ?? '') })] }),
+        new TableCell({ children: [new Paragraph({ text: c?.caseType || c?.programType || '' })] }),
+        new TableCell({ children: [new Paragraph({ text: formatDate(c?.lastUpdated || c?.updated_at || c?.created_at) })] }),
+      ],
+    })))
+  ];
+
+  const table = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: tableRows,
+  });
+
   const doc = new Document({
-    sections: [
-      {
-        properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } },
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({ text: 'CICL Case Management System', bold: true, size: 32, color: '297db9' }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [ new TextRun({ text: 'All Cases Summary Report', bold: true, size: 28 }) ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [ new TextRun({ text: `Generated on: ${new Date().toLocaleString()}`, size: 20 }) ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [ new TextRun({ text: `Total Cases: ${Array.isArray(casesData) ? casesData.length : 0}`, size: 20 }) ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 400 },
-          }),
-
-          // Summary tables
-          new Paragraph({ text: 'Summary', heading: HeadingLevel.HEADING_2, spacing: { after: 200 } }),
-          createKeyValueTable('Status', buildCounts(casesData, c => c?.status?.toLowerCase() || 'unknown')),
-          new Paragraph({ text: 'Program Distribution', heading: HeadingLevel.HEADING_3, spacing: { before: 200, after: 100 } }),
-          createKeyValueTable('Program', buildCounts(casesData, c => (c?.caseType || c?.programType || 'Unknown'))),
-
-          // Cases Overview Table
-          new Paragraph({ text: 'Cases Overview', heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } }),
-          createCasesOverviewTable(casesData),
-        ],
-      },
-    ],
+    sections: [{ properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: [header, table] }],
   });
 
   const buffer = await Packer.toBlob(doc);
-  const fileName = `CICL_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.docx`;
+  const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.docx`;
   const url = window.URL.createObjectURL(buffer);
   const link = document.createElement('a');
   link.href = url;

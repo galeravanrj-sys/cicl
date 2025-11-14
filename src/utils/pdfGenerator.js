@@ -629,16 +629,16 @@ export const downloadAllCasesPDF = (casesData = []) => {
   const pageWidth = doc.internal.pageSize.width;
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '';
     const d = new Date(dateString);
     if (isNaN(d.getTime())) return String(dateString);
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const calcAge = (birthdate) => {
-    if (!birthdate) return 'N/A';
+    if (!birthdate) return '';
     const bd = new Date(birthdate);
-    if (isNaN(bd.getTime())) return 'N/A';
+    if (isNaN(bd.getTime())) return '';
     const today = new Date();
     let age = today.getFullYear() - bd.getFullYear();
     const m = today.getMonth() - bd.getMonth();
@@ -646,78 +646,25 @@ export const downloadAllCasesPDF = (casesData = []) => {
     return age;
   };
 
-  // Cover page
-  doc.setFontSize(22);
-  doc.setTextColor(41, 128, 185);
-  doc.text('CICL Case Management System', pageWidth / 2, 50, { align: 'center' });
+  // Header
   doc.setFontSize(16);
-  doc.setTextColor(44, 62, 80);
-  doc.text('All Cases Summary Report', pageWidth / 2, 65, { align: 'center' });
-  doc.setFontSize(11);
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, 80, { align: 'center' });
-  doc.text(`Total Cases: ${Array.isArray(casesData) ? casesData.length : 0}`, pageWidth / 2, 90, { align: 'center' });
+  doc.setTextColor(41, 125, 185);
+  doc.text('All Cases', margin, 20);
+  doc.setFontSize(10);
+  doc.setTextColor(90);
+  doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
 
-  // Summary tables (Status and Program)
-  const normalize = (v) => String(v || '').trim().toLowerCase();
-  const statusCounts = {};
-  const programCounts = {};
-  (casesData || []).forEach(c => {
-    const s = normalize(c?.status) || 'unknown';
-    const p = String(c?.caseType || c?.programType || '').trim() || 'Unknown';
-    statusCounts[s] = (statusCounts[s] || 0) + 1;
-    programCounts[p] = (programCounts[p] || 0) + 1;
-  });
-
-  doc.setFontSize(12);
-  doc.text('Summary', margin, 104);
-
-  autoTable(doc, {
-    startY: 110,
-    head: [['Status', 'Count']],
-    body: Object.entries(statusCounts).map(([status, count]) => [status, String(count)]),
-    styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
-    alternateRowStyles: { fillColor: [245, 247, 250] },
-    theme: 'striped',
-    margin: { left: margin, right: margin }
-  });
-
-  const afterStatusY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 8 : 130;
-
-  doc.text('Program Distribution', margin, afterStatusY);
-  autoTable(doc, {
-    startY: afterStatusY + 6,
-    head: [['Program', 'Count']],
-    body: Object.entries(programCounts).map(([program, count]) => [program, String(count)]),
-    styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
-    alternateRowStyles: { fillColor: [245, 247, 250] },
-    theme: 'striped',
-    margin: { left: margin, right: margin }
-  });
-
-  const afterProgramY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 12 : afterStatusY + 40;
-
-  // Cases overview
-  doc.setFontSize(12);
-  doc.text('Cases Overview', margin, afterProgramY);
-
+  // List table: Name, Age, Program, Last Updated
   const rows = (casesData || []).map((c) => [
-    c.id || '',
-    c.name || `${c.lastName || ''}, ${c.firstName || ''}`.trim(),
-    c.sex || '',
-    formatDate(c.birthdate),
+    c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
     String(c.age ?? calcAge(c.birthdate) ?? ''),
     c.caseType || c.programType || '',
-    c.status || '',
     formatDate(c.lastUpdated || c.updated_at || c.created_at)
   ]);
 
   autoTable(doc, {
-    startY: afterProgramY + 6,
-    head: [[
-      'Case ID', 'Full Name', 'Gender', 'Birthdate', 'Age', 'Program', 'Status', 'Last Updated'
-    ]],
+    startY: 36,
+    head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
     body: rows,
     styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
     headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
@@ -735,6 +682,6 @@ export const downloadAllCasesPDF = (casesData = []) => {
     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
   }
 
-  const fileName = `CICL_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
+  const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
 };

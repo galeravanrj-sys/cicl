@@ -357,17 +357,11 @@ export const downloadCaseReportCSV = (caseData) => {
 };
 
 export const generateAllCasesCSV = (casesData) => {
-  if (!Array.isArray(casesData) || casesData.length === 0) {
-    return '';
-  }
+  if (!Array.isArray(casesData) || casesData.length === 0) return '';
 
-  // Local helpers for consistent formatting
   const q = (text) => {
     if (text === null || text === undefined) return '';
-    const clean = String(text)
-      .replace(/"/g, '""')
-      .replace(/\r\n|\n|\r/g, ' ')
-      .trim();
+    const clean = String(text).replace(/"/g, '""').replace(/\r\n|\n|\r/g, ' ').trim();
     return `"${clean}"`;
   };
   const formatDate = (dateString) => toDateOnly(dateString);
@@ -382,54 +376,18 @@ export const generateAllCasesCSV = (casesData) => {
     return age;
   };
 
-  // Build summary counts
-  const statusCounts = {};
-  const programCounts = {};
-  for (const c of casesData) {
-    const rawStatus = String(c?.status ?? 'Unknown').toLowerCase();
-    const normalizedStatus = (rawStatus === 'archived' || rawStatus === 'archives' || rawStatus === 'reintegrate')
-      ? 'Archived'
-      : (rawStatus === 'active' || c?.isActive === true || rawStatus === 'true') ? 'Active' : (c?.status ?? 'Unknown');
-    statusCounts[normalizedStatus] = (statusCounts[normalizedStatus] || 0) + 1;
-
-    const program = c?.caseType || c?.programType || 'Unknown';
-    programCounts[program] = (programCounts[program] || 0) + 1;
-  }
-
-  // Compose CSV lines: header block + overview table
   const lines = [];
-  // Use date-only to avoid showing timezone/UTC markers in the header
-  lines.push(`CICL All Cases Export,${new Date().toISOString().split('T')[0]}`);
-  lines.push('');
-  lines.push(`Summary,Total Cases,${casesData.length}`);
-  // Status summary
-  Object.keys(statusCounts)
-    .sort((a, b) => a.localeCompare(b))
-    .forEach(key => lines.push(`Summary,Status,${q(key)},${statusCounts[key]}`));
-  // Program summary
-  Object.keys(programCounts)
-    .sort((a, b) => a.localeCompare(b))
-    .forEach(key => lines.push(`Summary,Program,${q(key)},${programCounts[key]}`));
-  lines.push('');
-
-  const headers = ['Case ID','Full Name','Gender','Birthdate','Age','Program','Status','Last Updated'];
+  const headers = ['Name','Age','Program','Last Updated'];
   lines.push(headers.join(','));
 
   for (const c of casesData) {
     const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
-    const gender = c?.sex || c?.gender || '';
     const program = c?.caseType || c?.programType || '';
-    const status = c?.status || '';
-
     const row = [
-      q(c?.id ?? ''),
       q(fullName),
-      q(gender),
-      formatDate(c?.birthdate),
       calcAge(c?.birthdate),
       q(program),
-      q(status),
-      formatDate(c?.lastUpdated || c?.updated_at)
+      formatDate(c?.lastUpdated || c?.updated_at || c?.created_at)
     ].join(',');
     lines.push(row);
   }
