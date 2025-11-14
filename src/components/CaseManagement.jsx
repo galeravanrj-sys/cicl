@@ -121,7 +121,7 @@ const CaseManagement = () => {
   const formatTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
   
   const handleEdit = (caseItem) => {

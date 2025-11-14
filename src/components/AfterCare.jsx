@@ -32,7 +32,7 @@ const AfterCare = () => {
   const formatTime = (dateString) => {
     if (!dateString) return '';
     const d = new Date(dateString);
-    return d.toLocaleDateString('en-US', { weekday: 'short' });
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
   const afterCareCases = allCases.filter(c => isAfterCare(c.status));
