@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_BASE } from '../utils/apiBase';
 import { useParams, useNavigate } from 'react-router-dom';
 import { isArchivedStatus, getArchivedDisplayText } from '../utils/statusHelpers';
+import AfterCareDetails from './AfterCareDetails';
 
 const CaseDetailsPage = () => {
   // Accept both 'caseId' and legacy 'id' param names
