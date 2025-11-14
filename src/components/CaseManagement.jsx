@@ -289,53 +289,9 @@ const CaseManagement = () => {
     }
   };
 
-  const previewServerHtmlPdf = async (caseItem) => {
-    try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (!token) {
-        alert('Authentication token not found. Please log in again.');
-        return;
-      }
-      const url = `${API_BASE}/export/case/${caseItem.id}/pdf-html?format=A4&landscape=false`;
-      const res = await fetch(url, {
-        headers: {
-          'x-auth-token': token,
-        },
-      });
-      if (!res.ok) throw new Error('Server HTML PDF failed');
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank', 'noopener,noreferrer');
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-    } catch (error) {
-      console.error('Error previewing server HTML PDF:', error);
-      alert('Error generating server-side HTML PDF.');
-    }
-  };
+  // Removed: previewServerHtmlPdf
 
-  const previewServerTemplatePdf = async (caseItem) => {
-    try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (!token) {
-        alert('Authentication token not found. Please log in again.');
-        return;
-      }
-      const url = `${API_BASE}/export/case/${caseItem.id}/pdf`;
-      const res = await fetch(url, {
-        headers: {
-          'x-auth-token': token,
-        },
-      });
-      if (!res.ok) throw new Error('Server template PDF failed');
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank', 'noopener,noreferrer');
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
-    } catch (error) {
-      console.error('Error previewing server template PDF:', error);
-      alert('Error generating server-side template PDF.');
-    }
-  };
+  // Removed: previewServerTemplatePdf
 
   if (loading) {
     return (
@@ -642,31 +598,6 @@ const CaseManagement = () => {
                                   }}
                                 >
                                   <i className="fas fa-file-csv me-2"></i>Export as CSV
-                                </button>
-                              </li>
-                              <li><hr className="dropdown-divider" /></li>
-                              <li>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    previewServerHtmlPdf(caseItem);
-                                  }}
-                                >
-                                  <i className="fas fa-file-pdf me-2"></i>Preview Server PDF (HTML)
-                                </button>
-                              </li>
-                              <li>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    previewServerTemplatePdf(caseItem);
-                                  }}
-                                >
-                                  <i className="fas fa-file-pdf me-2"></i>Preview Server PDF (Template)
                                 </button>
                               </li>
                             </ul>
