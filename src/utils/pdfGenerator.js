@@ -815,65 +815,89 @@ export const downloadCaseReportPDF = async (caseData) => {
 };
 
 // Professional consolidated PDF export for all cases
-export const downloadAllCasesPDF = (casesData = []) => {
-  const doc = new jsPDF();
-  const margin = 20;
-  const pageWidth = doc.internal.pageSize.width;
+export const downloadAllCasesPDF = async (casesData = []) => {
+  // Prefer server-side professional consolidated PDF; fallback to local jsPDF summary
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Missing auth token');
+    const { API_BASE } = await import('./apiBase.js');
+    const resp = await fetch(`${API_BASE}/export/cases/pdf-html`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+      body: JSON.stringify({ cases: casesData || [] }),
+    });
+    if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CICL_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return;
+  } catch (err) {
+    console.warn('Falling back to client-side summary PDF:', err);
+    const doc = new jsPDF();
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.width;
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return String(dateString);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      const d = new Date(dateString);
+      if (isNaN(d.getTime())) return String(dateString);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    };
 
-  const calcAge = (birthdate) => {
-    if (!birthdate) return '';
-    const bd = new Date(birthdate);
-    if (isNaN(bd.getTime())) return '';
-    const today = new Date();
-    let age = today.getFullYear() - bd.getFullYear();
-    const m = today.getMonth() - bd.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
-    return age;
-  };
+    const calcAge = (birthdate) => {
+      if (!birthdate) return '';
+      const bd = new Date(birthdate);
+      if (isNaN(bd.getTime())) return '';
+      const today = new Date();
+      let age = today.getFullYear() - bd.getFullYear();
+      const m = today.getMonth() - bd.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+      return age;
+    };
 
-  // Header
-  doc.setFontSize(16);
-  doc.setTextColor(41, 125, 185);
-  doc.text('All Cases', margin, 20);
-  doc.setFontSize(10);
-  doc.setTextColor(90);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
+    // Header
+    doc.setFontSize(16);
+    doc.setTextColor(41, 125, 185);
+    doc.text('All Cases', margin, 20);
+    doc.setFontSize(10);
+    doc.setTextColor(90);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
 
-  // List table: Name, Age, Program, Last Updated
-  const rows = (casesData || []).map((c) => [
-    c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
-    String(c.age ?? calcAge(c.birthdate) ?? ''),
-    c.caseType || c.programType || '',
-    formatDate(c.lastUpdated || c.updated_at || c.created_at)
-  ]);
+    // List table: Name, Age, Program, Last Updated
+    const rows = (casesData || []).map((c) => [
+      c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
+      String(c.age ?? calcAge(c.birthdate) ?? ''),
+      c.caseType || c.programType || '',
+      formatDate(c.lastUpdated || c.updated_at || c.created_at)
+    ]);
 
-  autoTable(doc, {
-    startY: 36,
-    head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
-    body: rows,
-    styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
-    headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
-    alternateRowStyles: { fillColor: [245, 247, 250] },
-    theme: 'striped',
-    margin: { left: margin, right: margin }
-  });
+    autoTable(doc, {
+      startY: 36,
+      head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
+      body: rows,
+      styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+      theme: 'striped',
+      margin: { left: margin, right: margin }
+    });
 
-  // Footer on each page
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.text('CICL Case Management System', margin, doc.internal.pageSize.height - 10);
-    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+    // Footer on each page
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.text('CICL Case Management System', margin, doc.internal.pageSize.height - 10);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+    }
+
+    const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
   }
-
-  const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
 };
