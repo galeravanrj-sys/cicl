@@ -121,8 +121,8 @@ const Login = () => {
                 }}>HOPETRACK</div>
               </div>
               <img 
-                src="/images/progress-icon.png" 
-                alt="Progress Icon" 
+                src="/images/hopetrack-icon.svg" 
+                alt="HopeTrack Icon" 
                 style={{ width: '65px', height: '65px' }}
               />
             </div>
