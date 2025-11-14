@@ -690,18 +690,27 @@ export const downloadCaseReportPDF = async (caseData) => {
     const pdfDoc = await PDFDocument.load(ab);
     const form = pdfDoc.getForm();
     const data = buildTemplateData(caseData);
-
-    // Fill matching fields, ignore missing ones
-    Object.entries(data).forEach(([key, val]) => {
-      try {
-        const field = form.getTextField?.(key) || form.getFieldMaybe?.(key) || form.getField?.(key);
-        if (field && typeof field.setText === 'function') {
-          field.setText(String(val ?? ''));
-        }
-      } catch (_) {
-        // tolerate missing fields
+    // Fill matching fields by iterating existing form fields
+    try {
+      const fields = form.getFields();
+      for (const field of fields) {
+        const name = field.getName();
+        const val = data[name];
+        if (val === undefined || val === null) continue;
+        const ctor = field.constructor?.name || '';
+        try {
+          if (ctor === 'PDFTextField') {
+            field.setText(String(val ?? ''));
+          } else if (ctor === 'PDFCheckBox') {
+            const v = String(val).toLowerCase();
+            if (v === 'yes' || v === 'true' || v === '1') field.check();
+            else field.uncheck?.();
+          } else if (typeof field.setText === 'function') {
+            field.setText(String(val ?? ''));
+          }
+        } catch (_) {}
       }
-    });
+    } catch (_) {}
     // Flatten filled fields to regular content
     try { form.flatten(); } catch (_) {}
 
@@ -719,8 +728,65 @@ export const downloadCaseReportPDF = async (caseData) => {
   } catch (err) {
     console.warn('Template-based PDF render failed, falling back to generated PDF:', err);
   }
+  // Secondary fallback: build a simple fillable PDF on-the-fly and fill it
+  try {
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]);
+    const form = pdfDoc.getForm();
+    const data = buildTemplateData(caseData);
 
-  // Fallback: previous jsPDF-based full case report
+    const addLabel = (text, x, y) => {
+      page.drawText(String(text), { x, y, size: 10 });
+    };
+    const addField = (name, x, y, w = 250, h = 18) => {
+      const tf = form.createTextField(name);
+      tf.addToPage(page, { x, y: y - h + 2, width: w, height: h });
+      const val = data[name];
+      if (val !== undefined && val !== null) tf.setText(String(val));
+    };
+
+    let y = 800;
+    const leftX = 40;
+    const rightX = 320;
+
+    addLabel('Last Name', leftX, y); addField('last_name', leftX, y - 12, 230);
+    addLabel('First Name', rightX, y); addField('first_name', rightX, y - 12, 230);
+    y -= 40;
+    addLabel('Middle Name', leftX, y); addField('middle_name', leftX, y - 12, 230);
+    addLabel('Sex', rightX, y); addField('sex', rightX, y - 12, 100);
+    y -= 40;
+    addLabel('Birthdate', leftX, y); addField('birthdate', leftX, y - 12, 150);
+    addLabel('Age', rightX, y); addField('age', rightX, y - 12, 60);
+    y -= 40;
+    addLabel('Civil Status', leftX, y); addField('civil_status', leftX, y - 12, 200);
+    addLabel('Religion', rightX, y); addField('religion', rightX, y - 12, 200);
+    y -= 40;
+    addLabel('Address', leftX, y); addField('address', leftX, y - 12, 510);
+    y -= 40;
+    addLabel('Case Type', leftX, y); addField('case_type', leftX, y - 12, 230);
+    addLabel('Assigned House Parent', rightX, y); addField('assigned_house_parent', rightX, y - 12, 230);
+    y -= 40;
+    addLabel('Father Name', leftX, y); addField('father_name', leftX, y - 12, 230);
+    addLabel('Mother Name', rightX, y); addField('mother_name', rightX, y - 12, 230);
+    y -= 40;
+    addLabel('Guardian Name', leftX, y); addField('guardian_name', leftX, y - 12, 230);
+    addLabel('Guardian Relation', rightX, y); addField('guardian_relation', rightX, y - 12, 230);
+
+    try { form.flatten(); } catch (_) {}
+    const out = await pdfDoc.save();
+    const blob = new Blob([out], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return;
+  } catch (_) {}
+
+  // Final fallback: generated report PDF
   const doc = generateCaseReportPDF(caseData);
   doc.save(fileName);
 };
