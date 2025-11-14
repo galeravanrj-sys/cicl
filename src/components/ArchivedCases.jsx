@@ -332,60 +332,7 @@ const ArchivedCases = () => {
 
 
 
-  // New: Export All Discharged Cases (ignoring filters) using global dataset
-  const exportAllArchivedPDFAllCases = async () => {
-    try {
-      if (!allCases || allCases.length === 0) {
-        await fetchAllCases();
-      }
-      const dataset = archivedCases;
-      if (!dataset || dataset.length === 0) {
-        alert('No discharged cases to export');
-        return;
-      }
-      await downloadAllCasesPDF(dataset);
-      alert(`Successfully exported ${dataset.length} discharged cases summary as PDF`);
-    } catch (error) {
-      console.error('Error exporting all discharged cases PDF:', error);
-      alert('Error exporting PDFs. Please try again.');
-    }
-  };
-
-  const exportAllArchivedWordAllCases = async () => {
-    try {
-      if (!allCases || allCases.length === 0) {
-        await fetchAllCases();
-      }
-      const dataset = archivedCases;
-      if (!dataset || dataset.length === 0) {
-        alert('No discharged cases to export');
-        return;
-      }
-      await downloadAllCasesWord(dataset);
-      alert(`Successfully exported ${dataset.length} discharged cases summary as Word`);
-    } catch (error) {
-      console.error('Error exporting all discharged cases Word:', error);
-      alert('Error exporting Word documents. Please try again.');
-    }
-  };
-
-  const exportAllArchivedCSVAllCases = async () => {
-    try {
-      if (!allCases || allCases.length === 0) {
-        await fetchAllCases();
-      }
-      const dataset = archivedCases;
-      if (!dataset || dataset.length === 0) {
-        alert('No discharged cases to export');
-        return;
-      }
-      await downloadAllCasesCSV(dataset);
-      alert(`Successfully exported ${dataset.length} discharged cases to CSV`);
-    } catch (error) {
-      console.error('Error exporting all discharged cases CSV:', error);
-      alert('Error exporting CSV. Please try again.');
-    }
-  };
+  // Removed global discharged export handlers (ignoring filters)
 
 
 
@@ -448,23 +395,7 @@ const ArchivedCases = () => {
                 <i className="fas fa-file-csv me-2"></i>Export All to CSV
               </button>
             </li>
-            <li><hr className="dropdown-divider" /></li>
-            <li><h6 className="dropdown-header">All Discharged Cases (Ignoring filters)</h6></li>
-            <li>
-              <button className="dropdown-item" onClick={exportAllArchivedPDFAllCases}>
-                <i className="fas fa-file-pdf me-2"></i>All Discharged: PDF
-              </button>
-            </li>
-            <li>
-              <button className="dropdown-item" onClick={exportAllArchivedWordAllCases}>
-                <i className="fas fa-file-word me-2"></i>All Discharged: Word
-              </button>
-            </li>
-            <li>
-              <button className="dropdown-item" onClick={exportAllArchivedCSVAllCases}>
-                <i className="fas fa-file-csv me-2"></i>All Discharged: CSV
-              </button>
-            </li>
+            {/* Removed global "All Discharged (Ignoring filters)" export options */}
           </ul>
         </div>
       </div>

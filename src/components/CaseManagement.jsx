@@ -21,9 +21,7 @@ const CaseManagement = () => {
     error, 
     addCase, 
     updateCase, 
-    deleteCase,
-    fetchAllCases,
-    allCases
+    deleteCase
   } = useCases();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -140,51 +138,7 @@ const CaseManagement = () => {
     }
   };
 
-  // New: Export entire database (All Cases, ignoring filters)
-  const handleExportAllPDFAllCases = async () => {
-    try {
-      const dataset = (allCases && allCases.length > 0) ? allCases : await fetchAllCases();
-      if (!dataset || dataset.length === 0) {
-        alert('No cases to export');
-        return;
-      }
-      await downloadAllCasesPDF(dataset);
-      alert(`Successfully exported ${dataset.length} cases summary as PDF`);
-    } catch (error) {
-      console.error('Error exporting all cases PDF:', error);
-      alert('Error exporting PDFs. Please try again.');
-    }
-  };
-
-  const handleExportAllWordAllCases = async () => {
-    try {
-      const dataset = (allCases && allCases.length > 0) ? allCases : await fetchAllCases();
-      if (!dataset || dataset.length === 0) {
-        alert('No cases to export');
-        return;
-      }
-      await downloadAllCasesWord(dataset);
-      alert(`Successfully exported ${dataset.length} cases summary as Word`);
-    } catch (error) {
-      console.error('Error exporting all cases Word:', error);
-      alert('Error exporting Word documents. Please try again.');
-    }
-  };
-
-  const handleExportAllCSVAllCases = async () => {
-    try {
-      const dataset = (allCases && allCases.length > 0) ? allCases : await fetchAllCases();
-      if (!dataset || dataset.length === 0) {
-        alert('No cases to export');
-        return;
-      }
-      await downloadAllCasesCSV(dataset);
-      alert(`Successfully exported ${dataset.length} cases to CSV`);
-    } catch (error) {
-      console.error('Error exporting all cases CSV:', error);
-      alert('Error exporting CSV. Please try again.');
-    }
-  };
+  // Removed global "All Cases (Ignoring filters)" export handlers
 
   const handleDownloadWord = async (caseItem) => {
     try {
@@ -507,32 +461,6 @@ const CaseManagement = () => {
                     onClick={handleExportAllCSV}
                   >
                     <i className="fas fa-file-csv me-2"></i>Export All as CSV
-                  </button>
-                </li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><h6 className="dropdown-header">All Cases (Ignoring filters)</h6></li>
-                <li>
-                  <button 
-                    className="dropdown-item" 
-                    onClick={handleExportAllPDFAllCases}
-                  >
-                    <i className="fas fa-file-pdf me-2"></i>All Cases: PDF
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className="dropdown-item" 
-                    onClick={handleExportAllWordAllCases}
-                  >
-                    <i className="fas fa-file-word me-2"></i>All Cases: Word
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className="dropdown-item" 
-                    onClick={handleExportAllCSVAllCases}
-                  >
-                    <i className="fas fa-file-csv me-2"></i>All Cases: CSV
                   </button>
                 </li>
               </ul>
