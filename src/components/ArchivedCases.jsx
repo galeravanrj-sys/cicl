@@ -202,7 +202,6 @@ const ArchivedCases = () => {
       };
 
       updateCase(updatedCase);
-      alert('Case moved to After Care successfully');
       // Navigate to After Care page for immediate feedback
       navigate('/after-care', { state: { triggerRefresh: true } });
     } catch (err) {

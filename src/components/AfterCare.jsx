@@ -129,7 +129,6 @@ const AfterCare = () => {
       };
 
       updateCase(updatedCase);
-      alert('Case discharged successfully');
       navigate('/archived-cases', { state: { triggerRefresh: true } });
     } catch (err) {
       console.error('Error discharging case from After Care:', err);
