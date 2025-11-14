@@ -113,26 +113,12 @@ const Login = () => {
             }}>
               <div style={{ textAlign: 'right', marginRight: '15px' }}>
                 <div style={{ 
-                  fontSize: '26px', 
+                  fontSize: '28px', 
                   fontWeight: 'bold', 
                   lineHeight: '1.2',
                   textTransform: 'uppercase',
                   color: '#2c3e50'
-                }}>CICL:</div>
-                <div style={{ 
-                  fontSize: '26px', 
-                  fontWeight: 'bold', 
-                  lineHeight: '1.2',
-                  textTransform: 'uppercase',
-                  color: '#2c3e50'
-                }}>PROGRESS</div>
-                <div style={{ 
-                  fontSize: '26px', 
-                  fontWeight: 'bold', 
-                  lineHeight: '1.2',
-                  textTransform: 'uppercase',
-                  color: '#2c3e50'
-                }}>TRACKER</div>
+                }}>HOPETRACK</div>
               </div>
               <img 
                 src="/images/progress-icon.png" 

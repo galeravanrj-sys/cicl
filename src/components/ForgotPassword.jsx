@@ -80,7 +80,7 @@ const ForgotPassword = () => {
           marginBottom: '30px',
           width: '100%'
         }}>
-          <h2 style={{ marginRight: '10px', margin: 0 }}>Progress Tracker for CICL</h2>
+          <h2 style={{ marginRight: '10px', margin: 0, textTransform: 'uppercase' }}>HopeTrack</h2>
           <img 
             src="https://cdn-icons-png.flaticon.com/512/1584/1584961.png" 
             alt="Progress Icon" 
