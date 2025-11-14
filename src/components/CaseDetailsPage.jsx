@@ -208,6 +208,9 @@ const CaseDetailsPage = () => {
           </div>
         </div>
         <div className="card border-0 rounded-4 shadow-sm bg-white">
+          <div className="card-header bg-primary text-white">
+            <h6 className="mb-0"><i className="fas fa-user me-2"></i>After Care Details</h6>
+          </div>
           <div className="card-body p-4">
             {renderField('Name', fullName)}
             {renderField('Birthdate', birth, formatDate)}

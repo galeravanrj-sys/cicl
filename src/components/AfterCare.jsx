@@ -239,21 +239,23 @@ const AfterCare = () => {
                         <small className="text-muted">{formatTime(c.lastUpdated)}</small>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => handleViewCase(c.id)}
-                          style={{ borderRadius: '6px', padding: '6px 12px' }}
-                        >
-                          <i className="fas fa-eye me-1"></i>View Details
-                        </button>
-                        <button
-                          className="btn btn-outline-warning btn-sm ms-2"
-                          title="Discharge"
-                          onClick={() => handleDischarge(c)}
-                          style={{ borderRadius: '6px', padding: '6px 12px' }}
-                        >
-                          <i className="fas fa-sign-out-alt me-1"></i>Discharge
-                        </button>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={() => handleViewCase(c.id)}
+                            style={{ borderRadius: '6px', padding: '6px 12px', fontSize: '12px' }}
+                          >
+                            <i className="fas fa-eye me-1"></i>View Details
+                          </button>
+                          <button
+                            className="btn btn-outline-warning btn-sm"
+                            title="Discharge"
+                            onClick={() => handleDischarge(c)}
+                            style={{ borderRadius: '6px', padding: '6px 12px', fontSize: '12px' }}
+                          >
+                            <i className="fas fa-sign-out-alt me-1"></i>Discharge
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
