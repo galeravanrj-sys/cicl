@@ -366,34 +366,13 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Name:</strong>
-                        <div className="text-muted">{caseData.guardianName || caseData.guardian_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Age:</strong>
-                        <div className="text-muted">{caseData.guardianAge || caseData.guardian_age || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Education:</strong>
-                        <div className="text-muted">{caseData.guardianEducation || caseData.guardian_education || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Occupation:</strong>
-                        <div className="text-muted">{caseData.guardianOccupation || caseData.guardian_occupation || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Other Skills:</strong>
-                        <div className="text-muted">{caseData.guardianOtherSkills || caseData.guardian_other_skills || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Relation to Client:</strong>
-                        <div className="text-muted">{caseData.guardianRelation || caseData.guardian_relation || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Address:</strong>
-                        <div className="text-muted">{caseData.guardianAddress || caseData.guardian_address || 'N/A'}</div>
-                      </div>
+                      {renderField('Name', caseData.guardianName || caseData.guardian_name)}
+                      {renderField('Age', caseData.guardianAge || caseData.guardian_age)}
+                      {renderField('Education', caseData.guardianEducation || caseData.guardian_education)}
+                      {renderField('Occupation', caseData.guardianOccupation || caseData.guardian_occupation)}
+                      {renderField('Other Skills', caseData.guardianOtherSkills || caseData.guardian_other_skills)}
+                      {renderField('Relation to Client', caseData.guardianRelation || caseData.guardian_relation)}
+                      {renderField('Address', caseData.guardianAddress || caseData.guardian_address)}
                     </div>
                   </div>
                 </div>
