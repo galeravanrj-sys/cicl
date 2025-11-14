@@ -177,6 +177,20 @@ export const generateCaseReportPDF = (caseData) => {
   // Row 4: Address (full width)
   currentY = addFormField('Address', caseData.address || '', margin, currentY, pageWidth - margin * 2);
 
+  // Additional Personal Info
+  currentY = addFormField('Nickname', caseData.nickname || '', margin, currentY, 60);
+  addFormField('Birthplace', caseData.birthplace || '', margin + 65, currentY - 10, 80);
+  currentY = addFormField('Nationality', caseData.nationality || '', margin + 150, currentY - 10, 60);
+
+  // Split addresses
+  currentY = addFormField('Present Address', caseData.presentAddress || '', margin, currentY, pageWidth - margin * 2);
+  currentY = addFormField('Provincial Address', caseData.provincialAddress || '', margin, currentY, pageWidth - margin * 2);
+
+  // Referral details
+  currentY = addFormField('Date of Referral', caseData.dateOfReferral || '', margin, currentY, 60);
+  addFormField('Address & Tel.', caseData.addressAndTel || '', margin + 65, currentY - 10, 80);
+  currentY = addFormField('Relation to Client', caseData.relationToClient || '', margin + 150, currentY - 10, 70);
+
   // Row 5: Source of Referral
   currentY = addFormField('Source of Referral', caseData.sourceOfReferral || '', margin, currentY, 85);
   if (caseData.otherSourceOfReferral) {
@@ -618,20 +632,31 @@ export const generateCaseReportPDF = (caseData) => {
 };
 
 const buildTemplateData = (c) => ({
+  // Identity
   first_name: c.firstName || c.first_name || '',
   middle_name: c.middleName || c.middle_name || '',
   last_name: c.lastName || c.last_name || '',
+  nickname: c.nickname || c.nick_name || '',
   sex: c.sex || '',
   birthdate: c.birthdate || '',
+  birthplace: c.birthplace || c.birth_place || '',
   age: c.age || '',
   civil_status: c.status || '',
   religion: c.religion || '',
+  nationality: c.nationality || '',
   address: c.address || '',
+  present_address: c.presentAddress || c.present_address || '',
+  provincial_address: c.provincialAddress || c.provincial_address || '',
   barangay: c.barangay || '',
   municipality: c.municipality || '',
   province: c.province || '',
+  // Referral
   referral_source: c.sourceOfReferral || c.source_of_referral || '',
   referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
+  date_of_referral: c.dateOfReferral || c.date_of_referral || '',
+  address_and_tel: c.addressAndTel || c.address_and_tel || '',
+  relation_to_client: c.relationToClient || c.relation_to_client || '',
+  // Case meta
   case_type: c.caseType || c.programType || c.program_type || '',
   admission_month: c.admissionMonth || c.admission_month || '',
   admission_year: c.admissionYear || c.admission_year || '',
@@ -660,7 +685,11 @@ const buildTemplateData = (c) => ({
   guardian_age: c.guardianAge || c.guardian_age || '',
   guardian_education: c.guardianEducation || c.guardian_education || '',
   guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+  guardian_other_skills: c.guardianOtherSkills || c.guardian_other_skills || '',
   guardian_address: c.guardianAddress || c.guardian_address || '',
+  guardian_income: c.guardianIncome || c.guardian_income || '',
+  guardian_living: typeof c.guardianLiving === 'boolean' ? (c.guardianLiving ? 'Yes' : 'No') : (c.guardianLiving || ''),
+  guardian_deceased: typeof c.guardianDeceased === 'boolean' ? (c.guardianDeceased ? 'Yes' : 'No') : (c.guardianDeceased || ''),
 
   married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
   live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
@@ -734,7 +763,6 @@ export const downloadCaseReportPDF = async (caseData) => {
       return;
     } catch (fallbackErr) {
       console.error('Dynamic PDF generation failed:', fallbackErr);
-      alert('Error generating PDF.');
       return;
     }
   }

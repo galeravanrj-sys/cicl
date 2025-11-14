@@ -979,6 +979,29 @@ export const generateCaseReportWord = (caseData) => {
           ]),
         ] : []),
 
+        // Additional Personal Details
+        createSectionHeader("Additional Personal Details"),
+        createProfessionalTable([
+          new TableRow({ children: [ createTableCell("Nickname", true), createTableCell(caseData.nickname || '') ] }),
+          new TableRow({ children: [ createTableCell("Birthplace", true), createTableCell(caseData.birthplace || caseData.birth_place || '') ] }),
+          new TableRow({ children: [ createTableCell("Nationality", true), createTableCell(caseData.nationality || '') ] }),
+        ]),
+
+        // Addresses
+        createSectionHeader("Addresses"),
+        createProfessionalTable([
+          new TableRow({ children: [ createTableCell("Present Address", true), createTableCell(caseData.presentAddress || caseData.present_address || caseData.address || '') ] }),
+          new TableRow({ children: [ createTableCell("Provincial Address", true), createTableCell(caseData.provincialAddress || caseData.provincial_address || '') ] }),
+        ]),
+
+        // Referral Details
+        createSectionHeader("Referral Details"),
+        createProfessionalTable([
+          new TableRow({ children: [ createTableCell("Date of Referral", true), createTableCell(caseData.dateOfReferral || caseData.date_of_referral || '') ] }),
+          new TableRow({ children: [ createTableCell("Address & Tel.", true), createTableCell(caseData.addressAndTel || caseData.address_and_tel || '') ] }),
+          new TableRow({ children: [ createTableCell("Relation to Client", true), createTableCell(caseData.relationToClient || caseData.relation_to_client || '') ] }),
+        ]),
+
         // Signature Section
         new Paragraph({
           children: [
@@ -1026,15 +1049,23 @@ export const downloadCaseReportWord = async (caseData) => {
     first_name: c.firstName || c.first_name || '',
     middle_name: c.middleName || c.middle_name || '',
     last_name: c.lastName || c.last_name || '',
+    nickname: c.nickname || c.nick_name || '',
     sex: c.sex || '',
     birthdate: c.birthdate || '',
+    birthplace: c.birthplace || c.birth_place || '',
     age: c.age || '',
     civil_status: c.status || '',
     religion: c.religion || '',
+    nationality: c.nationality || '',
     address: c.address || '',
+    present_address: c.presentAddress || c.present_address || '',
+    provincial_address: c.provincialAddress || c.provincial_address || '',
     barangay: c.barangay || '',
     municipality: c.municipality || '',
     province: c.province || '',
+    date_of_referral: c.dateOfReferral || c.date_of_referral || '',
+    address_and_tel: c.addressAndTel || c.address_and_tel || '',
+    relation_to_client: c.relationToClient || c.relation_to_client || '',
     referral_source: c.sourceOfReferral || c.source_of_referral || '',
     referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
     case_type: c.caseType || c.programType || c.program_type || '',
@@ -1065,7 +1096,11 @@ export const downloadCaseReportWord = async (caseData) => {
     guardian_age: c.guardianAge || c.guardian_age || '',
     guardian_education: c.guardianEducation || c.guardian_education || '',
     guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+    guardian_other_skills: c.guardianOtherSkills || c.guardian_other_skills || '',
     guardian_address: c.guardianAddress || c.guardian_address || '',
+    guardian_income: c.guardianIncome || c.guardian_income || '',
+    guardian_living: typeof c.guardianLiving === 'boolean' ? (c.guardianLiving ? 'Yes' : 'No') : (c.guardianLiving || ''),
+    guardian_deceased: typeof c.guardianDeceased === 'boolean' ? (c.guardianDeceased ? 'Yes' : 'No') : (c.guardianDeceased || ''),
 
     married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
     live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
@@ -1120,7 +1155,7 @@ export const downloadCaseReportWord = async (caseData) => {
       return;
     } catch (fallbackErr) {
       console.error('Dynamic DOCX generation failed:', fallbackErr);
-      alert('Error generating Word document.');
+      // Silent failure
       return;
     }
   }

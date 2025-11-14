@@ -23,20 +23,30 @@ const toDateOnly = (value) => {
 
 // Build standardized field map (shared with PDF/Word templates)
 const buildTemplateData = (c = {}) => ({
+  // Identity
   first_name: c.firstName || c.first_name || '',
   middle_name: c.middleName || c.middle_name || '',
   last_name: c.lastName || c.last_name || '',
+  nickname: c.nickname || c.nick_name || '',
   sex: c.sex || '',
   birthdate: toDateOnly(c.birthdate),
+  birthplace: c.birthplace || c.birth_place || '',
   age: c.age || '',
   civil_status: c.status || '',
   religion: c.religion || '',
+  nationality: c.nationality || '',
   address: c.address || '',
+  present_address: c.presentAddress || c.present_address || '',
+  provincial_address: c.provincialAddress || c.provincial_address || '',
   barangay: c.barangay || '',
   municipality: c.municipality || '',
   province: c.province || '',
+  // Referral
   referral_source: c.sourceOfReferral || c.source_of_referral || '',
   referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
+  date_of_referral: c.dateOfReferral || c.date_of_referral || '',
+  address_and_tel: c.addressAndTel || c.address_and_tel || '',
+  relation_to_client: c.relationToClient || c.relation_to_client || '',
   case_type: c.caseType || c.programType || c.program_type || '',
   admission_month: c.admissionMonth || c.admission_month || '',
   admission_year: c.admissionYear || c.admission_year || '',
@@ -65,7 +75,11 @@ const buildTemplateData = (c = {}) => ({
   guardian_age: c.guardianAge || c.guardian_age || '',
   guardian_education: c.guardianEducation || c.guardian_education || '',
   guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+  guardian_other_skills: c.guardianOtherSkills || c.guardian_other_skills || '',
   guardian_address: c.guardianAddress || c.guardian_address || '',
+  guardian_income: c.guardianIncome || c.guardian_income || '',
+  guardian_living: typeof c.guardianLiving === 'boolean' ? (c.guardianLiving ? 'Yes' : 'No') : (c.guardianLiving || ''),
+  guardian_deceased: typeof c.guardianDeceased === 'boolean' ? (c.guardianDeceased ? 'Yes' : 'No') : (c.guardianDeceased || ''),
 
   married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
   live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
@@ -450,13 +464,12 @@ export const downloadCaseReportCSV = (caseData) => {
           URL.revokeObjectURL(url);
         } catch (fallbackErr) {
           console.error('Dynamic CSV generation failed:', fallbackErr);
-          alert('Error generating CSV.');
+          // Silent failure
         }
       }
     })();
   } catch (error) {
     console.error('Error generating CSV:', error);
-    alert('Error generating CSV. Please try again.');
   }
 };
 
@@ -562,12 +575,11 @@ export const downloadAllCasesCSV = (casesData) => {
           URL.revokeObjectURL(url);
         } catch (fallbackErr) {
           console.error('Dynamic all-cases CSV generation failed:', fallbackErr);
-          alert('Error generating CSV for all cases.');
+          // Silent failure
         }
       }
     })();
   } catch (error) {
     console.error('Error generating CSV for all cases:', error);
-    alert('Error generating CSV for all cases. Please try again.');
   }
 };

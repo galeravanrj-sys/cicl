@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { API_HOST } from '../utils/apiBase';
 import CaseDetailsForm from './CaseDetailsForm';
+import { downloadCaseReportPDF } from '../utils/pdfGenerator';
+import { downloadCaseReportWord } from '../utils/wordGenerator';
+import { downloadCaseReportCSV } from '../utils/csvGenerator';
 
 // Create a configured axios instance with authentication
 const createAuthAxios = () => {
@@ -111,6 +114,39 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
   const [showNextForm, setShowNextForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const computeAge = (birthdate) => {
+    if (!birthdate) return '';
+    const d = new Date(birthdate);
+    if (isNaN(d.getTime())) return '';
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const m = now.getMonth() - d.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+    return age;
+  };
+
+  const buildCaseDataForExport = () => ({
+    ...formData,
+    age: formData.age || computeAge(formData.birthdate),
+    address: formData.presentAddress || formData.address || '',
+  });
+
+  const handleExportPDF = (e) => {
+    e.preventDefault();
+    const data = buildCaseDataForExport();
+    try { downloadCaseReportPDF(data); } catch (err) { console.error('PDF export failed:', err); }
+  };
+  const handleExportWord = (e) => {
+    e.preventDefault();
+    const data = buildCaseDataForExport();
+    try { downloadCaseReportWord(data); } catch (err) { console.error('Word export failed:', err); }
+  };
+  const handleExportCSV = (e) => {
+    e.preventDefault();
+    const data = buildCaseDataForExport();
+    try { downloadCaseReportCSV(data); } catch (err) { console.error('CSV export failed:', err); }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -1680,7 +1716,18 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
            </div>
         </div>
         
-        <div className="d-flex justify-content-end mt-3">
+        <div className="d-flex justify-content-between mt-3">
+          <div className="d-flex gap-2">
+            <button type="button" className="btn btn-outline-secondary" onClick={handleExportPDF}>
+              <i className="fas fa-file-pdf me-2"></i> Export PDF
+            </button>
+            <button type="button" className="btn btn-outline-secondary" onClick={handleExportWord}>
+              <i className="fas fa-file-word me-2"></i> Export Word
+            </button>
+            <button type="button" className="btn btn-outline-secondary" onClick={handleExportCSV}>
+              <i className="fas fa-file-csv me-2"></i> Export CSV
+            </button>
+          </div>
           <button 
             type="submit"
             className="btn btn-primary px-5 py-2" 
