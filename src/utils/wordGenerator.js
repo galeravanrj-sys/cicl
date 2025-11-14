@@ -1104,20 +1104,11 @@ export const downloadCaseReportWord = async (caseData) => {
     window.URL.revokeObjectURL(url);
     return;
   } catch (err) {
-    console.warn('Template-based Word render failed, falling back to generated docx:', err);
+    console.error('Template-based Word render failed:', err);
+    alert('Word template missing or invalid. Ensure /public/template/GENERAL_INTAKEFORM_ASILO.docx exists and has matching tags.');
+    return;
   }
-
-  // Fallback: generate professional docx if template can't be used
-  const fallbackDoc = generateCaseReportWord(caseData);
-  const blob = await Packer.toBlob(fallbackDoc);
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  // No fallback: only use provided template
 };
 
 // Professional consolidated Word export for all cases

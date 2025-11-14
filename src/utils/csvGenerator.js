@@ -1,6 +1,6 @@
 // Professional CSV Generator for CICL Case Reports
-// Provides comprehensive, well-structured CSV exports with enhanced organization and readability
-// Designed for professional data analysis and reporting
+// Updated to use CSV templates from public/template when available, with safe fallback
+// Templates should use {{placeholders}} matching buildTemplateData keys
 
 // Strict date-only normalizer used across CSV exports
 const toDateOnly = (value) => {
@@ -19,6 +19,84 @@ const toDateOnly = (value) => {
   }
   // No generic Date parsing; leave non-matching strings untouched
   return s;
+};
+
+// Build standardized field map (shared with PDF/Word templates)
+const buildTemplateData = (c = {}) => ({
+  first_name: c.firstName || c.first_name || '',
+  middle_name: c.middleName || c.middle_name || '',
+  last_name: c.lastName || c.last_name || '',
+  sex: c.sex || '',
+  birthdate: toDateOnly(c.birthdate),
+  age: c.age || '',
+  civil_status: c.status || '',
+  religion: c.religion || '',
+  address: c.address || '',
+  barangay: c.barangay || '',
+  municipality: c.municipality || '',
+  province: c.province || '',
+  referral_source: c.sourceOfReferral || c.source_of_referral || '',
+  referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
+  case_type: c.caseType || c.programType || c.program_type || '',
+  admission_month: c.admissionMonth || c.admission_month || '',
+  admission_year: c.admissionYear || c.admission_year || '',
+  assigned_house_parent: c.assignedHouseParent || '',
+
+  father_name: c.fatherName || c.father_name || '',
+  father_age: c.fatherAge || c.father_age || '',
+  father_education: c.fatherEducation || c.father_education || '',
+  father_occupation: c.fatherOccupation || c.father_occupation || '',
+  father_other_skills: c.fatherOtherSkills || c.father_other_skills || '',
+  father_address: c.fatherAddress || c.father_address || '',
+  father_income: c.fatherIncome || c.father_income || '',
+  father_living: typeof c.fatherLiving === 'boolean' ? (c.fatherLiving ? 'Yes' : 'No') : (c.fatherLiving || ''),
+
+  mother_name: c.motherName || c.mother_name || '',
+  mother_age: c.motherAge || c.mother_age || '',
+  mother_education: c.motherEducation || c.mother_education || '',
+  mother_occupation: c.motherOccupation || c.mother_occupation || '',
+  mother_other_skills: c.motherOtherSkills || c.mother_other_skills || '',
+  mother_address: c.motherAddress || c.mother_address || '',
+  mother_income: c.motherIncome || c.mother_income || '',
+  mother_living: typeof c.motherLiving === 'boolean' ? (c.motherLiving ? 'Yes' : 'No') : (c.motherLiving || ''),
+
+  guardian_name: c.guardianName || c.guardian_name || '',
+  guardian_relation: c.guardianRelation || c.guardian_relation || '',
+  guardian_age: c.guardianAge || c.guardian_age || '',
+  guardian_education: c.guardianEducation || c.guardian_education || '',
+  guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+  guardian_address: c.guardianAddress || c.guardian_address || '',
+
+  married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
+  live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
+  civil_marriage: typeof c.civilMarriage === 'boolean' ? (c.civilMarriage ? 'Yes' : 'No') : (c.civilMarriage || ''),
+  separated: typeof c.separated === 'boolean' ? (c.separated ? 'Yes' : 'No') : (c.separated || ''),
+  marriage_date_place: c.marriageDatePlace || c.marriage_date_place || '',
+
+  brief_description: c.briefDescription || '',
+  problem_presented: c.problemPresented || c.problem_presented || '',
+  brief_history: c.briefHistory || c.brief_history || '',
+  economic_situation: c.economicSituation || c.economic_situation || '',
+  medical_history: c.medicalHistory || c.medical_history || '',
+  family_background: c.familyBackground || c.family_background || '',
+  assessment: c.assessment || '',
+  recommendation: c.recommendation || ''
+});
+
+const escapeForCSVCell = (value) => {
+  if (value === null || value === undefined) return '';
+  const clean = String(value).replace(/"/g, '""').replace(/\r\n|\n|\r/g, ' ').trim();
+  return clean;
+};
+
+const replacePlaceholders = (templateText, dataMap) => {
+  let out = String(templateText);
+  for (const [key, val] of Object.entries(dataMap)) {
+    const safeVal = escapeForCSVCell(val);
+    const re = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+    out = out.replace(re, safeVal);
+  }
+  return out;
 };
 
 export const generateCaseReportCSV = (caseData) => {
@@ -335,21 +413,31 @@ export const generateCaseReportCSV = (caseData) => {
 
 export const downloadCaseReportCSV = (caseData) => {
   try {
-    const csvContent = generateCaseReportCSV(caseData);
-    // Prepend BOM for better Excel compatibility
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    const safeName = (caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_');
-    link.setAttribute('download', `CICL_Intake_Form_${safeName}_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.csv';
+    const fileName = `CICL_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+
+    (async () => {
+      try {
+        const res = await fetch(templateUrl);
+        if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+        const templateText = await res.text();
+        const dataMap = buildTemplateData(caseData);
+        const filled = replacePlaceholders(templateText, dataMap);
+        const blob = new Blob(['\ufeff' + filled], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error('CSV template fill failed:', e);
+        alert('CSV template missing/invalid. Ensure /public/template/GENERAL_INTAKEFORM_ASILO.csv exists with placeholders.');
+      }
+    })();
   } catch (error) {
     console.error('Error generating CSV:', error);
     alert('Error generating CSV. Please try again.');
@@ -397,20 +485,55 @@ export const generateAllCasesCSV = (casesData) => {
 
 export const downloadAllCasesCSV = (casesData) => {
   try {
-    const csvContent = generateAllCasesCSV(casesData);
-    // Prepend BOM for better Excel compatibility
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `CICL_All_Cases_Export_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const templateUrl = '/template/CICL_All_Cases_List.csv';
+    const fileName = `CICL_All_Cases_Export_${new Date().toISOString().split('T')[0]}.csv`;
+
+    (async () => {
+      try {
+        const res = await fetch(templateUrl);
+        if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+        const templateText = await res.text();
+
+        // Build rows for placeholder {{rows}}
+        const formatDate = (dateString) => toDateOnly(dateString);
+        const calcAge = (birthdate) => {
+          if (!birthdate) return '';
+          const d = new Date(birthdate);
+          if (isNaN(d.getTime())) return '';
+          const now = new Date();
+          let age = now.getFullYear() - d.getFullYear();
+          const m = now.getMonth() - d.getMonth();
+          if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+          return age;
+        };
+        const lines = (casesData || []).map((c) => {
+          const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
+          const program = c?.caseType || c?.programType || '';
+          const parts = [
+            escapeForCSVCell(fullName),
+            escapeForCSVCell(calcAge(c?.birthdate)),
+            escapeForCSVCell(program),
+            escapeForCSVCell(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))
+          ];
+          return `"${parts[0]}",${parts[1]},"${parts[2]}","${parts[3]}"`;
+        }).join('\n');
+
+        const filled = templateText.replace(/\{\{\s*rows\s*\}\}/g, lines);
+        const blob = new Blob(['\ufeff' + filled], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error('CSV list template fill failed:', e);
+        alert('CSV list template missing/invalid. Ensure /public/template/CICL_All_Cases_List.csv exists with {{rows}} placeholder.');
+      }
+    })();
   } catch (error) {
     console.error('Error generating CSV for all cases:', error);
     alert('Error generating CSV for all cases. Please try again.');
