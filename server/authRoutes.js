@@ -13,6 +13,8 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3002';
+// No-email reset delivery flag
+const NO_EMAIL_RESET = String(process.env.NO_EMAIL_RESET || '').toLowerCase() === 'true';
 
 // SMTP configuration via environment variables
 const SMTP_HOST = process.env.SMTP_HOST;
@@ -308,6 +310,14 @@ router.post('/forgot-password', async (req, res) => {
     );
     
     const resetUrl = `${FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+
+    // No-email flow: return the reset URL directly when flag set or email disabled
+    if (NO_EMAIL_RESET || !emailEnabled || !mailTransporter) {
+      console.log('No-email reset flow. Reset URL:', resetUrl);
+      return res.status(200).json({ message: 'Password reset link generated', resetUrl });
+    }
+
+    // Email flow
     const mailOptions = {
       from: SMTP_USER || 'no-reply@cicl.local',
       to: email,
@@ -315,17 +325,14 @@ router.post('/forgot-password', async (req, res) => {
       text: `You requested a password reset. Use the link below to set a new password.\n\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.`,
       html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Reset your password</a></p><p>This link expires in 1 hour.</p>`
     };
-    
-    if (emailEnabled && mailTransporter) {
-      try {
-        await mailTransporter.sendMail(mailOptions);
-      } catch (e) {
-        console.warn('Failed to send reset email:', e.message);
-      }
-    } else {
-      console.log('Email sending disabled. Reset URL:', resetUrl);
+    try {
+      await mailTransporter.sendMail(mailOptions);
+    } catch (e) {
+      console.warn('Failed to send reset email:', e.message);
+      // Fall back to returning link if send fails
+      return res.status(200).json({ message: 'Password reset link generated', resetUrl });
     }
-    
+
     res.status(200).json({ message: 'Password reset email sent' });
   } catch (error) {
     console.error('Forgot password error:', error);

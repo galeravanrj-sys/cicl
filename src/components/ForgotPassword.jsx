@@ -6,6 +6,7 @@ import axios from 'axios';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [resetLink, setResetLink] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,10 +22,10 @@ const ForgotPassword = () => {
       setIsSubmitting(true);
       setError('');
       
-      // Replace with your actual API endpoint
-    await axios.post(`${API_BASE}/auth/forgot-password`, { email });
-      
-      setMessage('Password reset instructions have been sent to your email.');
+      const resp = await axios.post(`${API_BASE}/auth/forgot-password`, { email });
+      const { resetUrl, message: apiMessage } = resp.data || {};
+      setMessage(apiMessage || 'Password reset instructions have been sent to your email.');
+      if (resetUrl) setResetLink(resetUrl);
       setEmail('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to process your request. Please try again later.');
@@ -98,6 +99,18 @@ const ForgotPassword = () => {
             borderRadius: '5px',
             marginBottom: '15px'
           }}>{message}</div>}
+
+          {resetLink && (
+            <div style={{
+              padding: '10px',
+              backgroundColor: '#e8f0fe',
+              color: '#1a73e8',
+              borderRadius: '5px',
+              marginBottom: '15px'
+            }}>
+              Reset link: <a href={resetLink} style={{ color: '#1a73e8' }}>Open reset page</a>
+            </div>
+          )}
           
           {error && <div style={{ 
             padding: '10px', 
