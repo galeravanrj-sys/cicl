@@ -78,6 +78,23 @@ const CaseDetailsPage = () => {
     });
   };
 
+  const computeFullName = (data) => {
+    const first = data.firstName || data.first_name || '';
+    const middle = data.middleName || data.middle_name || '';
+    const last = data.lastName || data.last_name || '';
+    return [first, middle, last].filter(Boolean).join(' ').trim();
+  };
+
+  const parseAddressComponents = (addrRaw) => {
+    if (!addrRaw || typeof addrRaw !== 'string') return { address: null, barangay: null, municipality: null, province: null };
+    const address = addrRaw.trim();
+    const parts = address.split(',').map(s => s.trim()).filter(Boolean);
+    const province = parts.length >= 1 ? parts[parts.length - 1] : null;
+    const municipality = parts.length >= 2 ? parts[parts.length - 2] : null;
+    const barangay = parts.length >= 3 ? parts[parts.length - 3] : null;
+    return { address, barangay, municipality, province };
+  };
+
   if (loading) {
     return (
       <div className="container-fluid py-4">
@@ -181,7 +198,7 @@ const CaseDetailsPage = () => {
                     <div className="card-body">
                       <div className="mb-2">
                         <strong>Full Name:</strong>
-                        <div className="text-muted">{caseData.name || 'N/A'}</div>
+                        <div className="text-muted">{computeFullName(caseData) || caseData.name || 'N/A'}</div>
                       </div>
                       <div className="mb-2">
                         <strong>First Name:</strong>
@@ -227,22 +244,30 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Address:</strong>
-                        <div className="text-muted">{caseData.address || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Barangay:</strong>
-                        <div className="text-muted">{caseData.barangay || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Municipality:</strong>
-                        <div className="text-muted">{caseData.municipality || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Province:</strong>
-                        <div className="text-muted">{caseData.province || 'N/A'}</div>
-                      </div>
+                      {(() => {
+                        const primaryAddr = caseData.presentAddress || caseData.present_address || caseData.address || caseData.provincialAddress || caseData.provincial_address;
+                        const parsed = parseAddressComponents(primaryAddr);
+                        return (
+                          <>
+                          <div className="mb-2">
+                            <strong>Address:</strong>
+                            <div className="text-muted">{parsed.address || caseData.address || 'N/A'}</div>
+                          </div>
+                          <div className="mb-2">
+                            <strong>Barangay:</strong>
+                            <div className="text-muted">{parsed.barangay || caseData.barangay || 'N/A'}</div>
+                          </div>
+                          <div className="mb-2">
+                            <strong>Municipality:</strong>
+                            <div className="text-muted">{parsed.municipality || caseData.municipality || 'N/A'}</div>
+                          </div>
+                          <div className="mb-2">
+                            <strong>Province:</strong>
+                            <div className="text-muted">{parsed.province || caseData.province || 'N/A'}</div>
+                          </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
