@@ -815,16 +815,19 @@ export const downloadCaseReportPDF = async (caseData) => {
 };
 
 // Professional consolidated PDF export for all cases
-export const downloadAllCasesPDF = async (casesData = []) => {
+export const downloadAllCasesPDF = async (inputItems = []) => {
   // Prefer server-side professional consolidated PDF; fallback to local jsPDF summary
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) throw new Error('Missing auth token');
     const { API_BASE } = await import('./apiBase.js');
+    // Detect ids vs full case objects
+    const isIds = Array.isArray(inputItems) && inputItems.length > 0 && typeof inputItems[0] === 'number';
+    const payload = isIds ? { ids: inputItems } : { cases: inputItems || [] };
     const resp = await fetch(`${API_BASE}/export/cases/pdf-html`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-      body: JSON.stringify({ cases: casesData || [] }),
+      body: JSON.stringify(payload),
     });
     if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
     const blob = await resp.blob();
@@ -870,7 +873,7 @@ export const downloadAllCasesPDF = async (casesData = []) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
 
     // List table: Name, Age, Program, Last Updated
-    const rows = (casesData || []).map((c) => [
+    const rows = (inputItems || []).map((c) => [
       c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
       String(c.age ?? calcAge(c.birthdate) ?? ''),
       c.caseType || c.programType || '',

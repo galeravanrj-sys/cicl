@@ -72,19 +72,13 @@ const CaseManagement = () => {
 
     try {
       console.log('Starting PDF export for all cases...');
-      
-      const fullCases = await Promise.all(
-        sortedCases.map(async (c) => {
-          const details = await fetchCaseDetailsForExport(c.id);
-          return details || c;
-        })
-      );
-      await downloadAllCasesPDF(fullCases);
+      // Use server-side consolidated export by ids for full details
+      const ids = sortedCases.map(c => c.id);
+      await downloadAllCasesPDF(ids);
       console.log('All cases summary PDF exported successfully');
-      alert(`Successfully exported ${fullCases.length} cases summary as PDF`);
     } catch (error) {
       console.error('Error exporting PDFs:', error);
-      alert('Error exporting PDFs. Please try again.');
+      // Avoid intrusive alerts for success; keep error feedback minimal
     }
   };
 

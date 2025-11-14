@@ -261,14 +261,8 @@ const ArchivedCases = () => {
 
     // Consolidated professional summary PDF for archived cases
     (async () => {
-      const fullCases = await Promise.all(
-        filteredArchivedCases.map(async (c) => {
-          const details = await fetchCaseDetailsForExport(c.id);
-          return details || c;
-        })
-      );
-      await downloadAllCasesPDF(fullCases);
-      alert(`Successfully exported ${fullCases.length} archived cases summary as PDF`);
+      const ids = filteredArchivedCases.map(c => c.id);
+      await downloadAllCasesPDF(ids);
     })();
   };
 
