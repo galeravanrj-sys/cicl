@@ -416,7 +416,7 @@ export const downloadCaseReportCSV = (caseData) => {
     const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.csv';
     const fileName = `CICL_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
 
-    (async () => {
+  (async () => {
       try {
         const res = await fetch(templateUrl);
         if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
@@ -434,8 +434,24 @@ export const downloadCaseReportCSV = (caseData) => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } catch (e) {
-        console.error('CSV template fill failed:', e);
-        alert('CSV template missing/invalid. Ensure /public/template/GENERAL_INTAKEFORM_ASILO.csv exists with placeholders.');
+        console.error('CSV template fill failed, falling back to dynamic CSV:', e);
+        // Fallback: dynamically generate CSV without template
+        try {
+          const csvContent = generateCaseReportCSV(caseData);
+          const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', fileName);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } catch (fallbackErr) {
+          console.error('Dynamic CSV generation failed:', fallbackErr);
+          alert('Error generating CSV.');
+        }
       }
     })();
   } catch (error) {
@@ -530,8 +546,24 @@ export const downloadAllCasesCSV = (casesData) => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } catch (e) {
-        console.error('CSV list template fill failed:', e);
-        alert('CSV list template missing/invalid. Ensure /public/template/CICL_All_Cases_List.csv exists with {{rows}} placeholder.');
+        console.error('CSV list template fill failed, falling back to dynamic CSV:', e);
+        // Fallback: dynamically generate all-cases CSV without template
+        try {
+          const csvContent = generateAllCasesCSV(casesData);
+          const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.setAttribute('href', url);
+          link.setAttribute('download', fileName);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } catch (fallbackErr) {
+          console.error('Dynamic all-cases CSV generation failed:', fallbackErr);
+          alert('Error generating CSV for all cases.');
+        }
       }
     })();
   } catch (error) {

@@ -726,9 +726,17 @@ export const downloadCaseReportPDF = async (caseData) => {
     URL.revokeObjectURL(url);
     return;
   } catch (err) {
-    console.error('Template-based PDF render failed:', err);
-    alert('PDF template missing or invalid. Ensure /public/template/GENERAL_INTAKEFORM_ASILO.pdf exists and has matching fields.');
-    return;
+    console.error('Template-based PDF render failed, falling back to dynamic PDF:', err);
+    // Fallback: dynamically generate a professional PDF without template
+    try {
+      const doc = generateCaseReportPDF(caseData);
+      doc.save(fileName);
+      return;
+    } catch (fallbackErr) {
+      console.error('Dynamic PDF generation failed:', fallbackErr);
+      alert('Error generating PDF.');
+      return;
+    }
   }
   // No fallback: only use provided template
 };
