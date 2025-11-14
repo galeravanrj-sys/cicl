@@ -1,4 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle } from 'docx';
+import Docxtemplater from 'docxtemplater';
+import PizZip from 'pizzip';
 
 export const generateCaseReportWord = (caseData) => {
   // Professional color scheme
@@ -1016,10 +1018,98 @@ export const generateCaseReportWord = (caseData) => {
 };
 
 export const downloadCaseReportWord = async (caseData) => {
-  const doc = generateCaseReportWord(caseData);
+  const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.docx';
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
-  
-  const blob = await Packer.toBlob(doc);
+
+  const buildTemplateData = (c) => ({
+    // Common identity fields (add more keys as your template supports)
+    first_name: c.firstName || c.first_name || '',
+    middle_name: c.middleName || c.middle_name || '',
+    last_name: c.lastName || c.last_name || '',
+    sex: c.sex || '',
+    birthdate: c.birthdate || '',
+    age: c.age || '',
+    civil_status: c.status || '',
+    religion: c.religion || '',
+    address: c.address || '',
+    barangay: c.barangay || '',
+    municipality: c.municipality || '',
+    province: c.province || '',
+    referral_source: c.sourceOfReferral || c.source_of_referral || '',
+    referral_other: c.otherSourceOfReferral || c.other_source_of_referral || '',
+    case_type: c.caseType || c.programType || c.program_type || '',
+    admission_month: c.admissionMonth || c.admission_month || '',
+    admission_year: c.admissionYear || c.admission_year || '',
+    assigned_house_parent: c.assignedHouseParent || '',
+
+    father_name: c.fatherName || c.father_name || '',
+    father_age: c.fatherAge || c.father_age || '',
+    father_education: c.fatherEducation || c.father_education || '',
+    father_occupation: c.fatherOccupation || c.father_occupation || '',
+    father_other_skills: c.fatherOtherSkills || c.father_other_skills || '',
+    father_address: c.fatherAddress || c.father_address || '',
+    father_income: c.fatherIncome || c.father_income || '',
+    father_living: typeof c.fatherLiving === 'boolean' ? (c.fatherLiving ? 'Yes' : 'No') : (c.fatherLiving || ''),
+
+    mother_name: c.motherName || c.mother_name || '',
+    mother_age: c.motherAge || c.mother_age || '',
+    mother_education: c.motherEducation || c.mother_education || '',
+    mother_occupation: c.motherOccupation || c.mother_occupation || '',
+    mother_other_skills: c.motherOtherSkills || c.mother_other_skills || '',
+    mother_address: c.motherAddress || c.mother_address || '',
+    mother_income: c.motherIncome || c.mother_income || '',
+    mother_living: typeof c.motherLiving === 'boolean' ? (c.motherLiving ? 'Yes' : 'No') : (c.motherLiving || ''),
+
+    guardian_name: c.guardianName || c.guardian_name || '',
+    guardian_relation: c.guardianRelation || c.guardian_relation || '',
+    guardian_age: c.guardianAge || c.guardian_age || '',
+    guardian_education: c.guardianEducation || c.guardian_education || '',
+    guardian_occupation: c.guardianOccupation || c.guardian_occupation || '',
+    guardian_address: c.guardianAddress || c.guardian_address || '',
+
+    married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
+    live_in_common_law: typeof c.liveInCommonLaw === 'boolean' ? (c.liveInCommonLaw ? 'Yes' : 'No') : (c.liveInCommonLaw || ''),
+    civil_marriage: typeof c.civilMarriage === 'boolean' ? (c.civilMarriage ? 'Yes' : 'No') : (c.civilMarriage || ''),
+    separated: typeof c.separated === 'boolean' ? (c.separated ? 'Yes' : 'No') : (c.separated || ''),
+    marriage_date_place: c.marriageDatePlace || c.marriage_date_place || '',
+
+    brief_description: c.briefDescription || '',
+    problem_presented: c.problemPresented || c.problem_presented || '',
+    brief_history: c.briefHistory || c.brief_history || '',
+    economic_situation: c.economicSituation || c.economic_situation || '',
+    medical_history: c.medicalHistory || c.medical_history || '',
+    family_background: c.familyBackground || c.family_background || '',
+    assessment: c.assessment || '',
+    recommendation: c.recommendation || ''
+  });
+
+  try {
+    const res = await fetch(templateUrl);
+    if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+    const ab = await res.arrayBuffer();
+    const zip = new PizZip(ab);
+    const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+    doc.setData(buildTemplateData(caseData));
+    // If the template has no tags, render() still passes; tags remain as-is.
+    doc.render();
+    const out = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+    const url = window.URL.createObjectURL(out);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    return;
+  } catch (err) {
+    console.warn('Template-based Word render failed, falling back to generated docx:', err);
+  }
+
+  // Fallback: generate professional docx if template can't be used
+  const fallbackDoc = generateCaseReportWord(caseData);
+  const blob = await Packer.toBlob(fallbackDoc);
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;

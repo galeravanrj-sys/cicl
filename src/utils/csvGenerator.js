@@ -324,12 +324,8 @@ export const generateCaseReportCSV = (caseData) => {
     formatTextForCSV(caseData.status || '')
   ];
 
-  // Create CSV content
+  // Clean, professional CSV: header + single data row, no comment lines
   const csvContent = [
-    '# CHILDREN IN CONFLICT WITH THE LAW (CICL) - INTAKE FORM',
-    `# Generated on: ${new Date().toLocaleDateString()}`,
-    '# Case Management System Export',
-    '',
     csvHeaders.join(','),
     csvData.join(',')
   ].join('\n');
