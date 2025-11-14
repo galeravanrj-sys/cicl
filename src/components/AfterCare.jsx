@@ -51,7 +51,7 @@ const AfterCare = () => {
 
   const handlePageChange = (p) => setCurrentPage(p);
   const handleItemsPerPageChange = (n) => { setItemsPerPage(n); setCurrentPage(1); };
-  const handleViewCase = (caseId) => navigate(`/case-details/${caseId}`);
+  const handleViewCase = (caseId) => navigate(`/after-care/${caseId}`);
 
   const handleDischarge = async (caseItem) => {
     try {
