@@ -124,12 +124,18 @@ describe('Reports generation and chart correctness', () => {
     expect(await screen.findByRole('heading', { level: 2, name: /REPORTS/i })).toBeInTheDocument();
 
     // Charts present
-    const doughnut = await screen.findByTestId('doughnut-chart'); // Active Cases
-    const pieProgram = await screen.findByTestId('pie-chart');     // Program
+    await screen.findByTestId('doughnut-chart'); // Active Cases
+    await screen.findByTestId('pie-chart');      // Program
 
-    // Parse chart data
-    const doughnutData = JSON.parse(doughnut.getAttribute('data-chart'));
-    const pieProgramData = JSON.parse(pieProgram.getAttribute('data-chart'));
+    // Wait for async fetch + state update to settle
+    await waitFor(() => {
+      const d = JSON.parse(screen.getByTestId('doughnut-chart').getAttribute('data-chart'));
+      expect(d.datasets[0].data.length).toBe(2);
+    });
+
+    // Parse chart data after update
+    const doughnutData = JSON.parse(screen.getByTestId('doughnut-chart').getAttribute('data-chart'));
+    const pieProgramData = JSON.parse(screen.getByTestId('pie-chart').getAttribute('data-chart'));
 
     // Active Cases (Doughnut): [New Admissions, Discharged]
     const [newAdmissions, discharged] = doughnutData.datasets[0].data;
@@ -159,11 +165,15 @@ describe('Reports values match derived counts', () => {
   it('dataset values align with counts computed from sampleCases', async () => {
     renderReports('/reports');
 
-    const doughnut = await screen.findByTestId('doughnut-chart');
-    const pieProgram = await screen.findByTestId('pie-chart');
+    await screen.findByTestId('doughnut-chart');
+    await screen.findByTestId('pie-chart');
 
-    const doughnutData = JSON.parse(doughnut.getAttribute('data-chart'));
-    const pieProgramData = JSON.parse(pieProgram.getAttribute('data-chart'));
+    await waitFor(() => {
+      const d = JSON.parse(screen.getByTestId('doughnut-chart').getAttribute('data-chart'));
+      expect(d.datasets[0].data.length).toBe(2);
+    });
+    const doughnutData = JSON.parse(screen.getByTestId('doughnut-chart').getAttribute('data-chart'));
+    const pieProgramData = JSON.parse(screen.getByTestId('pie-chart').getAttribute('data-chart'));
 
     // Derived counts from sampleCases
     const now = new Date('2025-10-15T00:00:00Z');

@@ -18,41 +18,51 @@ const AfterCare = () => {
     }
   }, [fetchAllCases, allCases.length]);
 
+  // Check if a case status is in After Care
   const isAfterCare = (status) => {
     const s = String(status || '').toLowerCase();
     return s === 'after care' || s === 'aftercare';
   };
 
+  // Format a date string for UI display
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const d = new Date(dateString);
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  // Format a time string for UI display
   const formatTime = (dateString) => {
     if (!dateString) return '';
     const d = new Date(dateString);
     return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
+  // Only include cases currently in After Care
   const afterCareCases = allCases.filter(c => isAfterCare(c.status));
 
+  // Sort by latest update first
   const sortedCases = [...afterCareCases].sort((a, b) => {
     const dateA = new Date(a.lastUpdated || a.timestamp || 0);
     const dateB = new Date(b.lastUpdated || b.timestamp || 0);
     return dateB - dateA;
   });
 
+  // Pagination calculations
   const totalItems = sortedCases.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const pageItems = sortedCases.slice(startIndex, endIndex);
 
+  // Update current page
   const handlePageChange = (p) => setCurrentPage(p);
+  // Update page size and reset to first page
   const handleItemsPerPageChange = (n) => { setItemsPerPage(n); setCurrentPage(1); };
+  // Navigate to After Care details page
   const handleViewCase = (caseId) => navigate(`/after-care/${caseId}`);
 
+  // Discharge an After Care case back to archived (server + state + redirect)
   const handleDischarge = async (caseItem) => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');

@@ -117,6 +117,18 @@ const CaseManagement = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
+
+  const calculateAge = (birthdate) => {
+    if (!birthdate) return 'N/A';
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
   
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -237,17 +249,6 @@ const CaseManagement = () => {
     return dateB - dateA;
   });
 
-  const calculateAge = (birthdate) => {
-    if (!birthdate) return 'N/A';
-    const today = new Date();
-    const birth = new Date(birthdate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
 
   // eslint-disable-next-line no-unused-vars
   const handleArchive = (caseItem) => {
