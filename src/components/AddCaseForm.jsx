@@ -239,6 +239,24 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
         setLoading(false);
         return;
       }
+      const authAxios = createAuthAxios();
+      // Proactive duplicate check to avoid server 400
+      const { firstName, lastName, birthdate } = formData;
+      if (firstName && lastName) {
+        try {
+          const dup = await authAxios.get('/api/cases', {
+            params: { checkName: 'true', firstName, lastName, birthdate: birthdate || '' }
+          });
+          if (dup?.data?.exists) {
+            setError(dup.data.message || 'A case with this name and birthdate already exists.');
+            setLoading(false);
+            return;
+          }
+        } catch (checkErr) {
+          console.warn('Name check failed:', checkErr);
+          // Continue; backend will still validate
+        }
+      }
       
       console.log('Form data saved for next step:', formData);
       setShowNextForm(true);
@@ -277,6 +295,22 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
       };
       
       console.log('Submitting case data:', caseData);
+      // Proactive duplicate check to avoid server 400
+      if (caseData.firstName && caseData.lastName) {
+        try {
+          const dup = await authAxios.get('/api/cases', {
+            params: { checkName: 'true', firstName: caseData.firstName, lastName: caseData.lastName, birthdate: caseData.birthdate || '' }
+          });
+          if (dup?.data?.exists) {
+            setError(dup.data.message || 'Another case with this name and birthdate already exists.');
+            setLoading(false);
+            return;
+          }
+        } catch (checkErr) {
+          console.warn('Name check failed:', checkErr);
+        }
+      }
+
       // Use the configured axios instance with authentication
       const response = await authAxios.post('/api/cases', caseData);
       
@@ -306,7 +340,9 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
       
     } catch (err) {
       console.error('Error adding case:', err);
-      setError(err.response?.data?.message || 'Error adding case');
+      const serverMsg = err.response?.data?.message;
+      const serverDetails = err.response?.data?.details;
+      setError(serverMsg ? `${serverMsg}${serverDetails ? `: ${serverDetails}` : ''}` : 'Error adding case');
     } finally {
       setLoading(false);
     }
