@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { API_HOST } from '../utils/apiBase';
 import CaseDetailsForm from './CaseDetailsForm';
-import { downloadCaseReportPDF } from '../utils/pdfGenerator';
-import { downloadCaseReportCSV } from '../utils/csvGenerator';
+// Removed inline export actions from AddCaseForm
 
 // Create a configured axios instance with authentication
 const createAuthAxios = () => {
@@ -125,22 +124,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
     return age;
   };
 
-  const buildCaseDataForExport = () => ({
-    ...formData,
-    age: formData.age || computeAge(formData.birthdate),
-    address: formData.presentAddress || formData.address || '',
-  });
-
-  const handleExportPDF = (e) => {
-    e.preventDefault();
-    const data = buildCaseDataForExport();
-    try { downloadCaseReportPDF(data); } catch (err) { console.error('PDF export failed:', err); }
-  };
-  const handleExportCSV = (e) => {
-    e.preventDefault();
-    const data = buildCaseDataForExport();
-    try { downloadCaseReportCSV(data); } catch (err) { console.error('CSV export failed:', err); }
-  };
+  // Removed: buildCaseDataForExport, handleExportPDF, handleExportCSV
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -1695,15 +1679,7 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
            </div>
         </div>
         
-        <div className="d-flex justify-content-between mt-3">
-          <div className="d-flex gap-2">
-            <button type="button" className="btn btn-outline-secondary" onClick={handleExportPDF}>
-              <i className="fas fa-file-pdf me-2"></i> Export PDF
-            </button>
-            <button type="button" className="btn btn-outline-secondary" onClick={handleExportCSV}>
-              <i className="fas fa-file-csv me-2"></i> Export CSV
-            </button>
-          </div>
+        <div className="d-flex justify-content-end mt-3">
           <button 
             type="submit"
             className="btn btn-primary px-5 py-2" 
