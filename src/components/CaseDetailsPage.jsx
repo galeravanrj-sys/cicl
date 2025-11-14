@@ -107,6 +107,17 @@ const CaseDetailsPage = () => {
     );
   };
 
+  const computeAge = (dateString) => {
+    if (!dateString) return null;
+    const dob = new Date(dateString);
+    if (Number.isNaN(dob.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const m = now.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+    return age;
+  };
+
   if (loading) {
     return (
       <div className="container-fluid py-4">
@@ -162,6 +173,48 @@ const CaseDetailsPage = () => {
                 Back to Discharged Cases
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const isAfterCareStatus = () => {
+    const s = String(caseData.status || '').toLowerCase();
+    return s === 'after care' || s === 'aftercare';
+  };
+
+  if (isAfterCareStatus()) {
+    const fullName = computeFullName(caseData) || caseData.name;
+    const birth = caseData.birthdate || caseData.birth_date;
+    const age = computeAge(birth);
+    const edu = Array.isArray(caseData.educationalAttainment) && caseData.educationalAttainment.length > 0
+      ? caseData.educationalAttainment[caseData.educationalAttainment.length - 1]
+      : null;
+    const gradeLevel = edu?.level;
+    const schoolName = edu?.school_name;
+    const currentAddress = caseData.presentAddress || caseData.present_address || caseData.address || caseData.provincialAddress || caseData.provincial_address;
+    return (
+      <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+        <div className="row mb-4">
+          <div className="col-12 d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className="mb-1"><i className="fas fa-info-circle me-2 text-primary"></i>Case Details</h2>
+              <p className="text-muted mb-0">Viewing details for case #{caseData.id}</p>
+            </div>
+            <button className="btn btn-outline-primary" onClick={() => navigate('/after-care')}>
+              <i className="fas fa-arrow-left me-2"></i>Back to After Care
+            </button>
+          </div>
+        </div>
+        <div className="card border-0 rounded-4 shadow-sm bg-white">
+          <div className="card-body p-4">
+            {renderField('Name', fullName)}
+            {renderField('Birthdate', birth, formatDate)}
+            {renderField('Age', age)}
+            {renderField('Grade Level', gradeLevel)}
+            {renderField('School', schoolName)}
+            {renderField('Current Address', currentAddress)}
           </div>
         </div>
       </div>

@@ -242,13 +242,15 @@ const AfterCare = () => {
                         <button
                           className="btn btn-outline-primary btn-sm"
                           onClick={() => handleViewCase(c.id)}
+                          style={{ borderRadius: '6px', padding: '6px 12px' }}
                         >
                           <i className="fas fa-eye me-1"></i>View Details
                         </button>
                         <button
-                          className="btn btn-warning btn-sm ms-2"
+                          className="btn btn-outline-warning btn-sm ms-2"
                           title="Discharge"
                           onClick={() => handleDischarge(c)}
+                          style={{ borderRadius: '6px', padding: '6px 12px' }}
                         >
                           <i className="fas fa-sign-out-alt me-1"></i>Discharge
                         </button>
