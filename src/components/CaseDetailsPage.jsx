@@ -95,6 +95,18 @@ const CaseDetailsPage = () => {
     return { address, barangay, municipality, province };
   };
 
+  const hasValue = (v) => v !== undefined && v !== null && String(v).trim() !== '';
+  const renderField = (label, value, formatter) => {
+    const v = formatter ? formatter(value) : value;
+    if (!hasValue(v)) return null;
+    return (
+      <div className="mb-2">
+        <strong>{label}:</strong>
+        <div className="text-muted">{v}</div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="container-fluid py-4">
@@ -196,40 +208,24 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Full Name:</strong>
-                        <div className="text-muted">{computeFullName(caseData) || caseData.name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>First Name:</strong>
-                        <div className="text-muted">{caseData.firstName || caseData.first_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Middle Name:</strong>
-                        <div className="text-muted">{caseData.middleName || caseData.middle_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Last Name:</strong>
-                        <div className="text-muted">{caseData.lastName || caseData.last_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Sex:</strong>
-                        <div className="text-muted">{caseData.sex || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Birthdate:</strong>
-                        <div className="text-muted">{formatDate(caseData.birthdate || caseData.birth_date)}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Religion:</strong>
-                        <div className="text-muted">{caseData.religion || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Status:</strong>
-                        <span className={`badge ${isArchivedStatus(caseData.status) ? 'bg-secondary' : 'bg-success'}`}>
-                          {getArchivedDisplayText(caseData.status) || 'N/A'}
-                        </span>
-                      </div>
+                      {renderField('Full Name', computeFullName(caseData) || caseData.name)}
+                      {renderField('Nickname', caseData.nickname)}
+                      {renderField('First Name', caseData.firstName || caseData.first_name)}
+                      {renderField('Middle Name', caseData.middleName || caseData.middle_name)}
+                      {renderField('Last Name', caseData.lastName || caseData.last_name)}
+                      {renderField('Sex', caseData.sex)}
+                      {renderField('Birthdate', caseData.birthdate || caseData.birth_date, formatDate)}
+                      {renderField('Birthplace', caseData.birthplace)}
+                      {renderField('Nationality', caseData.nationality)}
+                      {renderField('Religion', caseData.religion)}
+                      {hasValue(caseData.status) && (
+                        <div className="mb-2">
+                          <strong>Status:</strong>
+                          <span className={`badge ${isArchivedStatus(caseData.status) ? 'bg-secondary' : 'bg-success'}`}>
+                            {getArchivedDisplayText(caseData.status)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -249,22 +245,10 @@ const CaseDetailsPage = () => {
                         const parsed = parseAddressComponents(primaryAddr);
                         return (
                           <>
-                          <div className="mb-2">
-                            <strong>Address:</strong>
-                            <div className="text-muted">{parsed.address || caseData.address || 'N/A'}</div>
-                          </div>
-                          <div className="mb-2">
-                            <strong>Barangay:</strong>
-                            <div className="text-muted">{parsed.barangay || caseData.barangay || 'N/A'}</div>
-                          </div>
-                          <div className="mb-2">
-                            <strong>Municipality:</strong>
-                            <div className="text-muted">{parsed.municipality || caseData.municipality || 'N/A'}</div>
-                          </div>
-                          <div className="mb-2">
-                            <strong>Province:</strong>
-                            <div className="text-muted">{parsed.province || caseData.province || 'N/A'}</div>
-                          </div>
+                            {renderField('Address', parsed.address || caseData.address)}
+                            {renderField('Barangay', parsed.barangay || caseData.barangay)}
+                            {renderField('Municipality', parsed.municipality || caseData.municipality)}
+                            {renderField('Province', parsed.province || caseData.province)}
                           </>
                         );
                       })()}
@@ -282,18 +266,12 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Source of Referral:</strong>
-                        <div className="text-muted">{caseData.sourceOfReferral || caseData.source_of_referral || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Other Source:</strong>
-                        <div className="text-muted">{caseData.otherSourceOfReferral || caseData.other_source_of_referral || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Assigned Home:</strong>
-                        <div className="text-muted">{caseData.assignedHouseParent || caseData.assigned_house_parent || 'N/A'}</div>
-                      </div>
+                      {renderField('Source of Referral', caseData.sourceOfReferral || caseData.source_of_referral)}
+                      {renderField('Other Source', caseData.otherSourceOfReferral || caseData.other_source_of_referral)}
+                      {renderField('Date of Referral', caseData.dateOfReferral || caseData.date_of_referral, formatDate)}
+                      {renderField('Address & Tel.', caseData.addressAndTel || caseData.address_and_tel)}
+                      {renderField('Relation to Client', caseData.relationToClient || caseData.relation_to_client)}
+                      {renderField('Assigned Home', caseData.assignedHouseParent || caseData.assigned_house_parent)}
                     </div>
                   </div>
                 </div>
@@ -308,22 +286,10 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Program Type:</strong>
-                        <div className="text-muted">{caseData.programType || caseData.program_type || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Admission Month:</strong>
-                        <div className="text-muted">{caseData.admissionMonth || caseData.admission_month || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Admission Year:</strong>
-                        <div className="text-muted">{caseData.admissionYear || caseData.admission_year || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Discharged Date:</strong>
-                        <div className="text-muted">{formatDate(caseData.archivedDate || caseData.archived_date)}</div>
-                      </div>
+                      {renderField('Program Type', caseData.programType || caseData.program_type)}
+                      {renderField('Admission Month', caseData.admissionMonth || caseData.admission_month)}
+                      {renderField('Admission Year', caseData.admissionYear || caseData.admission_year)}
+                      {renderField('Discharged Date', caseData.archivedDate || caseData.archived_date, formatDate)}
                     </div>
                   </div>
                 </div>
@@ -338,34 +304,13 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Name:</strong>
-                        <div className="text-muted">{caseData.fatherName || caseData.father_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Age:</strong>
-                        <div className="text-muted">{caseData.fatherAge || caseData.father_age || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Education:</strong>
-                        <div className="text-muted">{caseData.fatherEducation || caseData.father_education || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Occupation:</strong>
-                        <div className="text-muted">{caseData.fatherOccupation || caseData.father_occupation || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Other Skills:</strong>
-                        <div className="text-muted">{caseData.fatherOtherSkills || caseData.father_other_skills || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Address:</strong>
-                        <div className="text-muted">{caseData.fatherAddress || caseData.father_address || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Income:</strong>
-                        <div className="text-muted">{caseData.fatherIncome || caseData.father_income || 'N/A'}</div>
-                      </div>
+                      {renderField('Name', caseData.fatherName || caseData.father_name)}
+                      {renderField('Age', caseData.fatherAge || caseData.father_age)}
+                      {renderField('Education', caseData.fatherEducation || caseData.father_education)}
+                      {renderField('Occupation', caseData.fatherOccupation || caseData.father_occupation)}
+                      {renderField('Other Skills', caseData.fatherOtherSkills || caseData.father_other_skills)}
+                      {renderField('Address', caseData.fatherAddress || caseData.father_address)}
+                      {renderField('Income', caseData.fatherIncome || caseData.father_income)}
                       <div className="mb-2">
                         <strong>Living:</strong>
                         <div className="text-muted">
@@ -390,34 +335,13 @@ const CaseDetailsPage = () => {
                       </h6>
                     </div>
                     <div className="card-body">
-                      <div className="mb-2">
-                        <strong>Name:</strong>
-                        <div className="text-muted">{caseData.motherName || caseData.mother_name || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Age:</strong>
-                        <div className="text-muted">{caseData.motherAge || caseData.mother_age || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Education:</strong>
-                        <div className="text-muted">{caseData.motherEducation || caseData.mother_education || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Occupation:</strong>
-                        <div className="text-muted">{caseData.motherOccupation || caseData.mother_occupation || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Other Skills:</strong>
-                        <div className="text-muted">{caseData.motherOtherSkills || caseData.mother_other_skills || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Address:</strong>
-                        <div className="text-muted">{caseData.motherAddress || caseData.mother_address || 'N/A'}</div>
-                      </div>
-                      <div className="mb-2">
-                        <strong>Income:</strong>
-                        <div className="text-muted">{caseData.motherIncome || caseData.mother_income || 'N/A'}</div>
-                      </div>
+                      {renderField('Name', caseData.motherName || caseData.mother_name)}
+                      {renderField('Age', caseData.motherAge || caseData.mother_age)}
+                      {renderField('Education', caseData.motherEducation || caseData.mother_education)}
+                      {renderField('Occupation', caseData.motherOccupation || caseData.mother_occupation)}
+                      {renderField('Other Skills', caseData.motherOtherSkills || caseData.mother_other_skills)}
+                      {renderField('Address', caseData.motherAddress || caseData.mother_address)}
+                      {renderField('Income', caseData.motherIncome || caseData.mother_income)}
                       <div className="mb-2">
                         <strong>Living:</strong>
                         <div className="text-muted">
