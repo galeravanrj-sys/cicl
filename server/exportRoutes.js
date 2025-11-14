@@ -315,4 +315,65 @@ router.post('/case/pdf-html', auth, async (req, res) => {
   }
 });
 
+// DEV-ONLY: Preview sample PDFs without auth
+const SAMPLE_CASE = {
+  first_name: 'Juan',
+  middle_name: 'D.',
+  last_name: 'Delacruz',
+  sex: 'Male',
+  birthdate: '2009-06-12',
+  status: 'In Intake',
+  religion: 'Catholic',
+  nationality: 'Filipino',
+  nickname: 'JD',
+  address: '123 Barangay Sto. Niño, Cebu City',
+  present_address: '123 Barangay Sto. Niño, Cebu City',
+  provincial_address: 'Sitio Bayabas, Danao, Cebu',
+  birthplace: 'Cebu City',
+  date_of_referral: '2025-10-01',
+  source_of_referral: 'Barangay Council',
+  relation_to_client: 'Community Officer',
+  address_and_tel: 'Barangay Hall, (032) 555-0123',
+  case_type: 'Minor Offense',
+  program_type: 'Residential',
+  assigned_house_parent: 'Maria Santos',
+  mother_name: 'Luz Delacruz',
+  father_name: 'Jose Delacruz',
+  guardian_name: 'Auntie Fe'
+};
+
+router.get('/sample/pdf-html', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ message: 'Sample preview disabled in production' });
+  }
+  try {
+    const opts = {
+      format: (req.query.format || 'A4'),
+      landscape: req.query.landscape === 'true',
+    };
+    const pdf = await generateHtmlPdf(SAMPLE_CASE, opts);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="case-sample-html.pdf"');
+    return res.send(pdf);
+  } catch (err) {
+    console.error('Sample HTML PDF error:', err);
+    return res.status(500).json({ message: 'Failed to generate sample HTML PDF', error: err.message });
+  }
+});
+
+router.get('/sample/pdf', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ message: 'Sample preview disabled in production' });
+  }
+  try {
+    const pdfBytes = await fillPdfTemplate(SAMPLE_CASE);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="case-sample.pdf"');
+    return res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    console.error('Sample PDF error:', err);
+    return res.status(500).json({ message: 'Failed to generate sample PDF', error: err.message });
+  }
+});
+
 module.exports = router;
