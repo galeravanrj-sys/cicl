@@ -53,8 +53,8 @@ const LandingPage = () => {
               }}>HOPETRACK</div>
             </div>
             <img 
-              src="/images/hopetrack-icon.svg" 
-              alt="HopeTrack Icon" 
+              src="/images/progress-icon.png" 
+              alt="Progress Icon" 
               style={{ width: '65px', height: '65px' }}
             />
           </div>
