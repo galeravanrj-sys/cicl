@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const path = require('path');
+const compression = require('compression');
 const authRoutes = require('./authRoutes');
 const caseRoutes = require('./caseRoutes');
 const exportRoutes = require('./exportRoutes');
@@ -50,6 +51,8 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
+app.use(compression());
+
 // Increase payload size limit for profile picture uploads
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -68,7 +71,19 @@ app.use('/api/export', exportRoutes);
 
 // Serve React build statically
 const buildPath = path.join(__dirname, '..', 'build');
-app.use(express.static(buildPath));
+app.use(express.static(buildPath, {
+  maxAge: '1y',
+  etag: true,
+  setHeaders: (res, filePath) => {
+    if (/\.(html)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Expires', new Date(Date.now()).toUTCString());
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Expires', 'Thu, 31 Dec 2037 23:59:59 GMT');
+    }
+  }
+}));
 
 // Test route for development
 app.get('/', (req, res) => {
