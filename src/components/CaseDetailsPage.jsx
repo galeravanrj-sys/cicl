@@ -673,45 +673,46 @@ const CaseDetailsPage = () => {
                   </div>
                 </div>
 
-                {/* Intervention Plan Section */}
-                <div className="col-12 mb-4">
-                  <div className="card border-0 rounded-4 shadow-sm bg-white">
-                    <div className="card-header bg-warning text-dark">
-                      <h6 className="mb-0">
-                        <i className="fas fa-tasks me-2"></i>
-                        Intervention Plan
-                      </h6>
-                    </div>
-                    <div className="card-body">
-                      <div className="row">
-                        <div className="col-md-3 mb-3">
-                          <strong>Goals:</strong>
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                            {caseData.interventionGoals || 'N/A'}
+                {!isArchivedStatus(caseData.status) && (
+                  <div className="col-12 mb-4">
+                    <div className="card border-0 rounded-4 shadow-sm bg-white">
+                      <div className="card-header bg-warning text-dark">
+                        <h6 className="mb-0">
+                          <i className="fas fa-tasks me-2"></i>
+                          Intervention Plan
+                        </h6>
+                      </div>
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-md-3 mb-3">
+                            <strong>Goals:</strong>
+                            <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                              {caseData.interventionGoals || 'N/A'}
+                            </div>
                           </div>
-                        </div>
-                        <div className="col-md-3 mb-3">
-                          <strong>Objectives:</strong>
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                            {caseData.interventionObjectives || 'N/A'}
+                          <div className="col-md-3 mb-3">
+                            <strong>Objectives:</strong>
+                            <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                              {caseData.interventionObjectives || 'N/A'}
+                            </div>
                           </div>
-                        </div>
-                        <div className="col-md-3 mb-3">
-                          <strong>Timeline:</strong>
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                            {caseData.interventionTimeline || 'N/A'}
+                          <div className="col-md-3 mb-3">
+                            <strong>Timeline:</strong>
+                            <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                              {caseData.interventionTimeline || 'N/A'}
+                            </div>
                           </div>
-                        </div>
-                        <div className="col-md-3 mb-3">
-                          <strong>Expected Outcomes:</strong>
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                            {caseData.expectedOutcomes || 'N/A'}
+                          <div className="col-md-3 mb-3">
+                            <strong>Expected Outcomes:</strong>
+                            <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                              {caseData.expectedOutcomes || 'N/A'}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Case Details & History */}
                 <div className="col-12 mb-4">
