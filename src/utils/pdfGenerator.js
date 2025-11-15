@@ -3,7 +3,7 @@ import { autoTable } from 'jspdf-autotable';
 import { PDFDocument } from 'pdf-lib';
 import { fetchCaseDetailsForExport } from './exportHelpers';
 
-export const generateCaseReportPDF = (caseData) => {
+export const generateCaseReportPDF = (caseData, opts = {}) => {
   const doc = new jsPDF();
   
   const pageWidth = doc.internal.pageSize.width;
@@ -30,11 +30,21 @@ export const generateCaseReportPDF = (caseData) => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('CHILDREN IN CONFLICT WITH THE LAW (CICL)', pageWidth / 2, 15, { align: 'center' });
+    {
+      const title = (opts.branding && opts.branding.title) || 'CHILDREN IN CONFLICT WITH THE LAW (CICL)';
+      doc.text(title, pageWidth / 2, 15, { align: 'center' });
+    }
     
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    doc.text('INTAKE FORM', pageWidth / 2, 25, { align: 'center' });
+    const sub = (opts.branding && opts.branding.subtitle) || 'INTAKE FORM';
+    doc.text(sub, pageWidth / 2, 25, { align: 'center' });
+
+    try {
+      if (opts.logoDataUrl) {
+        doc.addImage(opts.logoDataUrl, 'PNG', margin - 5, 6, 24, 24, undefined, 'FAST');
+      }
+    } catch (_) {}
     
     // Reset text color
     doc.setTextColor(...colors.text);
@@ -58,6 +68,13 @@ export const generateCaseReportPDF = (caseData) => {
     if (caseData.id) {
       doc.text(`Case ID: ${caseData.id}`, margin, yPosition - 5);
     }
+
+    try {
+      if (opts.photoDataUrl) {
+        const w = 22, h = 22;
+        doc.addImage(opts.photoDataUrl, 'PNG', pageWidth - margin - w, 8, w, h, undefined, 'FAST');
+      }
+    } catch (_) {}
     
     yPosition += 10;
   };
@@ -431,10 +448,10 @@ export const generateCaseReportPDF = (caseData) => {
 
     if (familyTableData.length > 0) {
       yPosition = createProfessionalTable(
-        doc,
+        yPosition,
         ['Name', 'Relation', 'Age', 'Sex', 'Status', 'Education', 'Occupation', 'Income'],
         familyTableData,
-        yPosition
+        'Family Members'
       );
     }
   }
@@ -464,10 +481,10 @@ export const generateCaseReportPDF = (caseData) => {
 
     if (extendedTableData.length > 0) {
       yPosition = createProfessionalTable(
-        doc,
+        yPosition,
         ['Name', 'Relationship', 'Age', 'Sex', 'Status', 'Education', 'Occupation', 'Income'],
         extendedTableData,
-        yPosition
+        'Extended Family'
       );
     }
   }
@@ -740,10 +757,33 @@ const buildTemplateData = (c) => ({
   recommendation: c.recommendation || ''
 });
 
-export const downloadCaseReportPDF = async (caseData) => {
-  const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
+export const downloadCaseReportPDF = async (caseData, options = {}) => {
+  const fileName = options.filename || `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
   const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.pdf';
   const normalized = normalizeCaseData(caseData || {});
+  const toDataUrl = async (url) => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (_) { return null; }
+  };
+  const logoDataUrl = options.logoDataUrl || await toDataUrl('/logo512.png');
+  let photoDataUrl = null;
+  try {
+    const p = normalized.profilePicture || normalized.profile_picture;
+    if (typeof p === 'string') {
+      if (p.startsWith('data:image')) photoDataUrl = p;
+      else photoDataUrl = await toDataUrl(p);
+    }
+  } catch (_) {}
+  const branding = options.branding || { title: 'CHILDREN IN CONFLICT WITH THE LAW (CICL)', subtitle: 'INTAKE FORM' };
 
   // Try template-based fill with pdf-lib first
   try {
@@ -804,7 +844,7 @@ export const downloadCaseReportPDF = async (caseData) => {
     console.error('Template-based PDF render failed, falling back to dynamic PDF:', err);
     // Fallback: dynamically generate a professional PDF without template
     try {
-      const doc = generateCaseReportPDF(normalized);
+      const doc = generateCaseReportPDF(normalized, { logoDataUrl, photoDataUrl, branding });
       doc.save(fileName);
       return;
     } catch (fallbackErr) {
