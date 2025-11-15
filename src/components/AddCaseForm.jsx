@@ -763,7 +763,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.elementary.year}
@@ -793,7 +796,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.highSchool.year}
@@ -823,7 +829,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.seniorHighSchool.year}
@@ -853,7 +862,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.vocationalCourse.year}
@@ -883,7 +895,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.college.year}
@@ -913,7 +928,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                         </td>
                         <td>
                           <input 
-                            type="text" 
+                            type="number"
+                            inputMode="numeric"
+                            min="1900"
+                            max="2100"
                             className="form-control" 
                             placeholder="Year"
                             value={formData.educationalAttainment.others.year}
@@ -1132,7 +1150,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       <div className="col-md-2 mb-3">
                         <label className="form-label fw-semibold">Income</label>
                         <input
-                          type="text"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          min="0"
                           className="form-control"
                           name="fatherIncome"
                           value={formData.fatherIncome}
@@ -1254,7 +1275,10 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                       <div className="col-md-2 mb-3">
                         <label className="form-label fw-semibold">Income</label>
                         <input
-                          type="text"
+                          type="number"
+                          inputMode="decimal"
+                          step="0.01"
+                          min="0"
                           className="form-control"
                           name="motherIncome"
                           value={formData.motherIncome}
@@ -1515,16 +1539,27 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                                style={customInputStyle}
                              />
                            </td>
-                           <td>
-                             <input
-                               type="text"
-                               className="form-control form-control-sm"
-                               value={member.occupation}
-                               onChange={(e) => handleFamilyMemberChange(index, 'occupation', e.target.value)}
-                               placeholder="Job/Income"
-                               style={customInputStyle}
-                             />
-                           </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm mb-1"
+                              value={member.occupation}
+                              onChange={(e) => handleFamilyMemberChange(index, 'occupation', e.target.value)}
+                              placeholder="Occupation"
+                              style={customInputStyle}
+                            />
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              step="0.01"
+                              min="0"
+                              className="form-control form-control-sm"
+                              value={member.income}
+                              onChange={(e) => handleFamilyMemberChange(index, 'income', e.target.value)}
+                              placeholder="Income"
+                              style={customInputStyle}
+                            />
+                          </td>
                            <td>
                              <div className="d-flex gap-1">
                                {formData.familyMembers.length > 1 && (
@@ -1663,16 +1698,27 @@ const AddCaseForm = ({ onClose, onCaseAdded }) => {
                                style={customInputStyle}
                              />
                            </td>
-                           <td>
-                             <input
-                               type="text"
-                               className="form-control form-control-sm"
-                               value={member.occupation}
-                               onChange={(e) => handleExtendedFamilyChange(index, 'occupation', e.target.value)}
-                               placeholder="Job/Income"
-                               style={customInputStyle}
-                             />
-                           </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm mb-1"
+                              value={member.occupation}
+                              onChange={(e) => handleExtendedFamilyChange(index, 'occupation', e.target.value)}
+                              placeholder="Occupation"
+                              style={customInputStyle}
+                            />
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              step="0.01"
+                              min="0"
+                              className="form-control form-control-sm"
+                              value={member.income}
+                              onChange={(e) => handleExtendedFamilyChange(index, 'income', e.target.value)}
+                              placeholder="Income"
+                              style={customInputStyle}
+                            />
+                          </td>
                            <td>
                              <div className="d-flex gap-1">
                                {formData.extendedFamily.length > 1 && (
