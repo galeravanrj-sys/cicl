@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import { PDFDocument } from 'pdf-lib';
+import { fetchCaseDetailsForExport } from './exportHelpers';
 
 export const generateCaseReportPDF = (caseData) => {
   const doc = new jsPDF();
@@ -842,6 +843,17 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     return;
   } catch (err) {
     console.warn('Falling back to client-side summary PDF:', err);
+    let items = inputItems;
+    const isIds = Array.isArray(items) && items.length > 0 && typeof items[0] === 'number';
+    if (isIds) {
+      try {
+        const full = await Promise.all(items.map(async (id) => {
+          const d = await fetchCaseDetailsForExport(id);
+          return d || { id };
+        }));
+        items = full;
+      } catch (_) {}
+    }
     const doc = new jsPDF();
     const margin = 20;
     const pageWidth = doc.internal.pageSize.width;
@@ -873,7 +885,7 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
 
     // List table: Name, Age, Program, Last Updated
-    const rows = (inputItems || []).map((c) => [
+    const rows = (items || []).map((c) => [
       c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
       String(c.age ?? calcAge(c.birthdate) ?? ''),
       c.caseType || c.programType || '',

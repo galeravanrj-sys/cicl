@@ -18,7 +18,6 @@ const AfterCare = () => {
     }
   }, [fetchAllCases, allCases.length]);
 
-  // Check if a case status is in After Care
   const isAfterCare = (status) => {
     const s = String(status || '').toLowerCase();
     return s === 'after care' || s === 'aftercare';

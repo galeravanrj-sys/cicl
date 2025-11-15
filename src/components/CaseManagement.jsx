@@ -72,9 +72,7 @@ const CaseManagement = () => {
 
     try {
       console.log('Starting PDF export for all cases...');
-      // Use server-side consolidated export by ids for full details
-      const ids = sortedCases.map(c => c.id);
-      await downloadAllCasesPDF(ids);
+      await downloadAllCasesPDF(sortedCases);
       console.log('All cases summary PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDFs:', error);
