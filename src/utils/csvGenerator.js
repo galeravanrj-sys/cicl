@@ -427,18 +427,7 @@ export const generateCaseReportCSV = (caseData) => {
 
 export const downloadCaseReportCSV = (caseData) => {
   try {
-    const fileName = `HOPETRACK_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
-    const csvContent = generateCaseReportCSV(caseData);
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    return downloadCaseReportXLSX(caseData);
   } catch (error) {
     console.error('Error generating CSV:', error);
   }
@@ -485,19 +474,160 @@ export const generateAllCasesCSV = (casesData) => {
 
 export const downloadAllCasesCSV = (casesData) => {
   try {
-    const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.csv`;
-    const csvContent = generateAllCasesCSV(casesData);
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    return downloadAllCasesXLSX(casesData);
+  } catch (error) {
+    console.error('Error generating CSV for all cases:', error);
+  }
+};
+
+export const downloadAllCasesXLSX = async (casesData) => {
+  try {
+    const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');
+    const wb = XLSX.utils.book_new();
+    const formatDate = (dateString) => toDateOnly(dateString);
+    const calcAge = (birthdate) => {
+      if (!birthdate) return '';
+      const d = new Date(birthdate);
+      if (isNaN(d.getTime())) return '';
+      const now = new Date();
+      let age = now.getFullYear() - d.getFullYear();
+      const m = now.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+      return age;
+    };
+    const sheetData = [
+      ['Name', 'Age', 'Program', 'Last Updated'],
+      ...((casesData || []).map((c) => [
+        c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim(),
+        calcAge(c?.birthdate),
+        c?.caseType || c?.programType || '',
+        formatDate(c?.lastUpdated || c?.updated_at || c?.created_at),
+      ]))
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Summary');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
+    link.setAttribute('download', `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.xlsx`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Error generating CSV for all cases:', error);
+    console.error('Error generating XLSX for all cases:', error);
+  }
+};
+
+export const downloadCaseReportXLSX = async (caseData) => {
+  try {
+    const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');
+    const wb = XLSX.utils.book_new();
+    const d = caseData || {};
+    const dateOnly = (x) => toDateOnly(x);
+
+    const section = (title, rows) => {
+      const aoa = [['Label', 'Value'], ...rows];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, title);
+    };
+
+    section('Personal Information', [
+      ['First Name', d.firstName || d.first_name || ''],
+      ['Last Name', d.lastName || d.last_name || ''],
+      ['Middle Name', d.middleName || d.middle_name || ''],
+      ['Sex', d.sex || ''],
+      ['Birthdate', dateOnly(d.birthdate)],
+      ['Age', d.age || ''],
+      ['Status', d.status || ''],
+      ['Religion', d.religion || ''],
+      ['Nationality', d.nationality || ''],
+      ['Nickname', d.nickname || ''],
+      ['Birthplace', d.birthplace || ''],
+    ]);
+
+    section('Addresses', [
+      ['Present Address', d.presentAddress || d.present_address || d.address || ''],
+      ['Provincial Address', d.provincialAddress || d.provincial_address || ''],
+      ['Address & Tel', d.addressAndTel || d.address_and_tel || ''],
+    ]);
+
+    section('Referral', [
+      ['Date of Referral', dateOnly(d.dateOfReferral || d.date_of_referral)],
+      ['Source of Referral', d.sourceOfReferral || d.source_of_referral || ''],
+      ['Relation to Client', d.relationToClient || d.relation_to_client || ''],
+    ]);
+
+    section('Case Details', [
+      ['Program', d.programType || d.program_type || d.caseType || ''],
+      ['Assigned Home', d.assignedHouseParent || d.assigned_house_parent || ''],
+      ['Mother', d.motherName || d.mother_name || ''],
+      ['Father', d.fatherName || d.father_name || ''],
+      ['Guardian', d.guardianName || d.guardian_name || ''],
+    ]);
+
+    const fm = d.familyMembers || d.family_members || d.family_members_rows || [];
+    if (Array.isArray(fm) && fm.length) {
+      const aoa = [['Name','Relation','Age','Sex','Status','Education','Address','Occupation','Income'], ...fm.map(x => [x.name||'',x.relation||'',x.age||'',x.sex||'',x.status||'',x.education||'',x.address||'',x.occupation||'',x.income||''])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, 'Family Composition');
+    }
+
+    const ef = d.extendedFamily || d.extended_family || d.extended_family_rows || [];
+    if (Array.isArray(ef) && ef.length) {
+      const aoa = [['Name','Relationship','Age','Sex','Status','Education','Occupation','Income'], ...ef.map(x => [x.name||'',x.relationship||'',x.age||'',x.sex||'',x.status||'',x.education||'',x.occupation||'',x.income||''])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, 'Extended Family');
+    }
+
+    const edu = d.educationalAttainment || d.educational_attainment || [];
+    if (Array.isArray(edu) && edu.length) {
+      const aoa = [['Level','School Name','School Address','Year'], ...edu.map(x => [x.level||'',x.school_name||'',x.school_address||'',x.year_completed||x.year||''])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, 'Educational Attainment');
+    }
+
+    const sac = d.sacramentalRecords || d.sacramental_records || [];
+    if (Array.isArray(sac) && sac.length) {
+      const aoa = [['Sacrament','Date Received','Place/Parish'], ...sac.map(x => [x.sacrament||'', dateOnly(x.date_received||x.date||''), x.place_parish||''])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, 'Sacramental Records');
+    }
+
+    const ag = d.agencies || d.agencies_persons || [];
+    if (Array.isArray(ag) && ag.length) {
+      const aoa = [['Name','Address/Date/Duration','Services Received'], ...ag.map(x => [x.name||'', x.address_date_duration||'', x.services_received||''])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(wb, ws, 'Agencies / Persons');
+    }
+
+    const narrativeRows = [];
+    if (d.problem_presented || d.problemPresented) narrativeRows.push(['Problem Presented', d.problem_presented || d.problemPresented]);
+    if (d.brief_history || d.briefHistory) narrativeRows.push(['Brief History', d.brief_history || d.briefHistory]);
+    if (d.economic_situation || d.economicSituation) narrativeRows.push(['Economic Situation', d.economic_situation || d.economicSituation]);
+    if (d.medical_history || d.medicalHistory) narrativeRows.push(['Medical History', d.medical_history || d.medicalHistory]);
+    if (d.family_background || d.familyBackground) narrativeRows.push(['Family Background', d.family_background || d.familyBackground]);
+    if (d.client_description || d.clientDescription) narrativeRows.push(['Client Description', d.client_description || d.clientDescription]);
+    if (d.parents_description || d.parentsDescription) narrativeRows.push(["Parents' Description", d.parents_description || d.parentsDescription]);
+    if (d.recommendation) narrativeRows.push(['Recommendation', d.recommendation]);
+    if (d.assessment) narrativeRows.push(['Assessment', d.assessment]);
+    if (narrativeRows.length) section('Narrative', narrativeRows);
+
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `HOPETRACK_Intake_Form_${(d.name || `${d.firstName || ''}_${d.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error generating XLSX for case:', error);
   }
 };
