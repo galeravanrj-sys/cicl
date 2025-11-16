@@ -430,6 +430,7 @@ export const downloadCaseReportCSV = (caseData) => {
     const fileName = `HOPETRACK_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xls`;
     const safe = (v) => (v === null || v === undefined) ? '' : String(v);
     const d = caseData || {};
+    const t = buildTemplateData(d);
     const toBoolYesNo = (b) => {
       if (typeof b === 'boolean') return b ? 'Yes' : 'No';
       if (b === undefined || b === null || String(b).trim() === '') return '';
@@ -496,8 +497,8 @@ export const downloadCaseReportCSV = (caseData) => {
       </table>
       <div class="section-title">Addresses</div>
       <table>
-        <tr><td class="label">Present Address</td><td>${safe(d.presentAddress || d.present_address || d.address)}</td></tr>
-        <tr><td class="label">Provincial Address</td><td>${safe(d.provincialAddress || d.provincial_address)}</td></tr>
+        <tr><td class="label">Present Address</td><td>${safe(t.present_address || d.presentAddress || d.present_address || d.address)}</td></tr>
+        <tr><td class="label">Provincial Address</td><td>${safe(t.provincial_address || d.provincialAddress || d.provincial_address)}</td></tr>
         <tr><td class="label">Address & Tel</td><td>${safe(d.addressAndTel || d.address_and_tel)}</td></tr>
       </table>
       <div class="section-title">Referral</div>
@@ -514,31 +515,31 @@ export const downloadCaseReportCSV = (caseData) => {
       </table>
       <div class="section-title">Family / Household Composition</div>
       <table>
-        <tr><td class="label">Father Name</td><td>${safe(d.fatherName || d.father_name)}</td></tr>
-        <tr><td class="label">Father Age</td><td>${safe(d.fatherAge || d.father_age)}</td></tr>
-        <tr><td class="label">Father Education</td><td>${safe(d.fatherEducation || d.father_education)}</td></tr>
+        <tr><td class="label">Father Name</td><td>${safe(t.father_name || d.fatherName || d.father_name)}</td></tr>
+        <tr><td class="label">Father Age</td><td>${safe(t.father_age || d.fatherAge || d.father_age)}</td></tr>
+        <tr><td class="label">Father Education</td><td>${safe(t.father_education || d.fatherEducation || d.father_education)}</td></tr>
         <tr><td class="label">Father Living</td><td>${livingDisplay(d.fatherLiving ?? d.father_living)}</td></tr>
-        <tr><td class="label">Father Occupation</td><td>${safe(d.fatherOccupation || d.father_occupation)}</td></tr>
-        <tr><td class="label">Father Other Skills</td><td>${safe(d.fatherOtherSkills || d.father_other_skills)}</td></tr>
-        <tr><td class="label">Father Income</td><td>${safe(d.fatherIncome || d.father_income)}</td></tr>
-        <tr><td class="label">Father Address</td><td>${safe(d.fatherAddress || d.father_address)}</td></tr>
-        <tr><td class="label">Mother Name</td><td>${safe(d.motherName || d.mother_name)}</td></tr>
-        <tr><td class="label">Mother Age</td><td>${safe(d.motherAge || d.mother_age)}</td></tr>
-        <tr><td class="label">Mother Education</td><td>${safe(d.motherEducation || d.mother_education)}</td></tr>
+        <tr><td class="label">Father Occupation</td><td>${safe(t.father_occupation || d.fatherOccupation || d.father_occupation)}</td></tr>
+        <tr><td class="label">Father Other Skills</td><td>${safe(t.father_other_skills || d.fatherOtherSkills || d.father_other_skills)}</td></tr>
+        <tr><td class="label">Father Income</td><td>${safe(t.father_income || d.fatherIncome || d.father_income)}</td></tr>
+        <tr><td class="label">Father Address</td><td>${safe(t.father_address || d.fatherAddress || d.father_address)}</td></tr>
+        <tr><td class="label">Mother Name</td><td>${safe(t.mother_name || d.motherName || d.mother_name)}</td></tr>
+        <tr><td class="label">Mother Age</td><td>${safe(t.mother_age || d.motherAge || d.mother_age)}</td></tr>
+        <tr><td class="label">Mother Education</td><td>${safe(t.mother_education || d.motherEducation || d.mother_education)}</td></tr>
         <tr><td class="label">Mother Living</td><td>${livingDisplay(d.motherLiving ?? d.mother_living)}</td></tr>
-        <tr><td class="label">Mother Occupation</td><td>${safe(d.motherOccupation || d.mother_occupation)}</td></tr>
-        <tr><td class="label">Mother Other Skills</td><td>${safe(d.motherOtherSkills || d.mother_other_skills)}</td></tr>
-        <tr><td class="label">Mother Income</td><td>${safe(d.motherIncome || d.mother_income)}</td></tr>
-        <tr><td class="label">Mother Address</td><td>${safe(d.motherAddress || d.mother_address)}</td></tr>
-        <tr><td class="label">Guardian Name</td><td>${safe(d.guardianName || d.guardian_name)}</td></tr>
-        <tr><td class="label">Guardian Relation</td><td>${safe(d.guardianRelation || d.guardian_relation)}</td></tr>
-        <tr><td class="label">Guardian Age</td><td>${safe(d.guardianAge || d.guardian_age)}</td></tr>
-        <tr><td class="label">Guardian Education</td><td>${safe(d.guardianEducation || d.guardian_education)}</td></tr>
+        <tr><td class="label">Mother Occupation</td><td>${safe(t.mother_occupation || d.motherOccupation || d.mother_occupation)}</td></tr>
+        <tr><td class="label">Mother Other Skills</td><td>${safe(t.mother_other_skills || d.motherOtherSkills || d.mother_other_skills)}</td></tr>
+        <tr><td class="label">Mother Income</td><td>${safe(t.mother_income || d.motherIncome || d.mother_income)}</td></tr>
+        <tr><td class="label">Mother Address</td><td>${safe(t.mother_address || d.motherAddress || d.mother_address)}</td></tr>
+        <tr><td class="label">Guardian Name</td><td>${safe(t.guardian_name || d.guardianName || d.guardian_name)}</td></tr>
+        <tr><td class="label">Guardian Relation</td><td>${safe(t.guardian_relation || d.guardianRelation || d.guardian_relation)}</td></tr>
+        <tr><td class="label">Guardian Age</td><td>${safe(t.guardian_age || d.guardianAge || d.guardian_age)}</td></tr>
+        <tr><td class="label">Guardian Education</td><td>${safe(t.guardian_education || d.guardianEducation || d.guardian_education)}</td></tr>
         <tr><td class="label">Guardian Living</td><td>${livingDisplay(d.guardianLiving ?? d.guardian_living)}</td></tr>
-        <tr><td class="label">Guardian Occupation</td><td>${safe(d.guardianOccupation || d.guardian_occupation)}</td></tr>
-        <tr><td class="label">Guardian Other Skills</td><td>${safe(d.guardianOtherSkills || d.guardian_other_skills)}</td></tr>
-        <tr><td class="label">Guardian Income</td><td>${safe(d.guardianIncome || d.guardian_income)}</td></tr>
-        <tr><td class="label">Guardian Address</td><td>${safe(d.guardianAddress || d.guardian_address)}</td></tr>
+        <tr><td class="label">Guardian Occupation</td><td>${safe(t.guardian_occupation || d.guardianOccupation || d.guardian_occupation)}</td></tr>
+        <tr><td class="label">Guardian Other Skills</td><td>${safe(t.guardian_other_skills || d.guardianOtherSkills || d.guardian_other_skills)}</td></tr>
+        <tr><td class="label">Guardian Income</td><td>${safe(t.guardian_income || d.guardianIncome || d.guardian_income)}</td></tr>
+        <tr><td class="label">Guardian Address</td><td>${safe(t.guardian_address || d.guardianAddress || d.guardian_address)}</td></tr>
       </table>
       <div class="section-title">Civil Status of Parents</div>
       <table>
