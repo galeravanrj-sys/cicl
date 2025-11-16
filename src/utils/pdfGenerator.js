@@ -785,8 +785,8 @@ const buildTemplateData = (c) => ({
 
 export const downloadCaseReportPDF = async (caseData, options = {}) => {
   const normalized = normalizeCaseData(caseData || {});
-  const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE REPORT' }, theme: options.theme });
-  const fn = options.filename || `HOPETRACK_Case_Report_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE SUMMARY' }, theme: options.theme });
+  const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fn);
 };
 
