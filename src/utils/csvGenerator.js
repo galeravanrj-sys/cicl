@@ -488,7 +488,7 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Nickname</td><td>${safe(d.nickname)}</td></tr>
         <tr><td class="label">Sex</td><td>${safe(d.sex)}</td></tr>
         <tr><td class="label">Birthdate</td><td>${safe(toDateOnly(d.birthdate))}</td></tr>
-        <tr><td class="label">Age</td><td>${safe(d.age)}</td></tr>
+        <tr><td class="label">Age</td><td>${safe(d.age || ((bd)=>{ if(!bd) return ''; const dt=new Date(bd); if(isNaN(dt.getTime())) return ''; const now=new Date(); let a=now.getFullYear()-dt.getFullYear(); const m=now.getMonth()-dt.getMonth(); if(m<0 || (m===0 && now.getDate()<dt.getDate())) a--; return a; })(d.birthdate))}</td></tr>
         <tr><td class="label">Status</td><td>${safe(d.status)}</td></tr>
         <tr><td class="label">Nationality</td><td>${safe(d.nationality)}</td></tr>
         <tr><td class="label">Religion</td><td>${safe(d.religion)}</td></tr>
