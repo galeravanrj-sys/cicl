@@ -271,7 +271,7 @@ const ArchivedCases = () => {
 
     // Consolidated professional summary PDF for archived cases
     (async () => {
-      await downloadAllCasesPDF(filteredArchivedCases);
+      await downloadAllCasesPDF(filteredArchivedCases.map(c => c.id));
     })();
   };
 

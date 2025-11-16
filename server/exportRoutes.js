@@ -166,7 +166,7 @@ function buildHtml(caseData) {
         .table th { background: var(--light); font-weight: 600; color: #4f5d75; }
         .table thead th:nth-child(1), .table tbody td:nth-child(1) { text-align: left; }
         .table thead th:nth-child(2), .table tbody td:nth-child(2) { text-align: center; width: 80px; }
-        .table thead th:nth-child(3), .table tbody td:nth-child(3) { text-align: left; width: 140px; }
+        .table thead th:nth-child(3), .table tbody td:nth-child(3) { text-align: center; width: 140px; }
         .table thead th:nth-child(4), .table tbody td:nth-child(4) { text-align: right; width: 120px; }
         .note { white-space: pre-wrap; font-size: 12px; border: 1px solid var(--border); background: #fafbfc; padding: 8px; border-radius: 6px; }
       </style>
@@ -339,9 +339,9 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
     const updated = formatDate(c.lastUpdated || c.updated_at || c.created_at);
     return `<tr>
       <td>${escapeHtml(n)}</td>
-      <td>${escapeHtml(String(age ?? ''))}</td>
-      <td>${escapeHtml(program)}</td>
-      <td>${escapeHtml(updated)}</td>
+      <td style="text-align:center;">${escapeHtml(String(age ?? ''))}</td>
+      <td style="text-align:center;">${escapeHtml(program)}</td>
+      <td style="text-align:right;">${escapeHtml(updated)}</td>
     </tr>`;
   }).join('');
 
@@ -538,7 +538,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section">
           <table class="table">
             <thead>
-              <tr><th>Name</th><th>Age</th><th>Program</th><th>Last Updated</th></tr>
+          <tr><th>Name</th><th style="text-align:center;">Age</th><th style="text-align:center;">Program</th><th style="text-align:right;">Last Updated</th></tr>
             </thead>
             <tbody>
               ${summaryRows || '<tr><td colspan="4">No cases</td></tr>'}

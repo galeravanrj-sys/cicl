@@ -925,7 +925,7 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     // Detect ids vs full case objects
     const isIds = Array.isArray(inputItems) && inputItems.length > 0 && typeof inputItems[0] === 'number';
     const payload = isIds ? { ids: inputItems } : { cases: inputItems || [] };
-    const resp = await fetch(`${API_BASE}/export/cases/pdf-html?listOnly=true`, {
+    const resp = await fetch(`${API_BASE}/export/cases/pdf-html?listOnly=false`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
       body: JSON.stringify(payload),
@@ -1009,7 +1009,7 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       columnStyles: {
         0: { cellWidth: 'auto', halign: 'left' },
         1: { cellWidth: 22, halign: 'center' },
-        2: { cellWidth: 40, halign: 'left' },
+        2: { cellWidth: 40, halign: 'center' },
         3: { cellWidth: 36, halign: 'right' }
       }
     });

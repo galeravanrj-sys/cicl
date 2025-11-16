@@ -72,7 +72,7 @@ const CaseManagement = () => {
 
     try {
       console.log('Starting PDF export for all cases...');
-      await downloadAllCasesPDF(sortedCases);
+      await downloadAllCasesPDF(sortedCases.map(c => c.id));
       console.log('All cases summary PDF exported successfully');
     } catch (error) {
       console.error('Error exporting PDFs:', error);
