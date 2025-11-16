@@ -469,9 +469,25 @@ export const downloadCaseReportCSV = (caseData) => {
     }));
     const sacRows = hasRows(sacItems) ? sacItems.map(x => `<tr><td>${safe(x.sacrament)}</td><td>${safe(toDateOnly(x.date))}</td><td>${safe(x.place_parish)}</td></tr>`).join('') : '';
     const agRows = hasRows(ag) ? ag.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.addressDateDuration || x.address_date_duration)}</td><td>${safe(x.servicesReceived || x.services_received)}</td></tr>`).join('') : '';
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8" />
+    const html = `<!DOCTYPE html>
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8" />
       <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
+      <meta name="ProgId" content="Excel.Sheet" />
+      <meta name="Generator" content="HOPETRACK" />
       <title>HOPETRACK Intake Form</title>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>Intake</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
       <style>
         body { font-family: Segoe UI, Arial, sans-serif; }
         .section-title { background:#2C5282; color:#fff; font-weight:600; padding:6px 8px; }
@@ -667,9 +683,25 @@ export const downloadAllCasesCSV = (casesData) => {
         <td style="text-align:right;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
       </tr>`;
     }).join('');
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8" />
+    const html = `<!DOCTYPE html>
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8" />
       <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
+      <meta name="ProgId" content="Excel.Sheet" />
+      <meta name="Generator" content="HOPETRACK" />
       <title>${title}</title>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>All Cases</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
       <style>
         body { font-family: Segoe UI, Arial, sans-serif; }
         table { border-collapse: collapse; width: 100%; }
