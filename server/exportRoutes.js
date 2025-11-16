@@ -50,6 +50,12 @@ function normalizeCaseData(input) {
   const guardian_name = pick('guardian_name', 'guardianName');
   const program_type = pick('program_type', 'programType');
 
+  const married_in_church = !!pick('married_in_church', 'marriedInChurch');
+  const live_in_common_law = !!pick('live_in_common_law', 'liveInCommonLaw');
+  const civil_marriage = !!pick('civil_marriage', 'civilMarriage');
+  const separated = !!pick('separated');
+  const marriage_date_place = pick('marriage_date_place', 'marriageDatePlace');
+
   const age = pick('age') || computeAge(birthdate);
 
   // Return template field names expected by the PDF
@@ -78,6 +84,11 @@ function normalizeCaseData(input) {
     mother_name,
     guardian_name,
     program_type,
+    married_in_church,
+    live_in_common_law,
+    civil_marriage,
+    separated,
+    marriage_date_place,
   };
 }
 
@@ -221,6 +232,28 @@ function buildHtml(caseData) {
             ${fld('Mother', c.mother_name)}
             ${fld('Father', c.father_name)}
             ${fld('Guardian', c.guardian_name)}
+          </div>
+        </div>
+
+        <div class="section-title">Civil Status of Parents</div>
+        <div class="section">
+          <div class="grid">
+            ${fld('Married in church', c.married_in_church ? 'Yes' : 'No')}
+            ${fld('Live-in/Common Law', c.live_in_common_law ? 'Yes' : 'No')}
+            ${fld('Civil Marriage', c.civil_marriage ? 'Yes' : 'No')}
+            ${fld('Separated', c.separated ? 'Yes' : 'No')}
+            ${fld('Date and Place', c.marriage_date_place)}
+          </div>
+        </div>
+
+        <div class="section-title">Civil Status of Parents</div>
+        <div class="section">
+          <div class="grid">
+            ${fld('Married in church', c.married_in_church ? 'Yes' : 'No')}
+            ${fld('Live-in/Common Law', c.live_in_common_law ? 'Yes' : 'No')}
+            ${fld('Civil Marriage', c.civil_marriage ? 'Yes' : 'No')}
+            ${fld('Separated', c.separated ? 'Yes' : 'No')}
+            ${fld('Date and Place', c.marriage_date_place)}
           </div>
         </div>
 

@@ -428,7 +428,7 @@ export const generateCaseReportCSV = (caseData) => {
 export const downloadCaseReportCSV = (caseData) => {
   try {
     const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.csv';
-    const fileName = `CICL_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    const fileName = `HOPETRACK_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
 
   (async () => {
       try {
@@ -515,7 +515,7 @@ export const generateAllCasesCSV = (casesData) => {
 export const downloadAllCasesCSV = (casesData) => {
   try {
     const templateUrl = '/template/CICL_All_Cases_List.csv';
-    const fileName = `CICL_All_Cases_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.csv`;
 
     (async () => {
       try {

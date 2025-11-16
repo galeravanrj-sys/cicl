@@ -258,7 +258,7 @@ const ArchivedCases = () => {
       await downloadCaseReportCSV(caseData);
     } catch (error) {
       console.error('Error generating CSV:', error);
-      alert('Error generating CSV. Please try again.');
+      // Silent failure: keep UI clean
     }
   };
 
@@ -280,7 +280,7 @@ const ArchivedCases = () => {
   // CSV Export Function using centralized utility
   const exportToCSV = async () => {
     if (filteredArchivedCases.length === 0) {
-      alert('No archived cases to export');
+      console.info('No archived cases to export');
       return;
     }
 
@@ -294,10 +294,9 @@ const ArchivedCases = () => {
       );
       await downloadAllCasesCSV(fullCases);
       console.log('All archived cases exported to CSV successfully');
-      alert(`Successfully exported ${filteredArchivedCases.length} archived cases to CSV`);
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Error exporting CSV. Please try again.');
+      // Silent failure: keep UI clean
     }
   };
 

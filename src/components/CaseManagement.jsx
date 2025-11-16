@@ -84,7 +84,7 @@ const CaseManagement = () => {
   // Handle Export All CSV function
   const handleExportAllCSV = async () => {
     if (sortedCases.length === 0) {
-      alert('No cases to export');
+      console.info('No cases to export');
       return;
     }
 
@@ -98,10 +98,8 @@ const CaseManagement = () => {
       );
       await downloadAllCasesCSV(fullCases);
       console.log('All cases exported to CSV successfully');
-      alert(`Successfully exported ${sortedCases.length} cases to CSV`);
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Error exporting CSV. Please try again.');
     }
   };
 
@@ -284,7 +282,6 @@ const CaseManagement = () => {
       await downloadCaseReportCSV(caseData);
     } catch (error) {
       console.error('Error generating CSV:', error);
-      alert('Error generating CSV. Please try again.');
     }
   };
 
