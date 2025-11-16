@@ -427,47 +427,18 @@ export const generateCaseReportCSV = (caseData) => {
 
 export const downloadCaseReportCSV = (caseData) => {
   try {
-    const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.csv';
     const fileName = `HOPETRACK_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
-
-  (async () => {
-      try {
-        const res = await fetch(templateUrl);
-        if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
-        const templateText = await res.text();
-        const dataMap = buildTemplateData(caseData);
-        const filled = replacePlaceholders(templateText, dataMap);
-        const blob = new Blob(['\ufeff' + filled], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', fileName);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        console.error('CSV template fill failed, falling back to dynamic CSV:', e);
-        // Fallback: dynamically generate CSV without template
-        try {
-          const csvContent = generateCaseReportCSV(caseData);
-          const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.setAttribute('href', url);
-          link.setAttribute('download', fileName);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } catch (fallbackErr) {
-          console.error('Dynamic CSV generation failed:', fallbackErr);
-          // Silent failure
-        }
-      }
-    })();
+    const csvContent = generateCaseReportCSV(caseData);
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error generating CSV:', error);
   }
@@ -514,71 +485,18 @@ export const generateAllCasesCSV = (casesData) => {
 
 export const downloadAllCasesCSV = (casesData) => {
   try {
-    const templateUrl = '/template/CICL_All_Cases_List.csv';
     const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.csv`;
-
-    (async () => {
-      try {
-        const res = await fetch(templateUrl);
-        if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
-        const templateText = await res.text();
-
-        // Build rows for placeholder {{rows}}
-        const formatDate = (dateString) => toDateOnly(dateString);
-        const calcAge = (birthdate) => {
-          if (!birthdate) return '';
-          const d = new Date(birthdate);
-          if (isNaN(d.getTime())) return '';
-          const now = new Date();
-          let age = now.getFullYear() - d.getFullYear();
-          const m = now.getMonth() - d.getMonth();
-          if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
-          return age;
-        };
-        const lines = (casesData || []).map((c) => {
-          const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
-          const program = c?.caseType || c?.programType || '';
-          const parts = [
-            escapeForCSVCell(fullName),
-            escapeForCSVCell(calcAge(c?.birthdate)),
-            escapeForCSVCell(program),
-            escapeForCSVCell(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))
-          ];
-          return `"${parts[0]}",${parts[1]},"${parts[2]}","${parts[3]}"`;
-        }).join('\n');
-
-        const filled = templateText.replace(/\{\{\s*rows\s*\}\}/g, lines);
-        const blob = new Blob(['\ufeff' + filled], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', fileName);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        console.error('CSV list template fill failed, falling back to dynamic CSV:', e);
-        // Fallback: dynamically generate all-cases CSV without template
-        try {
-          const csvContent = generateAllCasesCSV(casesData);
-          const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.setAttribute('href', url);
-          link.setAttribute('download', fileName);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } catch (fallbackErr) {
-          console.error('Dynamic all-cases CSV generation failed:', fallbackErr);
-          // Silent failure
-        }
-      }
-    })();
+    const csvContent = generateAllCasesCSV(casesData);
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error generating CSV for all cases:', error);
   }

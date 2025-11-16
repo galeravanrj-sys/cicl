@@ -131,17 +131,23 @@ function escapeHtml(str) {
 function buildHtml(caseData) {
   const c = normalizeCaseData(caseData);
   const raw = caseData || {};
-  const fld = (label, value) => `
+  const hasVal = (v) => v !== undefined && v !== null && String(v).trim() !== '';
+  const fld = (label, value) => hasVal(value) ? `
       <div class="field">
         <div class="label">${escapeHtml(label)}</div>
-        <div class="value">${escapeHtml(value || '')}</div>
-      </div>`;
+        <div class="value">${escapeHtml(value)}</div>
+      </div>` : '';
   const renderTable = (columns, rows) => {
     if (!Array.isArray(rows) || rows.length === 0) return '<div class="muted">No records</div>';
     const thead = `<thead><tr>${columns.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
     const tbody = `<tbody>${rows.map(r => `<tr>${columns.map(h => `<td>${escapeHtml(r[h] ?? r[h.replace(/\s+/g,'_').toLowerCase()] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`;
     return `<table class="table">${thead}${tbody}</table>`;
   };
+  const note = (label, value) => hasVal(value) ? `
+            <div>
+              <div class="label">${escapeHtml(label)}</div>
+              <div class="note">${escapeHtml(value)}</div>
+            </div>` : '';
 
   return `<!doctype html>
   <html>
@@ -149,7 +155,7 @@ function buildHtml(caseData) {
       <meta charset="utf-8" />
       <meta http-equiv="X-UA-Compatible" content="IE=edge" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>CICL Case Report</title>
+      <title>HOPETRACK Case Report</title>
       <style>
         :root {
           --primary: #1f6feb;
@@ -246,17 +252,6 @@ function buildHtml(caseData) {
           </div>
         </div>
 
-        <div class="section-title">Civil Status of Parents</div>
-        <div class="section">
-          <div class="grid">
-            ${fld('Married in church', c.married_in_church ? 'Yes' : 'No')}
-            ${fld('Live-in/Common Law', c.live_in_common_law ? 'Yes' : 'No')}
-            ${fld('Civil Marriage', c.civil_marriage ? 'Yes' : 'No')}
-            ${fld('Separated', c.separated ? 'Yes' : 'No')}
-            ${fld('Date and Place', c.marriage_date_place)}
-          </div>
-        </div>
-
         <div class="section-title">Family Composition</div>
         <div class="section">
           ${renderTable(
@@ -300,42 +295,15 @@ function buildHtml(caseData) {
         <div class="section-title">Narrative</div>
         <div class="section">
           <div class="row">
-            <div>
-              <div class="label">Problem Presented</div>
-              <div class="note">${escapeHtml(raw.problem_presented || raw.problemPresented || '')}</div>
-            </div>
-            <div>
-              <div class="label">Brief History</div>
-              <div class="note">${escapeHtml(raw.brief_history || raw.briefHistory || '')}</div>
-            </div>
-            <div>
-              <div class="label">Economic Situation</div>
-              <div class="note">${escapeHtml(raw.economic_situation || raw.economicSituation || '')}</div>
-            </div>
-            <div>
-              <div class="label">Medical History</div>
-              <div class="note">${escapeHtml(raw.medical_history || raw.medicalHistory || '')}</div>
-            </div>
-            <div>
-              <div class="label">Family Background</div>
-              <div class="note">${escapeHtml(raw.family_background || raw.familyBackground || '')}</div>
-            </div>
-            <div>
-              <div class="label">Client Description</div>
-              <div class="note">${escapeHtml(raw.client_description || raw.clientDescription || '')}</div>
-            </div>
-            <div>
-              <div class="label">Parents' Description</div>
-              <div class="note">${escapeHtml(raw.parents_description || raw.parentsDescription || '')}</div>
-            </div>
-            <div>
-              <div class="label">Recommendation</div>
-              <div class="note">${escapeHtml(raw.recommendation || '')}</div>
-            </div>
-            <div>
-              <div class="label">Assessment</div>
-              <div class="note">${escapeHtml(raw.assessment || '')}</div>
-            </div>
+            ${note('Problem Presented', raw.problem_presented || raw.problemPresented)}
+            ${note('Brief History', raw.brief_history || raw.briefHistory)}
+            ${note('Economic Situation', raw.economic_situation || raw.economicSituation)}
+            ${note('Medical History', raw.medical_history || raw.medicalHistory)}
+            ${note('Family Background', raw.family_background || raw.familyBackground)}
+            ${note('Client Description', raw.client_description || raw.clientDescription)}
+            ${note("Parents' Description", raw.parents_description || raw.parentsDescription)}
+            ${note('Recommendation', raw.recommendation)}
+            ${note('Assessment', raw.assessment)}
           </div>
         </div>
       </div>
@@ -378,17 +346,23 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
     </tr>`;
   }).join('');
 
-  const fld = (label, value) => `
+  const hasVal = (v) => v !== undefined && v !== null && String(v).trim() !== '';
+  const fld = (label, value) => hasVal(value) ? `
       <div class="field">
         <div class="label">${escapeHtml(label)}</div>
-        <div class="value">${escapeHtml(value || '')}</div>
-      </div>`;
+        <div class="value">${escapeHtml(value)}</div>
+      </div>` : '';
   const renderTable = (columns, rows) => {
     if (!Array.isArray(rows) || rows.length === 0) return '<div class="muted">No records</div>';
     const thead = `<thead><tr>${columns.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
     const tbody = `<tbody>${rows.map(r => `<tr>${columns.map(h => `<td>${escapeHtml(r[h] ?? r[h.replace(/\s+/g,'_').toLowerCase()] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`;
     return `<table class="table">${thead}${tbody}</table>`;
   };
+  const note = (label, value) => hasVal(value) ? `
+            <div>
+              <div class="label">${escapeHtml(label)}</div>
+              <div class="note">${escapeHtml(value)}</div>
+            </div>` : '';
 
   const perCaseSections = listOnly ? '' : list.map((raw, idx) => {
     const c = normalizeCaseData(raw);
@@ -489,42 +463,15 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Narrative</div>
         <div class="section">
           <div class="row">
-            <div>
-              <div class="label">Problem Presented</div>
-              <div class="note">${escapeHtml(raw.problem_presented || raw.problemPresented || '')}</div>
-            </div>
-            <div>
-              <div class="label">Brief History</div>
-              <div class="note">${escapeHtml(raw.brief_history || raw.briefHistory || '')}</div>
-            </div>
-            <div>
-              <div class="label">Economic Situation</div>
-              <div class="note">${escapeHtml(raw.economic_situation || raw.economicSituation || '')}</div>
-            </div>
-            <div>
-              <div class="label">Medical History</div>
-              <div class="note">${escapeHtml(raw.medical_history || raw.medicalHistory || '')}</div>
-            </div>
-            <div>
-              <div class="label">Family Background</div>
-              <div class="note">${escapeHtml(raw.family_background || raw.familyBackground || '')}</div>
-            </div>
-            <div>
-              <div class="label">Client Description</div>
-              <div class="note">${escapeHtml(raw.client_description || raw.clientDescription || '')}</div>
-            </div>
-            <div>
-              <div class="label">Parents' Description</div>
-              <div class="note">${escapeHtml(raw.parents_description || raw.parentsDescription || '')}</div>
-            </div>
-            <div>
-              <div class="label">Recommendation</div>
-              <div class="note">${escapeHtml(raw.recommendation || '')}</div>
-            </div>
-            <div>
-              <div class="label">Assessment</div>
-              <div class="note">${escapeHtml(raw.assessment || '')}</div>
-            </div>
+            ${note('Problem Presented', raw.problem_presented || raw.problemPresented)}
+            ${note('Brief History', raw.brief_history || raw.briefHistory)}
+            ${note('Economic Situation', raw.economic_situation || raw.economicSituation)}
+            ${note('Medical History', raw.medical_history || raw.medicalHistory)}
+            ${note('Family Background', raw.family_background || raw.familyBackground)}
+            ${note('Client Description', raw.client_description || raw.clientDescription)}
+            ${note("Parents' Description", raw.parents_description || raw.parentsDescription)}
+            ${note('Recommendation', raw.recommendation)}
+            ${note('Assessment', raw.assessment)}
           </div>
         </div>
       </div>`;
@@ -668,17 +615,16 @@ async function generateHtmlPdf(caseData, opts = {}) {
 router.get('/case/:id/pdf', auth, async (req, res) => {
   try {
     const id = req.params.id;
-    const result = await db.query('SELECT * FROM cases WHERE id = $1', [id]);
-    if (!result.rows.length) return res.status(404).json({ message: 'Case not found' });
-    const base = result.rows[0];
-
-    // Optionally enrich with related tables if needed
-    // For now we fill the intake template with main case fields
-
-    const pdfBytes = await fillPdfTemplate(base);
+    const data = await fetchFullCaseById(id);
+    if (!data) return res.status(404).json({ message: 'Case not found' });
+    const opts = {
+      format: (req.query.format || 'A4'),
+      landscape: req.query.landscape === 'true',
+    };
+    const pdf = await generateHtmlPdf(data, opts);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="case-${id}.pdf"`);
-    return res.send(Buffer.from(pdfBytes));
+    return res.send(pdf);
   } catch (err) {
     console.error('PDF export error:', err);
     return res.status(500).json({ message: 'Failed to generate PDF', error: err.message });
@@ -688,10 +634,14 @@ router.get('/case/:id/pdf', auth, async (req, res) => {
 // POST: generate PDF from provided JSON case payload
 router.post('/case/pdf', auth, async (req, res) => {
   try {
-    const pdfBytes = await fillPdfTemplate(req.body || {});
+    const opts = {
+      format: (req.query.format || 'A4'),
+      landscape: req.query.landscape === 'true',
+    };
+    const pdf = await generateHtmlPdf(req.body || {}, opts);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="case-export.pdf"');
-    return res.send(Buffer.from(pdfBytes));
+    return res.send(pdf);
   } catch (err) {
     console.error('PDF export error:', err);
     return res.status(500).json({ message: 'Failed to generate PDF', error: err.message });

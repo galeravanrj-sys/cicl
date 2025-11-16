@@ -758,161 +758,37 @@ const buildTemplateData = (c) => ({
 });
 
 export const downloadCaseReportPDF = async (caseData, options = {}) => {
-  const fileName = options.filename || `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.pdf`;
-  const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.pdf';
-  const normalized = normalizeCaseData(caseData || {});
-  const toDataUrl = async (url) => {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const blob = await res.blob();
-      return await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (_) { return null; }
-  };
-  const logoDataUrl = options.logoDataUrl || await toDataUrl('/logo512.png');
-  let photoDataUrl = null;
   try {
-    const p = normalized.profilePicture || normalized.profile_picture;
-    if (typeof p === 'string') {
-      if (p.startsWith('data:image')) photoDataUrl = p;
-      else photoDataUrl = await toDataUrl(p);
-    }
-  } catch (_) {}
-  const branding = options.branding || { title: 'HOPETRACK', subtitle: 'INTAKE FORM' };
-
-  // Try template-based fill with pdf-lib first
-  try {
-    const res = await fetch(templateUrl);
-    if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
-    const ab = await res.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(ab);
-    const form = pdfDoc.getForm();
-    const data = buildTemplateData(normalized);
-    // Fill matching fields by iterating existing form fields
-    try {
-      const fields = form.getFields();
-      const tryResolve = (n) => {
-        if (data[n] !== undefined) return data[n];
-        const lower = String(n).toLowerCase();
-        if (data[lower] !== undefined) return data[lower];
-        const underscored = lower.replace(/\s+/g, '_');
-        if (data[underscored] !== undefined) return data[underscored];
-        const dashed = lower.replace(/\s+/g, '-');
-        if (data[dashed] !== undefined) return data[dashed];
-        const nospace = lower.replace(/[\s_-]+/g, '');
-        if (data[nospace] !== undefined) return data[nospace];
-        if (lower.includes('first') && lower.includes('name')) return data.first_name;
-        if (lower.includes('last') && lower.includes('name')) return data.last_name;
-        if (lower.includes('middle') && lower.includes('name')) return data.middle_name;
-        if (lower.includes('sex')) return data.sex;
-        if (lower.includes('birth') && lower.includes('date')) return data.birthdate;
-        if (lower.includes('age')) return data.age;
-        if (lower.includes('status') && !lower.includes('living')) return data.civil_status || data.status;
-        if (lower.includes('religion')) return data.religion;
-        if (lower.includes('nationality')) return data.nationality;
-        if (lower.includes('nickname')) return data.nickname;
-        if (lower.includes('birth') && lower.includes('place')) return data.birthplace;
-        if (lower.includes('present') && lower.includes('address')) return data.present_address || data.address;
-        if (lower.includes('provincial') && lower.includes('address')) return data.provincial_address;
-        if (lower.includes('address') && lower.includes('tel')) return data.address_and_tel;
-        if (lower.includes('relation') && lower.includes('client')) return data.relation_to_client;
-        if (lower.includes('source') && lower.includes('referral')) return data.source_of_referral || data.referral_source;
-        if (lower.includes('date') && lower.includes('referral')) return data.date_of_referral;
-        if (lower.includes('case') && lower.includes('type')) return data.case_type;
-        if (lower.includes('assigned') && lower.includes('house') && lower.includes('parent')) return data.assigned_house_parent;
-        if (lower.includes('father') && lower.includes('name')) return data.father_name;
-        if (lower.includes('father') && lower.includes('age')) return data.father_age;
-        if (lower.includes('father') && lower.includes('education')) return data.father_education;
-        if (lower.includes('father') && lower.includes('occupation')) return data.father_occupation;
-        if (lower.includes('father') && lower.includes('skills')) return data.father_other_skills;
-        if (lower.includes('father') && lower.includes('address')) return data.father_address;
-        if (lower.includes('father') && lower.includes('income')) return data.father_income;
-        if (lower.includes('father') && lower.includes('living')) return data.father_living;
-        if (lower.includes('mother') && lower.includes('name')) return data.mother_name;
-        if (lower.includes('mother') && lower.includes('age')) return data.mother_age;
-        if (lower.includes('mother') && lower.includes('education')) return data.mother_education;
-        if (lower.includes('mother') && lower.includes('occupation')) return data.mother_occupation;
-        if (lower.includes('mother') && lower.includes('skills')) return data.mother_other_skills;
-        if (lower.includes('mother') && lower.includes('address')) return data.mother_address;
-        if (lower.includes('mother') && lower.includes('income')) return data.mother_income;
-        if (lower.includes('mother') && lower.includes('living')) return data.mother_living;
-        if (lower.includes('guardian') && lower.includes('name')) return data.guardian_name;
-        if (lower.includes('guardian') && lower.includes('relation')) return data.guardian_relation;
-        if (lower.includes('guardian') && lower.includes('age')) return data.guardian_age;
-        if (lower.includes('guardian') && lower.includes('education')) return data.guardian_education;
-        if (lower.includes('guardian') && lower.includes('occupation')) return data.guardian_occupation;
-        if (lower.includes('guardian') && lower.includes('skills')) return data.guardian_other_skills;
-        if (lower.includes('guardian') && lower.includes('address')) return data.guardian_address;
-        if (lower.includes('guardian') && lower.includes('income')) return data.guardian_income;
-        if (lower.includes('guardian') && lower.includes('living')) return data.guardian_living;
-        if (lower.includes('marriage') && lower.includes('date') && lower.includes('place')) return data.marriage_date_place;
-        if (lower.includes('brief') && lower.includes('description')) return data.brief_description;
-        if (lower.includes('married') && lower.includes('church')) return data.married_in_church;
-        if (lower.includes('common') && lower.includes('law')) return data.live_in_common_law;
-        if (lower.includes('civil') && lower.includes('marriage')) return data.civil_marriage;
-        if (lower.includes('separated')) return data.separated;
-        return undefined;
-      };
-      for (const field of fields) {
-        const name = field.getName();
-        const val = tryResolve(name);
-        if (val === undefined || val === null) continue;
-        const ctor = field.constructor?.name || '';
-        try {
-          if (ctor === 'PDFTextField') {
-            field.setText(String(val ?? ''));
-          } else if (ctor === 'PDFCheckBox') {
-            const v = String(val).toLowerCase();
-            if (v === 'yes' || v === 'true' || v === '1') field.check();
-            else field.uncheck?.();
-          } else if (typeof field.setText === 'function') {
-            field.setText(String(val ?? ''));
-          }
-        } catch (_) {}
-      }
-    } catch (_) {}
-    // Flatten filled fields to regular content
-    try { form.flatten(); } catch (_) {}
-
-    // Append a professional dynamic report as extra pages to include non-template fields
-    try {
-      const extraDoc = generateCaseReportPDF(normalized, { logoDataUrl, photoDataUrl, branding });
-      const extraBytes = extraDoc.output('arraybuffer');
-      const extraPdf = await PDFDocument.load(extraBytes);
-      const indices = extraPdf.getPages().map((_, i) => i);
-      const copiedPages = await pdfDoc.copyPages(extraPdf, indices);
-      copiedPages.forEach((p) => pdfDoc.addPage(p));
-    } catch (_) {}
-
-    const out = await pdfDoc.save();
-    const blob = new Blob([out], { type: 'application/pdf' });
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) throw new Error('Missing auth token');
+    const { API_BASE } = await import('./apiBase.js');
+    const resp = await fetch(`${API_BASE}/export/case/pdf-html`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+      body: JSON.stringify(caseData || {}),
+    });
+    if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+    const blob = await resp.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = fileName;
+    const fn = options.filename || `HOPETRACK_Case_Report_${(caseData.lastName || caseData.last_name || 'Unknown')}_${(caseData.firstName || caseData.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+    a.download = fn;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    return;
   } catch (err) {
-    console.error('Template-based PDF render failed, falling back to dynamic PDF:', err);
-    // Fallback: dynamically generate a professional PDF without template
+    console.error('Error generating server HTML PDF, falling back:', err);
     try {
-      const doc = generateCaseReportPDF(normalized, { logoDataUrl, photoDataUrl, branding });
-      doc.save(fileName);
-      return;
+      const normalized = normalizeCaseData(caseData || {});
+      const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'INTAKE FORM' } });
+      const fn = options.filename || `HOPETRACK_Case_Report_${(caseData.lastName || caseData.last_name || 'Unknown')}_${(caseData.firstName || caseData.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fn);
     } catch (fallbackErr) {
-      console.error('Dynamic PDF generation failed:', fallbackErr);
-      return;
+      console.error('Client-side PDF generation failed:', fallbackErr);
     }
   }
-  // No fallback: only use provided template
 };
 
 // Professional consolidated PDF export for all cases
