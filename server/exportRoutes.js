@@ -161,7 +161,7 @@ function buildHtml(caseData) {
         .label { color: #57606a; font-weight: 600; font-size: 12px; }
         .value { font-size: 12px; }
         .row { display: grid; grid-template-columns: 1fr; gap: 6px; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: fixed; }
+        .table { width: 80%; border-collapse: collapse; margin: 8px auto; table-layout: fixed; }
         .table th, .table td { border: 1px solid var(--border); padding: 6px 8px; font-size: 11px; text-align: left; }
         .table th { background: var(--light); font-weight: 600; color: #4f5d75; }
         .table thead th:nth-child(1), .table tbody td:nth-child(1) { text-align: left; }

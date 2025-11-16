@@ -993,6 +993,9 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       formatDate(c.lastUpdated || c.updated_at || c.created_at)
     ]);
 
+    const tableWidth = Math.min(pageWidth * 0.8, pageWidth - margin * 2);
+    const centerMargin = (pageWidth - tableWidth) / 2;
+
     autoTable(doc, {
       startY: 30,
       head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
@@ -1001,8 +1004,8 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center', fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       theme: 'striped',
-      margin: { left: margin, right: margin },
-      tableWidth: pageWidth - margin * 2,
+      margin: { left: centerMargin, right: centerMargin },
+      tableWidth: tableWidth,
       columnStyles: {
         0: { cellWidth: 'auto', halign: 'left' },
         1: { cellWidth: 22, halign: 'center' },
