@@ -863,9 +863,9 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
 
     // List table: Name, Age, Program, Last Updated
     const rows = (items || []).map((c) => [
-      c.name || `${c.firstName || ''} ${c.middleName || ''} ${c.lastName || ''}`.trim(),
+      c.name || `${c.firstName || c.first_name || ''} ${c.middleName || c.middle_name || ''} ${c.lastName || c.last_name || ''}`.trim(),
       String(c.age ?? calcAge(c.birthdate) ?? ''),
-      c.caseType || c.programType || '',
+      c.caseType || c.programType || c.program_type || c.case_type || '',
       formatDate(c.lastUpdated || c.updated_at || c.created_at)
     ]);
 

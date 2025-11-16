@@ -627,8 +627,8 @@ export const generateAllCasesCSV = (casesData) => {
   lines.push(headers.join(','));
 
   for (const c of casesData) {
-    const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
-    const program = c?.caseType || c?.programType || '';
+    const fullName = c?.name || `${c?.firstName || c?.first_name || ''} ${c?.middleName || c?.middle_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
+    const program = c?.caseType || c?.programType || c?.program_type || c?.case_type || '';
     const row = [
       q(fullName),
       calcAge(c?.birthdate),
@@ -658,8 +658,8 @@ export const downloadAllCasesCSV = (casesData) => {
       return age;
     };
     const rowsHtml = (casesData || []).map((c) => {
-      const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
-      const program = c?.caseType || c?.programType || '';
+      const fullName = c?.name || `${c?.firstName || c?.first_name || ''} ${c?.middleName || c?.middle_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
+      const program = c?.caseType || c?.programType || c?.program_type || c?.case_type || '';
       return `<tr>
         <td>${safe(fullName)}</td>
         <td style="text-align:center;">${safe(calcAge(c?.birthdate))}</td>
