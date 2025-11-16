@@ -2,6 +2,24 @@ import jsPDF from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import { PDFDocument } from 'pdf-lib';
 import { fetchCaseDetailsForExport } from './exportHelpers';
+const pdfTheme = {
+  colors: {
+    primary: [41, 128, 185],
+    secondary: [52, 73, 94],
+    accent: [231, 76, 60],
+    light: [236, 240, 241],
+    text: [44, 62, 80]
+  },
+  type: {
+    h1: 18,
+    h2: 14,
+    body: 10,
+    label: 9
+  },
+  grid: {
+    row: 8
+  }
+};
 
 export const generateCaseReportPDF = (caseData, opts = {}) => {
   const doc = new jsPDF();
@@ -10,15 +28,9 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   const pageHeight = doc.internal.pageSize.height;
   const margin = 20;
   let yPosition = 25;
+  const gap = pdfTheme.grid.row;
 
-  // Professional color scheme
-  const colors = {
-    primary: [41, 128, 185],     // Professional blue
-    secondary: [52, 73, 94],     // Dark gray
-    accent: [231, 76, 60],       // Red accent
-    light: [236, 240, 241],      // Light gray
-    text: [44, 62, 80]           // Dark text
-  };
+  const colors = pdfTheme.colors;
 
   // Helper function to add professional header with logo area
   const addFormHeader = () => {
@@ -28,14 +40,14 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     
     // Organization header
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(18);
+    doc.setFontSize(pdfTheme.type.h1);
     doc.setFont('helvetica', 'bold');
     {
       const title = (opts.branding && opts.branding.title) || 'HOPETRACK';
       doc.text(title, pageWidth / 2, 15, { align: 'center' });
     }
     
-    doc.setFontSize(14);
+    doc.setFontSize(pdfTheme.type.h2);
     doc.setFont('helvetica', 'normal');
     const sub = (opts.branding && opts.branding.subtitle) || 'INTAKE FORM';
     doc.text(sub, pageWidth / 2, 25, { align: 'center' });
@@ -113,7 +125,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
 
   // Enhanced form field function with professional styling
   const addFormField = (label, value, x, y, width = 60) => {
-    doc.setFontSize(9);
+    doc.setFontSize(pdfTheme.type.label);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.secondary);
     doc.text(`${label}:`, x, y);
@@ -131,7 +143,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
       doc.text(String(value), x + labelWidth + 2, y);
     }
     
-    return y + 10;
+    return y + gap;
   };
 
   // Enhanced text area function
@@ -180,25 +192,25 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   
   // Row 1: Name fields with better spacing
   currentY = addFormField('Last Name', caseData.lastName || '', margin, currentY, 55);
-  addFormField('First Name', caseData.firstName || '', margin + 60, currentY - 10, 55);
-  currentY = addFormField('Middle Name', caseData.middleName || '', margin + 125, currentY - 10, 55);
+  addFormField('First Name', caseData.firstName || '', margin + 60, currentY - gap, 55);
+  currentY = addFormField('Middle Name', caseData.middleName || '', margin + 125, currentY - gap, 55);
 
   // Row 2: Personal details
   currentY = addFormField('Sex', caseData.sex || '', margin, currentY, 35);
-  addFormField('Birthdate', caseData.birthdate || '', margin + 40, currentY - 10, 55);
-  currentY = addFormField('Age', caseData.age || '', margin + 100, currentY - 10, 25);
+  addFormField('Birthdate', caseData.birthdate || '', margin + 40, currentY - gap, 55);
+  currentY = addFormField('Age', caseData.age || '', margin + 100, currentY - gap, 25);
 
   // Row 3: Status and Religion
   currentY = addFormField('Status', caseData.status || '', margin, currentY, 60);
-  currentY = addFormField('Religion', caseData.religion || '', margin + 65, currentY - 10, 60);
+  currentY = addFormField('Religion', caseData.religion || '', margin + 65, currentY - gap, 60);
 
   // Row 4: Address (full width)
   currentY = addFormField('Address', caseData.address || '', margin, currentY, pageWidth - margin * 2);
 
   // Additional Personal Info
   currentY = addFormField('Nickname', caseData.nickname || '', margin, currentY, 60);
-  addFormField('Birthplace', caseData.birthplace || '', margin + 65, currentY - 10, 80);
-  currentY = addFormField('Nationality', caseData.nationality || '', margin + 150, currentY - 10, 60);
+  addFormField('Birthplace', caseData.birthplace || '', margin + 65, currentY - gap, 80);
+  currentY = addFormField('Nationality', caseData.nationality || '', margin + 150, currentY - gap, 60);
 
   // Split addresses
   currentY = addFormField('Present Address', caseData.presentAddress || '', margin, currentY, pageWidth - margin * 2);
@@ -206,18 +218,18 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
 
   // Referral details
   currentY = addFormField('Date of Referral', caseData.dateOfReferral || '', margin, currentY, 60);
-  addFormField('Address & Tel.', caseData.addressAndTel || '', margin + 65, currentY - 10, 80);
-  currentY = addFormField('Relation to Client', caseData.relationToClient || '', margin + 150, currentY - 10, 70);
+  addFormField('Address & Tel.', caseData.addressAndTel || '', margin + 65, currentY - gap, 80);
+  currentY = addFormField('Relation to Client', caseData.relationToClient || '', margin + 150, currentY - gap, 70);
 
   // Row 5: Source of Referral
   currentY = addFormField('Source of Referral', caseData.sourceOfReferral || '', margin, currentY, 85);
   if (caseData.otherSourceOfReferral) {
-    currentY = addFormField('Other', caseData.otherSourceOfReferral || '', margin + 90, currentY - 10, 70);
+    currentY = addFormField('Other', caseData.otherSourceOfReferral || '', margin + 90, currentY - gap, 70);
   }
 
   // Row 6: Case details
   currentY = addFormField('Case Type', caseData.caseType || '', margin, currentY, 65);
-  currentY = addFormField('Assigned House Parent', caseData.assignedHouseParent || '', margin + 70, currentY - 10, 85);
+  currentY = addFormField('Assigned House Parent', caseData.assignedHouseParent || '', margin + 70, currentY - gap, 85);
 
   yPosition = currentY + 5;
 
@@ -233,13 +245,13 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
 
   currentY = yPosition;
   currentY = addFormField('Name', caseData.fatherName || '', margin, currentY, 80);
-  currentY = addFormField('Age', caseData.fatherAge || '', margin + 85, currentY - 8, 30);
+  currentY = addFormField('Age', caseData.fatherAge || '', margin + 85, currentY - gap, 30);
   currentY = addFormField('Education', caseData.fatherEducation || '', margin, currentY, 80);
-  currentY = addFormField('Occupation', caseData.fatherOccupation || '', margin + 85, currentY - 8, 80);
+  currentY = addFormField('Occupation', caseData.fatherOccupation || '', margin + 85, currentY - gap, 80);
   currentY = addFormField('Other Skills', caseData.fatherOtherSkills || '', margin, currentY, 80);
-  currentY = addFormField('Address', caseData.fatherAddress || '', margin + 85, currentY - 8, 80);
+  currentY = addFormField('Address', caseData.fatherAddress || '', margin + 85, currentY - gap, 80);
   currentY = addFormField('Income', caseData.fatherIncome ? `₱${caseData.fatherIncome}` : '', margin, currentY, 50);
-  currentY = addFormField('Living Status', caseData.fatherLiving ? 'Living' : 'Deceased', margin + 55, currentY - 8, 50);
+  currentY = addFormField('Living Status', (caseData.fatherLiving === true || caseData.father_living === true) ? 'Living' : (caseData.fatherLiving === false || caseData.father_living === false) ? 'Deceased' : '', margin + 55, currentY - gap, 50);
 
   yPosition = currentY + 8;
 
@@ -252,37 +264,34 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
 
   currentY = yPosition;
   currentY = addFormField('Name', caseData.motherName || '', margin, currentY, 80);
-  currentY = addFormField('Age', caseData.motherAge || '', margin + 85, currentY - 8, 30);
+  currentY = addFormField('Age', caseData.motherAge || '', margin + 85, currentY - gap, 30);
   currentY = addFormField('Education', caseData.motherEducation || '', margin, currentY, 80);
-  currentY = addFormField('Occupation', caseData.motherOccupation || '', margin + 85, currentY - 8, 80);
+  currentY = addFormField('Occupation', caseData.motherOccupation || '', margin + 85, currentY - gap, 80);
   currentY = addFormField('Other Skills', caseData.motherOtherSkills || '', margin, currentY, 80);
-  currentY = addFormField('Address', caseData.motherAddress || '', margin + 85, currentY - 8, 80);
+  currentY = addFormField('Address', caseData.motherAddress || '', margin + 85, currentY - gap, 80);
   currentY = addFormField('Income', caseData.motherIncome ? `₱${caseData.motherIncome}` : '', margin, currentY, 50);
-  currentY = addFormField('Living Status', caseData.motherLiving ? 'Living' : 'Deceased', margin + 55, currentY - 8, 50);
+  currentY = addFormField('Living Status', (caseData.motherLiving === true || caseData.mother_living === true) ? 'Living' : (caseData.motherLiving === false || caseData.mother_living === false) ? 'Deceased' : '', margin + 55, currentY - gap, 50);
 
   yPosition = currentY + 8;
 
-  // Guardian Information (if applicable)
-  if (caseData.guardianName) {
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text('GUARDIAN:', margin, yPosition);
-    doc.setFont(undefined, 'normal');
-    yPosition += 8;
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'bold');
+  doc.text('GUARDIAN:', margin, yPosition);
+  doc.setFont(undefined, 'normal');
+  yPosition += 8;
 
-    currentY = yPosition;
-    currentY = addFormField('Name', caseData.guardianName || '', margin, currentY, 80);
-    currentY = addFormField('Age', caseData.guardianAge || '', margin + 85, currentY - 8, 30);
-    currentY = addFormField('Relation', caseData.guardianRelation || '', margin, currentY, 80);
-    currentY = addFormField('Education', caseData.guardianEducation || '', margin + 85, currentY - 8, 80);
-    currentY = addFormField('Occupation', caseData.guardianOccupation || '', margin, currentY, 80);
-    currentY = addFormField('Other Skills', caseData.guardianOtherSkills || '', margin + 85, currentY - 8, 80);
-    currentY = addFormField('Address', caseData.guardianAddress || '', margin, currentY, pageWidth - margin * 2);
-    currentY = addFormField('Income', caseData.guardianIncome ? `₱${caseData.guardianIncome}` : '', margin, currentY, 50);
-    currentY = addFormField('Living Status', caseData.guardianLiving ? 'Living' : 'Deceased', margin + 55, currentY - 8, 50);
+  currentY = yPosition;
+  currentY = addFormField('Name', caseData.guardianName || caseData.guardian_name || '', margin, currentY, 80);
+  currentY = addFormField('Age', caseData.guardianAge || caseData.guardian_age || '', margin + 85, currentY - gap, 30);
+  currentY = addFormField('Relation', caseData.guardianRelation || caseData.guardian_relation || '', margin, currentY, 80);
+  currentY = addFormField('Education', caseData.guardianEducation || caseData.guardian_education || '', margin + 85, currentY - gap, 80);
+  currentY = addFormField('Occupation', caseData.guardianOccupation || caseData.guardian_occupation || '', margin, currentY, 80);
+  currentY = addFormField('Other Skills', caseData.guardianOtherSkills || caseData.guardian_other_skills || '', margin + 85, currentY - gap, 80);
+  currentY = addFormField('Address', caseData.guardianAddress || caseData.guardian_address || '', margin, currentY, pageWidth - margin * 2);
+  currentY = addFormField('Income', (caseData.guardianIncome || caseData.guardian_income) ? `₱${caseData.guardianIncome || caseData.guardian_income}` : '', margin, currentY, 50);
+  currentY = addFormField('Living Status', (caseData.guardianLiving === true || caseData.guardian_living === true) ? 'Living' : (caseData.guardianLiving === false || caseData.guardian_living === false) ? 'Deceased' : '', margin + 55, currentY - 8, 50);
 
-    yPosition = currentY + 8;
-  }
+  yPosition = currentY + 8;
 
   // Check if we need a new page
   if (yPosition > 220) {
@@ -679,6 +688,16 @@ const normalizeCaseData = (c = {}) => ({
   sex: capitalize(c.sex || ''),
   presentAddress: (c.presentAddress || c.present_address || '').toString().trim(),
   provincialAddress: (c.provincialAddress || c.provincial_address || '').toString().trim(),
+  guardianName: c.guardianName || c.guardian_name || '',
+  guardianAge: c.guardianAge || c.guardian_age || '',
+  guardianEducation: c.guardianEducation || c.guardian_education || '',
+  guardianOccupation: c.guardianOccupation || c.guardian_occupation || '',
+  guardianOtherSkills: c.guardianOtherSkills || c.guardian_other_skills || '',
+  guardianRelation: c.guardianRelation || c.guardian_relation || '',
+  guardianAddress: c.guardianAddress || c.guardian_address || '',
+  guardianIncome: c.guardianIncome || c.guardian_income || '',
+  guardianLiving: typeof c.guardianLiving === 'boolean' ? c.guardianLiving : (typeof c.guardian_living === 'boolean' ? c.guardian_living : undefined),
+  guardianDeceased: typeof c.guardianDeceased === 'boolean' ? c.guardianDeceased : (typeof c.guardian_deceased === 'boolean' ? c.guardian_deceased : undefined),
 });
 
 const buildTemplateData = (c) => ({
@@ -758,37 +777,10 @@ const buildTemplateData = (c) => ({
 });
 
 export const downloadCaseReportPDF = async (caseData, options = {}) => {
-  try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (!token) throw new Error('Missing auth token');
-    const { API_BASE } = await import('./apiBase.js');
-    const resp = await fetch(`${API_BASE}/export/case/pdf-html`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-      body: JSON.stringify(caseData || {}),
-    });
-    if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const fn = options.filename || `HOPETRACK_Case_Report_${(caseData.lastName || caseData.last_name || 'Unknown')}_${(caseData.firstName || caseData.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
-    a.download = fn;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error('Error generating server HTML PDF, falling back:', err);
-    try {
-      const normalized = normalizeCaseData(caseData || {});
-      const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'INTAKE FORM' } });
-      const fn = options.filename || `HOPETRACK_Case_Report_${(caseData.lastName || caseData.last_name || 'Unknown')}_${(caseData.firstName || caseData.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
-      doc.save(fn);
-    } catch (fallbackErr) {
-      console.error('Client-side PDF generation failed:', fallbackErr);
-    }
-  }
+  const normalized = normalizeCaseData(caseData || {});
+  const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE REPORT' } });
+  const fn = options.filename || `HOPETRACK_Case_Report_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fn);
 };
 
 // Professional consolidated PDF export for all cases
@@ -852,13 +844,12 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       return age;
     };
 
-    // Header bar
-    doc.setFillColor(41, 128, 185);
+    doc.setFillColor(...pdfTheme.colors.primary);
     doc.rect(0, 0, pageWidth, 24, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
+    doc.setFontSize(pdfTheme.type.h2);
     doc.text('All Cases', pageWidth / 2, 10, { align: 'center' });
-    doc.setFontSize(9);
+    doc.setFontSize(pdfTheme.type.label);
     doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 18, { align: 'center' });
 
     // List table: Name, Age, Program, Last Updated
@@ -876,8 +867,8 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       startY: 30,
       head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
       body: rows,
-      styles: { fontSize: 10, cellPadding: 4, textColor: [44, 62, 80], lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center', fontStyle: 'bold' },
+      styles: { fontSize: pdfTheme.type.body, cellPadding: 4, textColor: pdfTheme.colors.text, lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
+      headStyles: { fillColor: pdfTheme.colors.primary, textColor: 255, halign: 'center', fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       theme: 'striped',
       margin: { left: centerMargin, right: centerMargin },
