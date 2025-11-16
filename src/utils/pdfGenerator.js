@@ -829,6 +829,16 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
     // Flatten filled fields to regular content
     try { form.flatten(); } catch (_) {}
 
+    // Append a professional dynamic report as extra pages to include non-template fields
+    try {
+      const extraDoc = generateCaseReportPDF(normalized, { logoDataUrl, photoDataUrl, branding });
+      const extraBytes = extraDoc.output('arraybuffer');
+      const extraPdf = await PDFDocument.load(extraBytes);
+      const indices = extraPdf.getPages().map((_, i) => i);
+      const copiedPages = await pdfDoc.copyPages(extraPdf, indices);
+      copiedPages.forEach((p) => pdfDoc.addPage(p));
+    } catch (_) {}
+
     const out = await pdfDoc.save();
     const blob = new Blob([out], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
