@@ -905,3 +905,186 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
     doc.save(fileName);
   }
 };
+
+export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 20;
+  const theme = {
+    colors: { ...pdfTheme.colors, ...(((opts.theme && opts.theme.colors) || {})) },
+    type: { ...pdfTheme.type, ...(((opts.theme && opts.theme.type) || {})) },
+    grid: { ...pdfTheme.grid, ...(((opts.theme && opts.theme.grid) || {})) }
+  };
+  const gap = theme.grid.row;
+  const colors = theme.colors;
+
+  const header = () => {
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 0, pageWidth, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(theme.type.h2);
+    doc.setFont('helvetica', 'bold');
+    const title = (opts.branding && opts.branding.title) || 'HOPETRACK';
+    doc.text(title, pageWidth / 2, 11, { align: 'center' });
+    doc.setFontSize(theme.type.label);
+    doc.setFont('helvetica', 'normal');
+    const sub = (opts.branding && opts.branding.subtitle) || 'CASE SUMMARY';
+    doc.text(sub, pageWidth / 2, 19, { align: 'center' });
+    doc.setTextColor(...colors.text);
+  };
+
+  const section = (text, y) => {
+    if (y > pageHeight - 40) { doc.addPage(); y = 30; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(theme.type.body);
+    doc.setTextColor(...colors.text);
+    doc.text(text, margin, y);
+    doc.setDrawColor(...colors.primary);
+    doc.setLineWidth(0.6);
+    doc.line(margin, y + 2, pageWidth - margin, y + 2);
+    return y + 10;
+  };
+
+  const kv = (label, value, x, y, width, advance = true) => {
+    doc.setFontSize(theme.type.label);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...colors.text);
+    doc.text(label + ':', x, y);
+    const labelWidth = doc.getTextWidth(label + ': ');
+    doc.setDrawColor(...colors.primary);
+    doc.setLineWidth(0.3);
+    doc.line(x + labelWidth, y + 1, x + width, y + 1);
+    if (value) {
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(value), x + labelWidth + 2, y);
+    }
+    return advance ? y + gap : y;
+  };
+
+  const grid = (pairs, startY) => {
+    let y = startY;
+    const colW = Math.floor((pageWidth - 2 * margin - 14) / 2);
+    for (let i = 0; i < pairs.length; i += 2) {
+      const left = pairs[i];
+      const right = pairs[i + 1];
+      y = kv(left.label, left.value, margin, y, colW - 6, !right);
+      if (right) kv(right.label, right.value, margin + colW + 14, y - gap, colW - 6, true);
+      if (y > pageHeight - 40) { doc.addPage(); y = 30; }
+    }
+    return y;
+  };
+
+  const textArea = (label, value, y, height = 35) => {
+    if (y + height > pageHeight - 40) { doc.addPage(); y = 30; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(theme.type.body);
+    doc.setTextColor(...colors.text);
+    doc.text(label + ':', margin, y);
+    doc.setDrawColor(...colors.primary);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, y + 3, pageWidth - 2 * margin, height, 'S');
+    if (value) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(theme.type.label);
+      const lines = doc.splitTextToSize(String(value), pageWidth - 2 * margin - 4);
+      let ty = y + 10;
+      for (const line of lines) {
+        if (ty < y + height - 3) { doc.text(line, margin + 2, ty); ty += 4; } else { break; }
+      }
+    }
+    return y + height + 8;
+  };
+
+  header();
+  let y = 34;
+
+  y = section('IDENTIFYING INFORMATION', y);
+  y = grid([
+    { label: 'Last Name', value: caseData.lastName || caseData.last_name || '' },
+    { label: 'First Name', value: caseData.firstName || caseData.first_name || '' },
+    { label: 'Middle Name', value: caseData.middleName || caseData.middle_name || '' },
+    { label: 'Sex', value: caseData.sex || '' },
+    { label: 'Birthdate', value: formatLongDate(caseData.birthdate) || '' },
+    { label: 'Age', value: caseData.age || '' },
+    { label: 'Status', value: caseData.status || caseData.civil_status || '' },
+    { label: 'Religion', value: caseData.religion || '' },
+    { label: 'Nationality', value: caseData.nationality || '' },
+    { label: 'Nickname', value: caseData.nickname || '' }
+  ], y);
+
+  y = kv('Address', caseData.address || caseData.presentAddress || caseData.provincialAddress || '', margin, y, pageWidth - 2 * margin);
+  y = kv('Present Address', caseData.presentAddress || '', margin, y, pageWidth - 2 * margin);
+  y = kv('Provincial Address', caseData.provincialAddress || '', margin, y, pageWidth - 2 * margin);
+
+  y = section('REFERRAL', y);
+  y = grid([
+    { label: 'Source', value: caseData.sourceOfReferral || caseData.referral_source || '' },
+    { label: 'Other', value: caseData.otherSourceOfReferral || caseData.referral_other || '' },
+    { label: 'Date', value: formatLongDate(caseData.dateOfReferral || caseData.date_of_referral) || '' },
+    { label: 'Relation', value: caseData.relationToClient || caseData.relation_to_client || '' },
+    { label: 'Case Type', value: caseData.caseType || caseData.programType || caseData.program_type || '' },
+    { label: 'House Parent', value: caseData.assignedHouseParent || '' }
+  ], y);
+  y = kv('Address & Tel.', caseData.addressAndTel || caseData.address_and_tel || '', margin, y, pageWidth - 2 * margin);
+
+  y = section('FATHER', y);
+  y = grid([
+    { label: 'Name', value: caseData.fatherName || '' },
+    { label: 'Age', value: caseData.fatherAge || '' },
+    { label: 'Education', value: caseData.fatherEducation || '' },
+    { label: 'Occupation', value: caseData.fatherOccupation || '' },
+    { label: 'Income', value: caseData.fatherIncome ? `₱${caseData.fatherIncome}` : '' },
+    { label: 'Living', value: (caseData.fatherLiving === true || caseData.father_living === true) ? 'Living' : (caseData.fatherLiving === false || caseData.father_living === false) ? 'Deceased' : '' }
+  ], y);
+
+  y = section('MOTHER', y);
+  y = grid([
+    { label: 'Name', value: caseData.motherName || '' },
+    { label: 'Age', value: caseData.motherAge || '' },
+    { label: 'Education', value: caseData.motherEducation || '' },
+    { label: 'Occupation', value: caseData.motherOccupation || '' },
+    { label: 'Income', value: caseData.motherIncome ? `₱${caseData.motherIncome}` : '' },
+    { label: 'Living', value: (caseData.motherLiving === true || caseData.mother_living === true) ? 'Living' : (caseData.motherLiving === false || caseData.mother_living === false) ? 'Deceased' : '' }
+  ], y);
+
+  y = section('GUARDIAN', y);
+  y = grid([
+    { label: 'Name', value: caseData.guardianName || caseData.guardian_name || '' },
+    { label: 'Age', value: caseData.guardianAge || caseData.guardian_age || '' },
+    { label: 'Relation', value: caseData.guardianRelation || caseData.guardian_relation || '' },
+    { label: 'Education', value: caseData.guardianEducation || caseData.guardian_education || '' },
+    { label: 'Occupation', value: caseData.guardianOccupation || caseData.guardian_occupation || '' },
+    { label: 'Income', value: (caseData.guardianIncome || caseData.guardian_income) ? `₱${caseData.guardianIncome || caseData.guardian_income}` : '' },
+  ], y);
+  y = kv('Address', caseData.guardianAddress || caseData.guardian_address || '', margin, y, pageWidth - 2 * margin);
+  y = kv('Living', (caseData.guardianLiving === true || caseData.guardian_living === true) ? 'Living' : (caseData.guardianLiving === false || caseData.guardian_living === false) ? 'Deceased' : '', margin, y, pageWidth - 2 * margin);
+
+  y = section('CASE NARRATIVE', y);
+  y = textArea('Client', caseData.clientDescription || caseData.client_description, y, 30);
+  y = textArea('Parents/Relatives/Guardian', caseData.parentsDescription || caseData.parents_description, y, 30);
+  y = textArea('Problem Presented', caseData.problemPresented || caseData.problem_presented, y, 35);
+  y = textArea('Brief History', caseData.briefHistory || caseData.brief_history, y, 35);
+  y = textArea('Economic Situation', caseData.economicSituation || caseData.economic_situation, y, 35);
+  y = textArea('Medical History', caseData.medicalHistory || caseData.medical_history, y, 35);
+  y = textArea('Family Background', caseData.familyBackground || caseData.family_background, y, 35);
+  y = textArea('Assessment', caseData.assessment, y, 35);
+  y = textArea('Recommendation', caseData.recommendation, y, 35);
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.text('HOPETRACK', margin, doc.internal.pageSize.height - 10);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+  }
+
+  return doc;
+};
+
+export const downloadCleanCaseSummaryPDF = async (caseData, options = {}) => {
+  const normalized = normalizeCaseData(caseData || {});
+  const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE SUMMARY' }, theme: options.theme });
+  const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fn);
+};
