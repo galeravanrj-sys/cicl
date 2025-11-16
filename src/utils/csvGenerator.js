@@ -427,7 +427,63 @@ export const generateCaseReportCSV = (caseData) => {
 
 export const downloadCaseReportCSV = (caseData) => {
   try {
-    return downloadCaseReportXLSX(caseData);
+    const fileName = `HOPETRACK_Intake_Form_${(caseData.name || `${caseData.firstName || ''}_${caseData.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xls`;
+    const title = 'HOPETRACK Intake Form';
+    const safe = (v) => (v === null || v === undefined) ? '' : String(v);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8" />
+      <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
+      <title>${title}</title>
+      <style>
+        body { font-family: Segoe UI, Arial, sans-serif; }
+        .section-title { background:#2C5282; color:#fff; font-weight:600; padding:6px 8px; }
+        table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+        th, td { border: 1px solid #cbd5e0; padding: 6px 8px; text-align: left; }
+        th { background: #edf2f7; }
+        .label { width: 30%; font-weight:600; }
+      </style>
+    </head><body>
+      <div class="section-title">Personal Information</div>
+      <table>
+        <tr><td class="label">First Name</td><td>${safe(caseData.firstName || caseData.first_name)}</td></tr>
+        <tr><td class="label">Last Name</td><td>${safe(caseData.lastName || caseData.last_name)}</td></tr>
+        <tr><td class="label">Middle Name</td><td>${safe(caseData.middleName || caseData.middle_name)}</td></tr>
+        <tr><td class="label">Sex</td><td>${safe(caseData.sex)}</td></tr>
+        <tr><td class="label">Birthdate</td><td>${safe(toDateOnly(caseData.birthdate))}</td></tr>
+        <tr><td class="label">Age</td><td>${safe(caseData.age)}</td></tr>
+        <tr><td class="label">Status</td><td>${safe(caseData.status)}</td></tr>
+        <tr><td class="label">Religion</td><td>${safe(caseData.religion)}</td></tr>
+        <tr><td class="label">Nationality</td><td>${safe(caseData.nationality)}</td></tr>
+        <tr><td class="label">Nickname</td><td>${safe(caseData.nickname)}</td></tr>
+        <tr><td class="label">Birthplace</td><td>${safe(caseData.birthplace)}</td></tr>
+      </table>
+      <div class="section-title">Addresses</div>
+      <table>
+        <tr><td class="label">Present Address</td><td>${safe(caseData.presentAddress || caseData.present_address || caseData.address)}</td></tr>
+        <tr><td class="label">Provincial Address</td><td>${safe(caseData.provincialAddress || caseData.provincial_address)}</td></tr>
+        <tr><td class="label">Address & Tel</td><td>${safe(caseData.addressAndTel || caseData.address_and_tel)}</td></tr>
+      </table>
+      <div class="section-title">Referral</div>
+      <table>
+        <tr><td class="label">Date of Referral</td><td>${safe(toDateOnly(caseData.dateOfReferral || caseData.date_of_referral))}</td></tr>
+        <tr><td class="label">Source of Referral</td><td>${safe(caseData.sourceOfReferral || caseData.source_of_referral)}</td></tr>
+        <tr><td class="label">Relation to Client</td><td>${safe(caseData.relationToClient || caseData.relation_to_client)}</td></tr>
+      </table>
+      <div class="section-title">Case Details</div>
+      <table>
+        <tr><td class="label">Program</td><td>${safe(caseData.programType || caseData.program_type || caseData.caseType)}</td></tr>
+        <tr><td class="label">Assigned Home</td><td>${safe(caseData.assignedHouseParent || caseData.assigned_house_parent)}</td></tr>
+      </table>
+    </body></html>`;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error generating CSV:', error);
   }
@@ -474,16 +530,9 @@ export const generateAllCasesCSV = (casesData) => {
 
 export const downloadAllCasesCSV = (casesData) => {
   try {
-    return downloadAllCasesXLSX(casesData);
-  } catch (error) {
-    console.error('Error generating CSV for all cases:', error);
-  }
-};
-
-export const downloadAllCasesXLSX = async (casesData) => {
-  try {
-    const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');
-    const wb = XLSX.utils.book_new();
+    const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.xls`;
+    const title = 'HOPETRACK All Cases';
+    const safe = (v) => (v === null || v === undefined) ? '' : String(v);
     const formatDate = (dateString) => toDateOnly(dateString);
     const calcAge = (birthdate) => {
       if (!birthdate) return '';
@@ -495,139 +544,46 @@ export const downloadAllCasesXLSX = async (casesData) => {
       if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
       return age;
     };
-    const sheetData = [
-      ['Name', 'Age', 'Program', 'Last Updated'],
-      ...((casesData || []).map((c) => [
-        c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim(),
-        calcAge(c?.birthdate),
-        c?.caseType || c?.programType || '',
-        formatDate(c?.lastUpdated || c?.updated_at || c?.created_at),
-      ]))
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(sheetData);
-    XLSX.utils.book_append_sheet(wb, ws, 'Summary');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const rowsHtml = (casesData || []).map((c) => {
+      const fullName = c?.name || `${c?.firstName || ''} ${c?.middleName || ''} ${c?.lastName || ''}`.trim();
+      const program = c?.caseType || c?.programType || '';
+      return `<tr>
+        <td>${safe(fullName)}</td>
+        <td style="text-align:center;">${safe(calcAge(c?.birthdate))}</td>
+        <td style="text-align:center;">${safe(program)}</td>
+        <td style="text-align:right;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
+      </tr>`;
+    }).join('');
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8" />
+      <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
+      <title>${title}</title>
+      <style>
+        body { font-family: Segoe UI, Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #cbd5e0; padding: 6px 8px; font-size: 12px; }
+        th { background: #edf2f7; }
+      </style>
+    </head><body>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Age</th><th>Program</th><th>Last Updated</th></tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body></html>`;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.xlsx`);
+    link.setAttribute('download', fileName);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Error generating XLSX for all cases:', error);
-  }
-};
-
-export const downloadCaseReportXLSX = async (caseData) => {
-  try {
-    const XLSX = await import('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm');
-    const wb = XLSX.utils.book_new();
-    const d = caseData || {};
-    const dateOnly = (x) => toDateOnly(x);
-
-    const section = (title, rows) => {
-      const aoa = [['Label', 'Value'], ...rows];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, title);
-    };
-
-    section('Personal Information', [
-      ['First Name', d.firstName || d.first_name || ''],
-      ['Last Name', d.lastName || d.last_name || ''],
-      ['Middle Name', d.middleName || d.middle_name || ''],
-      ['Sex', d.sex || ''],
-      ['Birthdate', dateOnly(d.birthdate)],
-      ['Age', d.age || ''],
-      ['Status', d.status || ''],
-      ['Religion', d.religion || ''],
-      ['Nationality', d.nationality || ''],
-      ['Nickname', d.nickname || ''],
-      ['Birthplace', d.birthplace || ''],
-    ]);
-
-    section('Addresses', [
-      ['Present Address', d.presentAddress || d.present_address || d.address || ''],
-      ['Provincial Address', d.provincialAddress || d.provincial_address || ''],
-      ['Address & Tel', d.addressAndTel || d.address_and_tel || ''],
-    ]);
-
-    section('Referral', [
-      ['Date of Referral', dateOnly(d.dateOfReferral || d.date_of_referral)],
-      ['Source of Referral', d.sourceOfReferral || d.source_of_referral || ''],
-      ['Relation to Client', d.relationToClient || d.relation_to_client || ''],
-    ]);
-
-    section('Case Details', [
-      ['Program', d.programType || d.program_type || d.caseType || ''],
-      ['Assigned Home', d.assignedHouseParent || d.assigned_house_parent || ''],
-      ['Mother', d.motherName || d.mother_name || ''],
-      ['Father', d.fatherName || d.father_name || ''],
-      ['Guardian', d.guardianName || d.guardian_name || ''],
-    ]);
-
-    const fm = d.familyMembers || d.family_members || d.family_members_rows || [];
-    if (Array.isArray(fm) && fm.length) {
-      const aoa = [['Name','Relation','Age','Sex','Status','Education','Address','Occupation','Income'], ...fm.map(x => [x.name||'',x.relation||'',x.age||'',x.sex||'',x.status||'',x.education||'',x.address||'',x.occupation||'',x.income||''])];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'Family Composition');
-    }
-
-    const ef = d.extendedFamily || d.extended_family || d.extended_family_rows || [];
-    if (Array.isArray(ef) && ef.length) {
-      const aoa = [['Name','Relationship','Age','Sex','Status','Education','Occupation','Income'], ...ef.map(x => [x.name||'',x.relationship||'',x.age||'',x.sex||'',x.status||'',x.education||'',x.occupation||'',x.income||''])];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'Extended Family');
-    }
-
-    const edu = d.educationalAttainment || d.educational_attainment || [];
-    if (Array.isArray(edu) && edu.length) {
-      const aoa = [['Level','School Name','School Address','Year'], ...edu.map(x => [x.level||'',x.school_name||'',x.school_address||'',x.year_completed||x.year||''])];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'Educational Attainment');
-    }
-
-    const sac = d.sacramentalRecords || d.sacramental_records || [];
-    if (Array.isArray(sac) && sac.length) {
-      const aoa = [['Sacrament','Date Received','Place/Parish'], ...sac.map(x => [x.sacrament||'', dateOnly(x.date_received||x.date||''), x.place_parish||''])];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'Sacramental Records');
-    }
-
-    const ag = d.agencies || d.agencies_persons || [];
-    if (Array.isArray(ag) && ag.length) {
-      const aoa = [['Name','Address/Date/Duration','Services Received'], ...ag.map(x => [x.name||'', x.address_date_duration||'', x.services_received||''])];
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'Agencies / Persons');
-    }
-
-    const narrativeRows = [];
-    if (d.problem_presented || d.problemPresented) narrativeRows.push(['Problem Presented', d.problem_presented || d.problemPresented]);
-    if (d.brief_history || d.briefHistory) narrativeRows.push(['Brief History', d.brief_history || d.briefHistory]);
-    if (d.economic_situation || d.economicSituation) narrativeRows.push(['Economic Situation', d.economic_situation || d.economicSituation]);
-    if (d.medical_history || d.medicalHistory) narrativeRows.push(['Medical History', d.medical_history || d.medicalHistory]);
-    if (d.family_background || d.familyBackground) narrativeRows.push(['Family Background', d.family_background || d.familyBackground]);
-    if (d.client_description || d.clientDescription) narrativeRows.push(['Client Description', d.client_description || d.clientDescription]);
-    if (d.parents_description || d.parentsDescription) narrativeRows.push(["Parents' Description", d.parents_description || d.parentsDescription]);
-    if (d.recommendation) narrativeRows.push(['Recommendation', d.recommendation]);
-    if (d.assessment) narrativeRows.push(['Assessment', d.assessment]);
-    if (narrativeRows.length) section('Narrative', narrativeRows);
-
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `HOPETRACK_Intake_Form_${(d.name || `${d.firstName || ''}_${d.lastName || ''}` || 'case').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error generating XLSX for case:', error);
+    console.error('Error generating CSV for all cases:', error);
   }
 };
