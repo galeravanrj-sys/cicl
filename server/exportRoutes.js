@@ -173,7 +173,7 @@ function buildHtml(caseData) {
     </head>
     <body>
       <div class="titlebar">
-        <div class="brand">Children in Conflict with the Law</div>
+        <div class="brand">HOPETRACK</div>
         <div class="meta">Generated ${escapeHtml(new Date().toLocaleString())}</div>
       </div>
       <div class="container">
@@ -311,7 +311,8 @@ function buildHtml(caseData) {
 }
 
 // Build consolidated HTML for multiple cases with summary table and per-case sections
-function buildMultiCaseHtml(casesList = []) {
+function buildMultiCaseHtml(casesList = [], options = {}) {
+  const listOnly = !!options.listOnly;
   const list = Array.isArray(casesList) ? casesList : [];
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -356,7 +357,7 @@ function buildMultiCaseHtml(casesList = []) {
     return `<table class="table">${thead}${tbody}</table>`;
   };
 
-  const perCaseSections = list.map((raw, idx) => {
+  const perCaseSections = listOnly ? '' : list.map((raw, idx) => {
     const c = normalizeCaseData(raw);
     const titleName = (c.first_name || '') + (c.middle_name ? ` ${c.middle_name}` : '') + (c.last_name ? ` ${c.last_name}` : '');
     return `
@@ -529,7 +530,7 @@ function buildMultiCaseHtml(casesList = []) {
     </head>
     <body>
       <div class="titlebar">
-        <div class="brand">Children in Conflict with the Law</div>
+        <div class="brand">HOPETRACK</div>
         <div class="meta">Generated ${escapeHtml(new Date().toLocaleString())}</div>
       </div>
       <div class="container">
@@ -560,7 +561,7 @@ async function generateMultiHtmlPdf(casesList, opts = {}) {
   const browser = await puppeteer.launch({ headless: 'new', args });
   try {
     const page = await browser.newPage();
-    await page.setContent(buildMultiCaseHtml(casesList), { waitUntil: 'domcontentloaded' });
+    await page.setContent(buildMultiCaseHtml(casesList, { listOnly: !!opts.listOnly }), { waitUntil: 'domcontentloaded' });
     await page.emulateMediaType('screen');
     const pdf = await page.pdf({
       format: opts.format || 'A4',
@@ -568,7 +569,7 @@ async function generateMultiHtmlPdf(casesList, opts = {}) {
       printBackground: true,
       margin: opts.margin || { top: '16mm', right: '12mm', bottom: '18mm', left: '12mm' },
       displayHeaderFooter: true,
-      headerTemplate: `<div style="font-size:10px; color:#6b7b93; padding-left:12mm; padding-right:12mm; width:100%;"><span>Cases Summary</span></div>`,
+      headerTemplate: `<div style="font-size:10px; color:#6b7b93; padding-left:12mm; padding-right:12mm; width:100%;"><span>${opts.listOnly ? 'Cases Summary (List)' : 'Cases Summary'}</span></div>`,
       footerTemplate: `<div style="font-size:10px; color:#6b7b93; padding-left:12mm; padding-right:12mm; width:100%; display:flex; justify-content:space-between;">
         <span>Generated ${escapeHtml(new Date().toLocaleDateString())}</span>
         <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
@@ -738,10 +739,11 @@ router.post('/cases/pdf-html', auth, async (req, res) => {
     const opts = {
       format: (req.query.format || 'A4'),
       landscape: req.query.landscape === 'true',
+      listOnly: req.query.listOnly === 'true' || body.listOnly === true,
     };
     const pdf = await generateMultiHtmlPdf(casesList, opts);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="cases-summary-html.pdf"');
+    res.setHeader('Content-Disposition', `attachment; filename="${opts.listOnly ? 'cases-list-html' : 'cases-summary-html'}.pdf"`);
     return res.send(pdf);
   } catch (err) {
     console.error('HTML PDF export (multi) error:', err);

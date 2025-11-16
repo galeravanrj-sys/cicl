@@ -31,7 +31,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     {
-      const title = (opts.branding && opts.branding.title) || 'CHILDREN IN CONFLICT WITH THE LAW (CICL)';
+      const title = (opts.branding && opts.branding.title) || 'HOPETRACK';
       doc.text(title, pageWidth / 2, 15, { align: 'center' });
     }
     
@@ -643,7 +643,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
-    doc.text('CICL Intake Form - Case Management System', margin, doc.internal.pageSize.height - 10);
+    doc.text('HOPETRACK Case Management System', margin, doc.internal.pageSize.height - 10);
   }
 
   return doc;
@@ -694,8 +694,8 @@ const buildTemplateData = (c) => ({
   civil_status: c.status || '',
   religion: c.religion || '',
   nationality: c.nationality || '',
-  address: c.address || '',
-  present_address: c.presentAddress || c.present_address || '',
+  address: c.address || c.presentAddress || c.present_address || c.provincialAddress || c.provincial_address || '',
+  present_address: c.presentAddress || c.present_address || c.address || '',
   provincial_address: c.provincialAddress || c.provincial_address || '',
   barangay: c.barangay || '',
   municipality: c.municipality || '',
@@ -719,7 +719,7 @@ const buildTemplateData = (c) => ({
   father_other_skills: c.fatherOtherSkills || c.father_other_skills || '',
   father_address: c.fatherAddress || c.father_address || '',
   father_income: c.fatherIncome || c.father_income || '',
-  father_living: typeof c.fatherLiving === 'boolean' ? (c.fatherLiving ? 'Yes' : 'No') : (c.fatherLiving || ''),
+  father_living: typeof c.fatherLiving === 'boolean' ? (c.fatherLiving ? 'Alive' : 'Deceased') : (c.fatherLiving || ''),
 
   mother_name: c.motherName || c.mother_name || '',
   mother_age: c.motherAge || c.mother_age || '',
@@ -728,7 +728,7 @@ const buildTemplateData = (c) => ({
   mother_other_skills: c.motherOtherSkills || c.mother_other_skills || '',
   mother_address: c.motherAddress || c.mother_address || '',
   mother_income: c.motherIncome || c.mother_income || '',
-  mother_living: typeof c.motherLiving === 'boolean' ? (c.motherLiving ? 'Yes' : 'No') : (c.motherLiving || ''),
+  mother_living: typeof c.motherLiving === 'boolean' ? (c.motherLiving ? 'Alive' : 'Deceased') : (c.motherLiving || ''),
 
   guardian_name: c.guardianName || c.guardian_name || '',
   guardian_relation: c.guardianRelation || c.guardian_relation || '',
@@ -738,7 +738,7 @@ const buildTemplateData = (c) => ({
   guardian_other_skills: c.guardianOtherSkills || c.guardian_other_skills || '',
   guardian_address: c.guardianAddress || c.guardian_address || '',
   guardian_income: c.guardianIncome || c.guardian_income || '',
-  guardian_living: typeof c.guardianLiving === 'boolean' ? (c.guardianLiving ? 'Yes' : 'No') : (c.guardianLiving || ''),
+  guardian_living: typeof c.guardianLiving === 'boolean' ? (c.guardianLiving ? 'Alive' : 'Deceased') : (c.guardianLiving || ''),
   guardian_deceased: typeof c.guardianDeceased === 'boolean' ? (c.guardianDeceased ? 'Yes' : 'No') : (c.guardianDeceased || ''),
 
   married_in_church: typeof c.marriedInChurch === 'boolean' ? (c.marriedInChurch ? 'Yes' : 'No') : (c.marriedInChurch || ''),
@@ -783,7 +783,7 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
       else photoDataUrl = await toDataUrl(p);
     }
   } catch (_) {}
-  const branding = options.branding || { title: 'CHILDREN IN CONFLICT WITH THE LAW (CICL)', subtitle: 'INTAKE FORM' };
+  const branding = options.branding || { title: 'HOPETRACK', subtitle: 'INTAKE FORM' };
 
   // Try template-based fill with pdf-lib first
   try {
@@ -806,6 +806,56 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
         if (data[dashed] !== undefined) return data[dashed];
         const nospace = lower.replace(/[\s_-]+/g, '');
         if (data[nospace] !== undefined) return data[nospace];
+        if (lower.includes('first') && lower.includes('name')) return data.first_name;
+        if (lower.includes('last') && lower.includes('name')) return data.last_name;
+        if (lower.includes('middle') && lower.includes('name')) return data.middle_name;
+        if (lower.includes('sex')) return data.sex;
+        if (lower.includes('birth') && lower.includes('date')) return data.birthdate;
+        if (lower.includes('age')) return data.age;
+        if (lower.includes('status') && !lower.includes('living')) return data.civil_status || data.status;
+        if (lower.includes('religion')) return data.religion;
+        if (lower.includes('nationality')) return data.nationality;
+        if (lower.includes('nickname')) return data.nickname;
+        if (lower.includes('birth') && lower.includes('place')) return data.birthplace;
+        if (lower.includes('present') && lower.includes('address')) return data.present_address || data.address;
+        if (lower.includes('provincial') && lower.includes('address')) return data.provincial_address;
+        if (lower.includes('address') && lower.includes('tel')) return data.address_and_tel;
+        if (lower.includes('relation') && lower.includes('client')) return data.relation_to_client;
+        if (lower.includes('source') && lower.includes('referral')) return data.source_of_referral || data.referral_source;
+        if (lower.includes('date') && lower.includes('referral')) return data.date_of_referral;
+        if (lower.includes('case') && lower.includes('type')) return data.case_type;
+        if (lower.includes('assigned') && lower.includes('house') && lower.includes('parent')) return data.assigned_house_parent;
+        if (lower.includes('father') && lower.includes('name')) return data.father_name;
+        if (lower.includes('father') && lower.includes('age')) return data.father_age;
+        if (lower.includes('father') && lower.includes('education')) return data.father_education;
+        if (lower.includes('father') && lower.includes('occupation')) return data.father_occupation;
+        if (lower.includes('father') && lower.includes('skills')) return data.father_other_skills;
+        if (lower.includes('father') && lower.includes('address')) return data.father_address;
+        if (lower.includes('father') && lower.includes('income')) return data.father_income;
+        if (lower.includes('father') && lower.includes('living')) return data.father_living;
+        if (lower.includes('mother') && lower.includes('name')) return data.mother_name;
+        if (lower.includes('mother') && lower.includes('age')) return data.mother_age;
+        if (lower.includes('mother') && lower.includes('education')) return data.mother_education;
+        if (lower.includes('mother') && lower.includes('occupation')) return data.mother_occupation;
+        if (lower.includes('mother') && lower.includes('skills')) return data.mother_other_skills;
+        if (lower.includes('mother') && lower.includes('address')) return data.mother_address;
+        if (lower.includes('mother') && lower.includes('income')) return data.mother_income;
+        if (lower.includes('mother') && lower.includes('living')) return data.mother_living;
+        if (lower.includes('guardian') && lower.includes('name')) return data.guardian_name;
+        if (lower.includes('guardian') && lower.includes('relation')) return data.guardian_relation;
+        if (lower.includes('guardian') && lower.includes('age')) return data.guardian_age;
+        if (lower.includes('guardian') && lower.includes('education')) return data.guardian_education;
+        if (lower.includes('guardian') && lower.includes('occupation')) return data.guardian_occupation;
+        if (lower.includes('guardian') && lower.includes('skills')) return data.guardian_other_skills;
+        if (lower.includes('guardian') && lower.includes('address')) return data.guardian_address;
+        if (lower.includes('guardian') && lower.includes('income')) return data.guardian_income;
+        if (lower.includes('guardian') && lower.includes('living')) return data.guardian_living;
+        if (lower.includes('marriage') && lower.includes('date') && lower.includes('place')) return data.marriage_date_place;
+        if (lower.includes('brief') && lower.includes('description')) return data.brief_description;
+        if (lower.includes('married') && lower.includes('church')) return data.married_in_church;
+        if (lower.includes('common') && lower.includes('law')) return data.live_in_common_law;
+        if (lower.includes('civil') && lower.includes('marriage')) return data.civil_marriage;
+        if (lower.includes('separated')) return data.separated;
         return undefined;
       };
       for (const field of fields) {
@@ -875,7 +925,7 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     // Detect ids vs full case objects
     const isIds = Array.isArray(inputItems) && inputItems.length > 0 && typeof inputItems[0] === 'number';
     const payload = isIds ? { ids: inputItems } : { cases: inputItems || [] };
-    const resp = await fetch(`${API_BASE}/export/cases/pdf-html`, {
+    const resp = await fetch(`${API_BASE}/export/cases/pdf-html?listOnly=true`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
       body: JSON.stringify(payload),
@@ -885,7 +935,7 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `CICL_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
+    a.download = `HOPETRACK_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -966,11 +1016,11 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
-      doc.text('CICL Case Management System', margin, doc.internal.pageSize.height - 10);
+      doc.text('HOPETRACK Case Management System', margin, doc.internal.pageSize.height - 10);
       doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
     }
 
-    const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `HOPETRACK_All_Cases_List_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fileName);
   }
 };
