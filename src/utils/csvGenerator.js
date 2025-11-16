@@ -438,6 +438,14 @@ export const downloadCaseReportCSV = (caseData) => {
       if (s === 'false' || s === 'no' || s === '0') return 'No';
       return String(b);
     };
+    const livingDisplay = (v) => {
+      if (v === true) return 'Living';
+      if (v === false) return 'Deceased';
+      const s = String(v || '').trim().toLowerCase();
+      if (s === 'alive' || s === 'living') return 'Living';
+      if (s === 'deceased' || s === 'dead') return 'Deceased';
+      return safe(v);
+    };
     const fm = d.familyMembers || d.family_members || d.family_members_rows || [];
     const ef = d.extendedFamily || d.extended_family || d.extended_family_rows || [];
     const edu = d.educationalAttainment || d.educational_attainment || [];
@@ -446,9 +454,20 @@ export const downloadCaseReportCSV = (caseData) => {
     const hasRows = (arr) => Array.isArray(arr) && arr.length > 0;
     const familyRows = hasRows(fm) ? fm.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relation)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.address)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
     const extRows = hasRows(ef) ? ef.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relationship)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
-    const eduRows = hasRows(edu) ? edu.map(x => `<tr><td>${safe(x.level)}</td><td>${safe(x.school_name)}</td><td>${safe(x.school_address)}</td><td>${safe(x.year_completed || x.year)}</td></tr>`).join('') : '';
-    const sacRows = hasRows(sac) ? sac.map(x => `<tr><td>${safe(x.sacrament)}</td><td>${safe(toDateOnly(x.date_received || x.date))}</td><td>${safe(x.place_parish)}</td></tr>`).join('') : '';
-    const agRows = hasRows(ag) ? ag.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.address_date_duration)}</td><td>${safe(x.services_received)}</td></tr>`).join('') : '';
+    const eduItems = Array.isArray(edu) ? edu : Object.entries(edu || {}).map(([lvl, rec]) => ({
+      level: lvl,
+      school_name: (rec && (rec.school_name || rec.schoolName)) || '',
+      school_address: (rec && (rec.school_address || rec.schoolAddress)) || '',
+      year: (rec && (rec.year || rec.year_completed)) || ''
+    }));
+    const eduRows = hasRows(eduItems) ? eduItems.map(x => `<tr><td>${safe(x.level)}</td><td>${safe(x.school_name || x.schoolName)}</td><td>${safe(x.school_address || x.schoolAddress)}</td><td>${safe(x.year_completed || x.year)}</td></tr>`).join('') : '';
+    const sacItems = Array.isArray(sac) ? sac : Object.entries(sac || {}).map(([key, rec]) => ({
+      sacrament: key === 'firstCommunion' ? 'First Communion' : (key.charAt(0).toUpperCase() + key.slice(1)),
+      date: (rec && (rec.date_received || rec.dateReceived)) || '',
+      place_parish: (rec && (rec.place_parish || rec.placeParish)) || ''
+    }));
+    const sacRows = hasRows(sacItems) ? sacItems.map(x => `<tr><td>${safe(x.sacrament)}</td><td>${safe(toDateOnly(x.date))}</td><td>${safe(x.place_parish)}</td></tr>`).join('') : '';
+    const agRows = hasRows(ag) ? ag.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.addressDateDuration || x.address_date_duration)}</td><td>${safe(x.servicesReceived || x.services_received)}</td></tr>`).join('') : '';
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8" />
       <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
       <title>HOPETRACK Intake Form</title>
@@ -485,6 +504,7 @@ export const downloadCaseReportCSV = (caseData) => {
       <table>
         <tr><td class="label">Date of Referral</td><td>${safe(toDateOnly(d.dateOfReferral || d.date_of_referral))}</td></tr>
         <tr><td class="label">Source of Referral</td><td>${safe(d.sourceOfReferral || d.source_of_referral)}</td></tr>
+        <tr><td class="label">Other Source of Referral</td><td>${safe(d.otherSourceOfReferral || d.other_source_of_referral)}</td></tr>
         <tr><td class="label">Relation to Client</td><td>${safe(d.relationToClient || d.relation_to_client)}</td></tr>
       </table>
       <div class="section-title">Case Details</div>
@@ -497,7 +517,7 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Father Name</td><td>${safe(d.fatherName || d.father_name)}</td></tr>
         <tr><td class="label">Father Age</td><td>${safe(d.fatherAge || d.father_age)}</td></tr>
         <tr><td class="label">Father Education</td><td>${safe(d.fatherEducation || d.father_education)}</td></tr>
-        <tr><td class="label">Father Living</td><td>${safe(d.fatherLiving || d.father_living)}</td></tr>
+        <tr><td class="label">Father Living</td><td>${livingDisplay(d.fatherLiving ?? d.father_living)}</td></tr>
         <tr><td class="label">Father Occupation</td><td>${safe(d.fatherOccupation || d.father_occupation)}</td></tr>
         <tr><td class="label">Father Other Skills</td><td>${safe(d.fatherOtherSkills || d.father_other_skills)}</td></tr>
         <tr><td class="label">Father Income</td><td>${safe(d.fatherIncome || d.father_income)}</td></tr>
@@ -505,13 +525,19 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Mother Name</td><td>${safe(d.motherName || d.mother_name)}</td></tr>
         <tr><td class="label">Mother Age</td><td>${safe(d.motherAge || d.mother_age)}</td></tr>
         <tr><td class="label">Mother Education</td><td>${safe(d.motherEducation || d.mother_education)}</td></tr>
-        <tr><td class="label">Mother Living</td><td>${safe(d.motherLiving || d.mother_living)}</td></tr>
+        <tr><td class="label">Mother Living</td><td>${livingDisplay(d.motherLiving ?? d.mother_living)}</td></tr>
         <tr><td class="label">Mother Occupation</td><td>${safe(d.motherOccupation || d.mother_occupation)}</td></tr>
         <tr><td class="label">Mother Other Skills</td><td>${safe(d.motherOtherSkills || d.mother_other_skills)}</td></tr>
         <tr><td class="label">Mother Income</td><td>${safe(d.motherIncome || d.mother_income)}</td></tr>
         <tr><td class="label">Mother Address</td><td>${safe(d.motherAddress || d.mother_address)}</td></tr>
         <tr><td class="label">Guardian Name</td><td>${safe(d.guardianName || d.guardian_name)}</td></tr>
         <tr><td class="label">Guardian Relation</td><td>${safe(d.guardianRelation || d.guardian_relation)}</td></tr>
+        <tr><td class="label">Guardian Age</td><td>${safe(d.guardianAge || d.guardian_age)}</td></tr>
+        <tr><td class="label">Guardian Education</td><td>${safe(d.guardianEducation || d.guardian_education)}</td></tr>
+        <tr><td class="label">Guardian Living</td><td>${livingDisplay(d.guardianLiving ?? d.guardian_living)}</td></tr>
+        <tr><td class="label">Guardian Occupation</td><td>${safe(d.guardianOccupation || d.guardian_occupation)}</td></tr>
+        <tr><td class="label">Guardian Other Skills</td><td>${safe(d.guardianOtherSkills || d.guardian_other_skills)}</td></tr>
+        <tr><td class="label">Guardian Income</td><td>${safe(d.guardianIncome || d.guardian_income)}</td></tr>
         <tr><td class="label">Guardian Address</td><td>${safe(d.guardianAddress || d.guardian_address)}</td></tr>
       </table>
       <div class="section-title">Civil Status of Parents</div>
