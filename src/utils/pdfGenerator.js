@@ -4,11 +4,11 @@ import { PDFDocument } from 'pdf-lib';
 import { fetchCaseDetailsForExport } from './exportHelpers';
 const pdfTheme = {
   colors: {
-    primary: [41, 128, 185],
-    secondary: [52, 73, 94],
-    accent: [231, 76, 60],
-    light: [236, 240, 241],
-    text: [44, 62, 80]
+    primary: [0, 0, 0],
+    secondary: [0, 0, 0],
+    accent: [0, 0, 0],
+    light: [255, 255, 255],
+    text: [0, 0, 0]
   },
   type: {
     h1: 18,
