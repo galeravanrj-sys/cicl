@@ -926,13 +926,14 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       return age;
     };
 
-    // Header
-    doc.setFontSize(16);
-    doc.setTextColor(41, 125, 185);
-    doc.text('All Cases', margin, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(90);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 28);
+    // Header bar
+    doc.setFillColor(41, 128, 185);
+    doc.rect(0, 0, pageWidth, 24, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.text('All Cases', pageWidth / 2, 10, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 18, { align: 'center' });
 
     // List table: Name, Age, Program, Last Updated
     const rows = (items || []).map((c) => [
@@ -943,14 +944,21 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     ]);
 
     autoTable(doc, {
-      startY: 36,
+      startY: 30,
       head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
       body: rows,
-      styles: { fontSize: 9, cellPadding: 3, textColor: [44, 62, 80] },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center' },
+      styles: { fontSize: 10, cellPadding: 4, textColor: [44, 62, 80], lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center', fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       theme: 'striped',
-      margin: { left: margin, right: margin }
+      margin: { left: margin, right: margin },
+      tableWidth: pageWidth - margin * 2,
+      columnStyles: {
+        0: { cellWidth: 'auto', halign: 'left' },
+        1: { cellWidth: 22, halign: 'center' },
+        2: { cellWidth: 40, halign: 'left' },
+        3: { cellWidth: 36, halign: 'right' }
+      }
     });
 
     // Footer on each page

@@ -161,9 +161,13 @@ function buildHtml(caseData) {
         .label { color: #57606a; font-weight: 600; font-size: 12px; }
         .value { font-size: 12px; }
         .row { display: grid; grid-template-columns: 1fr; gap: 6px; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: fixed; }
         .table th, .table td { border: 1px solid var(--border); padding: 6px 8px; font-size: 11px; text-align: left; }
         .table th { background: var(--light); font-weight: 600; color: #4f5d75; }
+        .table thead th:nth-child(1), .table tbody td:nth-child(1) { text-align: left; }
+        .table thead th:nth-child(2), .table tbody td:nth-child(2) { text-align: center; width: 80px; }
+        .table thead th:nth-child(3), .table tbody td:nth-child(3) { text-align: left; width: 140px; }
+        .table thead th:nth-child(4), .table tbody td:nth-child(4) { text-align: right; width: 120px; }
         .note { white-space: pre-wrap; font-size: 12px; border: 1px solid var(--border); background: #fafbfc; padding: 8px; border-radius: 6px; }
       </style>
     </head>
