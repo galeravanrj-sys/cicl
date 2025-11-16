@@ -28,9 +28,14 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   const pageHeight = doc.internal.pageSize.height;
   const margin = 20;
   let yPosition = 25;
-  const gap = pdfTheme.grid.row;
+  const theme = {
+    colors: { ...pdfTheme.colors, ...(((opts.theme && opts.theme.colors) || {})) },
+    type: { ...pdfTheme.type, ...(((opts.theme && opts.theme.type) || {})) },
+    grid: { ...pdfTheme.grid, ...(((opts.theme && opts.theme.grid) || {})) }
+  };
+  const gap = theme.grid.row;
 
-  const colors = pdfTheme.colors;
+  const colors = theme.colors;
 
   // Helper function to add professional header with logo area
   const addFormHeader = () => {
@@ -40,14 +45,14 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     
     // Organization header
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(pdfTheme.type.h1);
+    doc.setFontSize(theme.type.h1);
     doc.setFont('helvetica', 'bold');
     {
       const title = (opts.branding && opts.branding.title) || 'HOPETRACK';
       doc.text(title, pageWidth / 2, 15, { align: 'center' });
     }
     
-    doc.setFontSize(pdfTheme.type.h2);
+    doc.setFontSize(theme.type.h2);
     doc.setFont('helvetica', 'normal');
     const sub = (opts.branding && opts.branding.subtitle) || 'INTAKE FORM';
     doc.text(sub, pageWidth / 2, 25, { align: 'center' });
@@ -125,7 +130,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
 
   // Enhanced form field function with professional styling
   const addFormField = (label, value, x, y, width = 60) => {
-    doc.setFontSize(pdfTheme.type.label);
+    doc.setFontSize(theme.type.label);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.secondary);
     doc.text(`${label}:`, x, y);
@@ -778,13 +783,13 @@ const buildTemplateData = (c) => ({
 
 export const downloadCaseReportPDF = async (caseData, options = {}) => {
   const normalized = normalizeCaseData(caseData || {});
-  const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE REPORT' } });
+  const doc = generateCaseReportPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE REPORT' }, theme: options.theme });
   const fn = options.filename || `HOPETRACK_Case_Report_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fn);
 };
 
 // Professional consolidated PDF export for all cases
-export const downloadAllCasesPDF = async (inputItems = []) => {
+export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
   // Prefer server-side professional consolidated PDF; fallback to local jsPDF summary
   try {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -825,7 +830,11 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
     const doc = new jsPDF();
     const margin = 20;
     const pageWidth = doc.internal.pageSize.width;
-
+    const theme = {
+      colors: { ...pdfTheme.colors, ...(((options.theme && options.theme.colors) || {})) },
+      type: { ...pdfTheme.type, ...(((options.theme && options.theme.type) || {})) },
+      grid: { ...pdfTheme.grid, ...(((options.theme && options.theme.grid) || {})) }
+    };
     const formatDate = (dateString) => {
       if (!dateString) return '';
       const d = new Date(dateString);
@@ -844,12 +853,12 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       return age;
     };
 
-    doc.setFillColor(...pdfTheme.colors.primary);
+    doc.setFillColor(...theme.colors.primary);
     doc.rect(0, 0, pageWidth, 24, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(pdfTheme.type.h2);
+    doc.setFontSize(theme.type.h2);
     doc.text('All Cases', pageWidth / 2, 10, { align: 'center' });
-    doc.setFontSize(pdfTheme.type.label);
+    doc.setFontSize(theme.type.label);
     doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 18, { align: 'center' });
 
     // List table: Name, Age, Program, Last Updated
@@ -867,8 +876,8 @@ export const downloadAllCasesPDF = async (inputItems = []) => {
       startY: 30,
       head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
       body: rows,
-      styles: { fontSize: pdfTheme.type.body, cellPadding: 4, textColor: pdfTheme.colors.text, lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
-      headStyles: { fillColor: pdfTheme.colors.primary, textColor: 255, halign: 'center', fontStyle: 'bold' },
+      styles: { fontSize: theme.type.body, cellPadding: 4, textColor: theme.colors.text, lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
+      headStyles: { fillColor: theme.colors.primary, textColor: 255, halign: 'center', fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       theme: 'striped',
       margin: { left: centerMargin, right: centerMargin },
