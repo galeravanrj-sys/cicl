@@ -129,7 +129,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   addFormHeader();
 
   // Enhanced form field function with professional styling
-  const addFormField = (label, value, x, y, width = 60) => {
+  const addFormField = (label, value, x, y, width = 60, advance = true) => {
     doc.setFontSize(theme.type.label);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...colors.secondary);
@@ -148,7 +148,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
       doc.text(String(value), x + labelWidth + 2, y);
     }
     
-    return y + gap;
+    return advance ? y + gap : y;
   };
 
   // Enhanced text area function
@@ -195,46 +195,48 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   // Create professional form layout
   let currentY = yPosition;
   
-  // Row 1: Name fields with better spacing
-  currentY = addFormField('Last Name', caseData.lastName || '', margin, currentY, 55);
-  addFormField('First Name', caseData.firstName || '', margin + 60, currentY - gap, 55);
-  currentY = addFormField('Middle Name', caseData.middleName || '', margin + 125, currentY - gap, 55);
+  // Row 1: Name fields aligned in three columns
+  addFormField('Last Name', caseData.lastName || '', margin, currentY, 70, false);
+  addFormField('First Name', caseData.firstName || '', margin + 85, currentY, 70, false);
+  currentY = addFormField('Middle Name', caseData.middleName || '', margin + 170, currentY, 70, true);
 
-  // Row 2: Personal details
-  currentY = addFormField('Sex', caseData.sex || '', margin, currentY, 35);
-  addFormField('Birthdate', caseData.birthdate || '', margin + 40, currentY - gap, 55);
-  currentY = addFormField('Age', caseData.age || '', margin + 100, currentY - gap, 25);
+  // Row 2: Personal details aligned
+  addFormField('Sex', caseData.sex || '', margin, currentY, 50, false);
+  addFormField('Birthdate', caseData.birthdate || '', margin + 85, currentY, 75, false);
+  currentY = addFormField('Age', caseData.age || '', margin + 170, currentY, 40, true);
 
-  // Row 3: Status and Religion
-  currentY = addFormField('Status', caseData.status || '', margin, currentY, 60);
-  currentY = addFormField('Religion', caseData.religion || '', margin + 65, currentY - gap, 60);
+  // Row 3: Status and Religion aligned
+  addFormField('Status', caseData.status || '', margin, currentY, 90, false);
+  currentY = addFormField('Religion', caseData.religion || '', margin + 100, currentY, 90, true);
 
   // Row 4: Address (full width)
   currentY = addFormField('Address', caseData.address || '', margin, currentY, pageWidth - margin * 2);
 
-  // Additional Personal Info
-  currentY = addFormField('Nickname', caseData.nickname || '', margin, currentY, 60);
-  addFormField('Birthplace', caseData.birthplace || '', margin + 65, currentY - gap, 80);
-  currentY = addFormField('Nationality', caseData.nationality || '', margin + 150, currentY - gap, 60);
+  // Additional Personal Info aligned
+  addFormField('Nickname', caseData.nickname || '', margin, currentY, 80, false);
+  addFormField('Birthplace', caseData.birthplace || '', margin + 85, currentY, 100, false);
+  currentY = addFormField('Nationality', caseData.nationality || '', margin + 190, currentY, 80, true);
 
   // Split addresses
   currentY = addFormField('Present Address', caseData.presentAddress || '', margin, currentY, pageWidth - margin * 2);
   currentY = addFormField('Provincial Address', caseData.provincialAddress || '', margin, currentY, pageWidth - margin * 2);
 
-  // Referral details
-  currentY = addFormField('Date of Referral', caseData.dateOfReferral || '', margin, currentY, 60);
-  addFormField('Address & Tel.', caseData.addressAndTel || '', margin + 65, currentY - gap, 80);
-  currentY = addFormField('Relation to Client', caseData.relationToClient || '', margin + 150, currentY - gap, 70);
+  // Referral details aligned
+  addFormField('Date of Referral', caseData.dateOfReferral || '', margin, currentY, 100, false);
+  addFormField('Address & Tel.', caseData.addressAndTel || '', margin + 110, currentY, 120, false);
+  currentY = addFormField('Relation to Client', caseData.relationToClient || '', margin + 240, currentY, 90, true);
 
-  // Row 5: Source of Referral
-  currentY = addFormField('Source of Referral', caseData.sourceOfReferral || '', margin, currentY, 85);
+  // Row 5: Source of Referral aligned
+  addFormField('Source of Referral', caseData.sourceOfReferral || '', margin, currentY, 140, false);
   if (caseData.otherSourceOfReferral) {
-    currentY = addFormField('Other', caseData.otherSourceOfReferral || '', margin + 90, currentY - gap, 70);
+    currentY = addFormField('Other', caseData.otherSourceOfReferral || '', margin + 150, currentY, 120, true);
+  } else {
+    currentY = currentY + gap;
   }
 
-  // Row 6: Case details
-  currentY = addFormField('Case Type', caseData.caseType || '', margin, currentY, 65);
-  currentY = addFormField('Assigned House Parent', caseData.assignedHouseParent || '', margin + 70, currentY - gap, 85);
+  // Row 6: Case details aligned
+  addFormField('Case Type', caseData.caseType || '', margin, currentY, 120, false);
+  currentY = addFormField('Assigned House Parent', caseData.assignedHouseParent || '', margin + 130, currentY, 140, true);
 
   yPosition = currentY + 5;
 
@@ -249,14 +251,14 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   yPosition += 8;
 
   currentY = yPosition;
-  currentY = addFormField('Name', caseData.fatherName || '', margin, currentY, 80);
-  currentY = addFormField('Age', caseData.fatherAge || '', margin + 85, currentY - gap, 30);
-  currentY = addFormField('Education', caseData.fatherEducation || '', margin, currentY, 80);
-  currentY = addFormField('Occupation', caseData.fatherOccupation || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Other Skills', caseData.fatherOtherSkills || '', margin, currentY, 80);
-  currentY = addFormField('Address', caseData.fatherAddress || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Income', caseData.fatherIncome ? `₱${caseData.fatherIncome}` : '', margin, currentY, 50);
-  currentY = addFormField('Living Status', (caseData.fatherLiving === true || caseData.father_living === true) ? 'Living' : (caseData.fatherLiving === false || caseData.father_living === false) ? 'Deceased' : '', margin + 55, currentY - gap, 50);
+  addFormField('Name', caseData.fatherName || '', margin, currentY, 120, false);
+  currentY = addFormField('Age', caseData.fatherAge || '', margin + 130, currentY, 40, true);
+  addFormField('Education', caseData.fatherEducation || '', margin, currentY, 120, false);
+  currentY = addFormField('Occupation', caseData.fatherOccupation || '', margin + 130, currentY, 120, true);
+  addFormField('Other Skills', caseData.fatherOtherSkills || '', margin, currentY, 120, false);
+  currentY = addFormField('Address', caseData.fatherAddress || '', margin + 130, currentY, 120, true);
+  addFormField('Income', caseData.fatherIncome ? `₱${caseData.fatherIncome}` : '', margin, currentY, 80, false);
+  currentY = addFormField('Living Status', (caseData.fatherLiving === true || caseData.father_living === true) ? 'Living' : (caseData.fatherLiving === false || caseData.father_living === false) ? 'Deceased' : '', margin + 90, currentY, 80, true);
 
   yPosition = currentY + 8;
 
@@ -268,14 +270,14 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   yPosition += 8;
 
   currentY = yPosition;
-  currentY = addFormField('Name', caseData.motherName || '', margin, currentY, 80);
-  currentY = addFormField('Age', caseData.motherAge || '', margin + 85, currentY - gap, 30);
-  currentY = addFormField('Education', caseData.motherEducation || '', margin, currentY, 80);
-  currentY = addFormField('Occupation', caseData.motherOccupation || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Other Skills', caseData.motherOtherSkills || '', margin, currentY, 80);
-  currentY = addFormField('Address', caseData.motherAddress || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Income', caseData.motherIncome ? `₱${caseData.motherIncome}` : '', margin, currentY, 50);
-  currentY = addFormField('Living Status', (caseData.motherLiving === true || caseData.mother_living === true) ? 'Living' : (caseData.motherLiving === false || caseData.mother_living === false) ? 'Deceased' : '', margin + 55, currentY - gap, 50);
+  addFormField('Name', caseData.motherName || '', margin, currentY, 120, false);
+  currentY = addFormField('Age', caseData.motherAge || '', margin + 130, currentY, 40, true);
+  addFormField('Education', caseData.motherEducation || '', margin, currentY, 120, false);
+  currentY = addFormField('Occupation', caseData.motherOccupation || '', margin + 130, currentY, 120, true);
+  addFormField('Other Skills', caseData.motherOtherSkills || '', margin, currentY, 120, false);
+  currentY = addFormField('Address', caseData.motherAddress || '', margin + 130, currentY, 120, true);
+  addFormField('Income', caseData.motherIncome ? `₱${caseData.motherIncome}` : '', margin, currentY, 80, false);
+  currentY = addFormField('Living Status', (caseData.motherLiving === true || caseData.mother_living === true) ? 'Living' : (caseData.motherLiving === false || caseData.mother_living === false) ? 'Deceased' : '', margin + 90, currentY, 80, true);
 
   yPosition = currentY + 8;
 
@@ -286,15 +288,15 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   yPosition += 8;
 
   currentY = yPosition;
-  currentY = addFormField('Name', caseData.guardianName || caseData.guardian_name || '', margin, currentY, 80);
-  currentY = addFormField('Age', caseData.guardianAge || caseData.guardian_age || '', margin + 85, currentY - gap, 30);
-  currentY = addFormField('Relation', caseData.guardianRelation || caseData.guardian_relation || '', margin, currentY, 80);
-  currentY = addFormField('Education', caseData.guardianEducation || caseData.guardian_education || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Occupation', caseData.guardianOccupation || caseData.guardian_occupation || '', margin, currentY, 80);
-  currentY = addFormField('Other Skills', caseData.guardianOtherSkills || caseData.guardian_other_skills || '', margin + 85, currentY - gap, 80);
-  currentY = addFormField('Address', caseData.guardianAddress || caseData.guardian_address || '', margin, currentY, pageWidth - margin * 2);
-  currentY = addFormField('Income', (caseData.guardianIncome || caseData.guardian_income) ? `₱${caseData.guardianIncome || caseData.guardian_income}` : '', margin, currentY, 50);
-  currentY = addFormField('Living Status', (caseData.guardianLiving === true || caseData.guardian_living === true) ? 'Living' : (caseData.guardianLiving === false || caseData.guardian_living === false) ? 'Deceased' : '', margin + 55, currentY - 8, 50);
+  addFormField('Name', caseData.guardianName || caseData.guardian_name || '', margin, currentY, 120, false);
+  currentY = addFormField('Age', caseData.guardianAge || caseData.guardian_age || '', margin + 130, currentY, 40, true);
+  addFormField('Relation', caseData.guardianRelation || caseData.guardian_relation || '', margin, currentY, 120, false);
+  currentY = addFormField('Education', caseData.guardianEducation || caseData.guardian_education || '', margin + 130, currentY, 120, true);
+  addFormField('Occupation', caseData.guardianOccupation || caseData.guardian_occupation || '', margin, currentY, 120, false);
+  currentY = addFormField('Other Skills', caseData.guardianOtherSkills || caseData.guardian_other_skills || '', margin + 130, currentY, 120, true);
+  currentY = addFormField('Address', caseData.guardianAddress || caseData.guardian_address || '', margin, currentY, pageWidth - margin * 2, true);
+  addFormField('Income', (caseData.guardianIncome || caseData.guardian_income) ? `₱${caseData.guardianIncome || caseData.guardian_income}` : '', margin, currentY, 80, false);
+  currentY = addFormField('Living Status', (caseData.guardianLiving === true || caseData.guardian_living === true) ? 'Living' : (caseData.guardianLiving === false || caseData.guardian_living === false) ? 'Deceased' : '', margin + 90, currentY, 80, true);
 
   yPosition = currentY + 8;
 
@@ -657,7 +659,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
-    doc.text('HOPETRACK Case Management System', margin, doc.internal.pageSize.height - 10);
+    doc.text('HOPETRACK', margin, doc.internal.pageSize.height - 10);
   }
 
   return doc;
@@ -895,7 +897,7 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
-      doc.text('HOPETRACK Case Management System', margin, doc.internal.pageSize.height - 10);
+      doc.text('HOPETRACK', margin, doc.internal.pageSize.height - 10);
       doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
     }
 
