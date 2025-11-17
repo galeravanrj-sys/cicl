@@ -32,6 +32,7 @@ function normalizeCaseData(input) {
   const sex = pick('sex');
   const birthdate = pick('birthdate');
   const status = pick('status');
+  const civil_status = pick('civil_status', 'status');
   const religion = pick('religion');
   const address = pick('address', 'presentAddress', 'present_address');
   const nickname = pick('nickname');
@@ -46,8 +47,11 @@ function normalizeCaseData(input) {
   const case_type = pick('case_type', 'caseType');
   const assigned_house_parent = pick('assigned_house_parent', 'assignedHouseParent');
   const father_name = pick('father_name', 'fatherName');
+  const father_occupation = pick('father_occupation', 'fatherOccupation');
   const mother_name = pick('mother_name', 'motherName');
+  const mother_occupation = pick('mother_occupation', 'motherOccupation');
   const guardian_name = pick('guardian_name', 'guardianName');
+  const guardian_relation = pick('guardian_relation', 'guardianRelation');
   const program_type = pick('program_type', 'programType');
 
   const married_in_church = !!pick('married_in_church', 'marriedInChurch');
@@ -58,6 +62,16 @@ function normalizeCaseData(input) {
 
   const age = pick('age') || computeAge(birthdate);
 
+  // Narrative fields from Add Case
+  const brief_description = pick('brief_description', 'client_description', 'clientDescription');
+  const problem_presented = pick('problem_presented', 'problemPresented');
+  const brief_history = pick('brief_history', 'briefHistory');
+  const economic_situation = pick('economic_situation', 'economicSituation');
+  const medical_history = pick('medical_history', 'medicalHistory');
+  const family_background = pick('family_background', 'familyBackground');
+  const assessment = pick('assessment');
+  const recommendation = pick('recommendation');
+
   // Return template field names expected by the PDF
   return {
     first_name,
@@ -67,6 +81,7 @@ function normalizeCaseData(input) {
     birthdate,
     age,
     status,
+    civil_status,
     religion,
     address,
     nickname,
@@ -81,14 +96,25 @@ function normalizeCaseData(input) {
     case_type,
     assigned_house_parent,
     father_name,
+    father_occupation,
     mother_name,
+    mother_occupation,
     guardian_name,
+    guardian_relation,
     program_type,
     married_in_church,
     live_in_common_law,
     civil_marriage,
     separated,
     marriage_date_place,
+    brief_description,
+    problem_presented,
+    brief_history,
+    economic_situation,
+    medical_history,
+    family_background,
+    assessment,
+    recommendation,
   };
 }
 
@@ -106,6 +132,15 @@ async function fillPdfTemplate(caseData) {
   const entries = Object.entries(normalized).filter(([, v]) => v !== undefined && v !== null && v !== '');
   for (const [fieldName, value] of entries) {
     try {
+      if (typeof value === 'boolean') {
+        try {
+          const cb = form.getCheckBox(fieldName);
+          if (value) cb.check(); else cb.uncheck();
+          continue;
+        } catch (_) {
+          // not a checkbox, fall back to text
+        }
+      }
       const field = form.getTextField(fieldName);
       field.setText(String(value));
       field.updateAppearances(helvetica);
