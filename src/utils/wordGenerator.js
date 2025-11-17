@@ -3,6 +3,45 @@ import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 
 export const generateCaseReportWord = (caseData) => {
+  const kvPairs = [
+    ['First Name', getText('', 'firstName','first_name')],
+    ['Last Name', getText('', 'lastName','last_name')],
+    ['Middle Name', getText('', 'middleName','middle_name')],
+    ['Sex', getText('', 'sex')],
+    ['Birthdate', getText('', 'birthdate')],
+    ['Age', getText('', 'age')],
+    ['Status', getText('', 'status','civil_status')],
+    ['Religion', getText('', 'religion')],
+    ['Nationality', getText('', 'nationality')],
+    ['Nickname', getText('', 'nickname')],
+    ['Present Address', getText('', 'presentAddress','present_address','address')],
+    ['Provincial Address', getText('', 'provincialAddress','provincial_address')],
+    ['Birthplace', getText('', 'birthplace','birth_place')],
+    ['Date of Referral', getText('', 'dateOfReferral','date_of_referral')],
+    ['Source of Referral', getText('', 'sourceOfReferral','source_of_referral')],
+    ['Relation to Client', getText('', 'relationToClient','relation_to_client')],
+    ['Address & Tel', getText('', 'addressAndTel','address_and_tel')],
+    ['Case Type', getText('', 'caseType','programType','program_type')],
+    ['Program Type', getText('', 'programType','program_type')],
+    ['Assigned House Parent', getText('', 'assignedHouseParent','assigned_house_parent')],
+    ['Mother', getText('', 'motherName','mother_name')],
+    ['Father', getText('', 'fatherName','father_name')],
+    ['Guardian', getText('', 'guardianName','guardian_name')],
+    ['Married in church', getText('', 'marriedInChurch','married_in_church')],
+    ['Live-in/Common Law', getText('', 'liveInCommonLaw','live_in_common_law')],
+    ['Civil Marriage', getText('', 'civilMarriage','civil_marriage')],
+    ['Separated', getText('', 'separated')],
+    ['Date and Place', getText('', 'marriageDatePlace','marriage_date_place')],
+    ['Problem Presented', getText('', 'problemPresented','problem_presented')],
+    ['Brief History', getText('', 'briefHistory','brief_history')],
+    ['Economic Situation', getText('', 'economicSituation','economic_situation')],
+    ['Medical History', getText('', 'medicalHistory','medical_history')],
+    ['Family Background', getText('', 'familyBackground','family_background')],
+    ['Client Description', getText('', 'clientDescription','client_description')],
+    ["Parents' Description", getText('', 'parentsDescription','parents_description')],
+    ['Recommendation', getText('', 'recommendation')],
+    ['Assessment', getText('', 'assessment')],
+  ];
   // Professional color scheme
   const primaryColor = "2C5282"; // Professional blue
   const accentColor = "E2E8F0"; // Light gray
@@ -1041,8 +1080,6 @@ export const generateCaseReportWord = (caseData) => {
 };
 
 export const downloadCaseReportWord = async (caseData) => {
-  const primaryUrl = '/template/GENERAL_INTAKEFORM_ASILO.docx';
-  const altUrl = '/template/GENERAL_INTAKEFORM_ASILO (1).docx';
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
 
   // Normalize data for cleaner output in templates and dynamic DOCX
@@ -1151,73 +1188,79 @@ export const downloadCaseReportWord = async (caseData) => {
     recommendation: c.recommendation || ''
   });
 
-  try {
-    let res = await fetch(primaryUrl);
-    if (!res.ok) {
-      res = await fetch(altUrl);
-      if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
-    }
-    const ab = await res.arrayBuffer();
-    const zip = new PizZip(ab);
-    const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-    const base = buildTemplateData(normalized);
-    const withAliases = {
-      ...base,
-      'First Name': base.first_name,
-      'Middle Name': base.middle_name,
-      'Last Name': base.last_name,
-      'Nickname': base.nickname,
-      'Sex': base.sex,
-      'Birthdate': base.birthdate,
-      'Birthplace': base.birthplace,
-      'Age': base.age,
-      'Religion': base.religion,
-      'Nationality': base.nationality,
-      'Address': base.address,
-      'Present Address': base.present_address,
-      'Provincial Address': base.provincial_address,
-      'Date of Referral': base.date_of_referral,
-      'Address & Tel.': base.address_and_tel,
-      'Relation to Client': base.relation_to_client,
-      'Case Type': base.case_type,
-      'Assigned House Parent': base.assigned_house_parent,
-    };
-    doc.setData(withAliases);
-    // If the template has no tags, render() still passes; tags remain as-is.
-    doc.render();
-    const out = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-    const url = window.URL.createObjectURL(out);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    return;
-  } catch (err) {
-    console.error('Template-based Word render failed, falling back to dynamic DOCX:', err);
-    // Fallback: dynamically generate a professional DOCX without template
-    try {
-      const doc = generateCaseReportWord(normalized);
-      const buffer = await Packer.toBlob(doc);
-      const url = window.URL.createObjectURL(buffer);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      return;
-    } catch (fallbackErr) {
-      console.error('Dynamic DOCX generation failed:', fallbackErr);
-      // Silent failure
-      return;
-    }
-  }
-  // No fallback: only use provided template
+  const primaryColor = '297db9';
+  const tableRows = (function buildRows() {
+    const pairs = [
+      ['First Name', caseData.firstName || caseData.first_name || ''],
+      ['Last Name', caseData.lastName || caseData.last_name || ''],
+      ['Middle Name', caseData.middleName || caseData.middle_name || ''],
+      ['Sex', caseData.sex || ''],
+      ['Birthdate', caseData.birthdate || ''],
+      ['Age', String(caseData.age ?? '')],
+      ['Status', caseData.status || caseData.civil_status || ''],
+      ['Religion', caseData.religion || ''],
+      ['Nationality', caseData.nationality || ''],
+      ['Nickname', caseData.nickname || ''],
+      ['Present Address', caseData.presentAddress || caseData.present_address || caseData.address || ''],
+      ['Provincial Address', caseData.provincialAddress || caseData.provincial_address || ''],
+      ['Birthplace', caseData.birthplace || caseData.birth_place || ''],
+      ['Date of Referral', caseData.dateOfReferral || caseData.date_of_referral || ''],
+      ['Source of Referral', caseData.sourceOfReferral || caseData.source_of_referral || ''],
+      ['Relation to Client', caseData.relationToClient || caseData.relation_to_client || ''],
+      ['Address & Tel', caseData.addressAndTel || caseData.address_and_tel || ''],
+      ['Case Type', caseData.caseType || caseData.programType || caseData.program_type || ''],
+      ['Program Type', caseData.programType || caseData.program_type || ''],
+      ['Assigned House Parent', caseData.assignedHouseParent || caseData.assigned_house_parent || ''],
+      ['Mother', caseData.motherName || caseData.mother_name || ''],
+      ['Father', caseData.fatherName || caseData.father_name || ''],
+      ['Guardian', caseData.guardianName || caseData.guardian_name || ''],
+      ['Married in church', String(caseData.marriedInChurch ?? caseData.married_in_church ?? '')],
+      ['Live-in/Common Law', String(caseData.liveInCommonLaw ?? caseData.live_in_common_law ?? '')],
+      ['Civil Marriage', String(caseData.civilMarriage ?? caseData.civil_marriage ?? '')],
+      ['Separated', String(caseData.separated ?? '')],
+      ['Date and Place', caseData.marriageDatePlace || caseData.marriage_date_place || ''],
+      ['Problem Presented', caseData.problemPresented || caseData.problem_presented || ''],
+      ['Brief History', caseData.briefHistory || caseData.brief_history || ''],
+      ['Economic Situation', caseData.economicSituation || caseData.economic_situation || ''],
+      ['Medical History', caseData.medicalHistory || caseData.medical_history || ''],
+      ['Family Background', caseData.familyBackground || caseData.family_background || ''],
+      ['Client Description', caseData.clientDescription || caseData.client_description || ''],
+      ["Parents' Description", caseData.parentsDescription || caseData.parents_description || ''],
+      ['Recommendation', caseData.recommendation || ''],
+      ['Assessment', caseData.assessment || ''],
+    ];
+    return [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ text: 'Field', bold: true })] }),
+          new TableCell({ children: [new Paragraph({ text: 'Value', bold: true })] }),
+        ],
+      }),
+      ...pairs.map(([k, v]) => new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ text: String(k), bold: true })] }),
+          new TableCell({ children: [new Paragraph(String(v))] }),
+        ],
+      })),
+    ];
+  })();
+  const doc = new Document({
+    sections: [{
+      children: [
+        new Paragraph({ children: [ new TextRun({ text: 'Case Summary', bold: true, size: 30, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 300 } }),
+        new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: tableRows })
+      ]
+    }]
+  });
+  const buffer = await Packer.toBlob(doc);
+  const url = window.URL.createObjectURL(buffer);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };
 
 // Professional consolidated Word export for all cases
