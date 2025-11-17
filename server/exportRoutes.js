@@ -200,27 +200,30 @@ function buildHtml(caseData) {
           --border: #e1e4e8;
         }
         * { box-sizing: border-box; }
-        body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); margin: 0; }
+        body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); margin: 0; line-height: 1.5; }
         .titlebar { padding: 14px 24px; border-bottom: 2px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }
         .titlebar .brand { font-weight: 700; color: var(--primary); letter-spacing: .2px; }
         .titlebar .meta { font-size: 12px; color: #6b7b93; }
         .container { padding: 18px 24px; }
         .section-title { margin: 16px 0 8px; font-weight: 700; color: var(--secondary); font-size: 13px; }
-        .section { border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 12px 14px; }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 18px; }
-        .field { display: grid; grid-template-columns: 160px 1fr; align-items: center; border-bottom: 1px dashed var(--border); padding: 6px 0; }
-        .field:last-child { border-bottom: 0; }
-        .label { color: #57606a; font-weight: 600; font-size: 12px; }
-        .value { font-size: 12px; }
+        .section { border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 14px 16px; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+        .field { display: grid; grid-template-columns: 180px 1fr; align-items: start; padding: 6px 0; gap: 8px; }
+        .label { color: #57606a; font-weight: 600; font-size: 12px; line-height: 1.4; }
+        .value { font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
         .row { display: grid; grid-template-columns: 1fr; gap: 6px; }
-        .table { width: 80%; border-collapse: collapse; margin: 8px auto; table-layout: fixed; }
+        .table { width: 100%; border-collapse: collapse; margin: 8px 0; table-layout: fixed; }
         .table th, .table td { border: 1px solid var(--border); padding: 6px 8px; font-size: 11px; text-align: left; }
         .table th { background: var(--light); font-weight: 600; color: #4f5d75; }
         .table thead th:nth-child(1), .table tbody td:nth-child(1) { text-align: left; }
-        .table thead th:nth-child(2), .table tbody td:nth-child(2) { text-align: center; width: 80px; }
-        .table thead th:nth-child(3), .table tbody td:nth-child(3) { text-align: center; width: 140px; }
-        .table thead th:nth-child(4), .table tbody td:nth-child(4) { text-align: right; width: 120px; }
+        .table thead th:nth-child(2), .table tbody td:nth-child(2) { text-align: center; width: 90px; }
+        .table thead th:nth-child(3), .table tbody td:nth-child(3) { text-align: center; width: 150px; }
+        .table thead th:nth-child(4), .table tbody td:nth-child(4) { text-align: right; width: 140px; }
         .note { white-space: pre-wrap; font-size: 12px; border: 1px solid var(--border); background: #fafbfc; padding: 8px; border-radius: 6px; }
+        @media print {
+          .grid { grid-template-columns: 1fr 1fr; }
+          .field { grid-template-columns: 180px 1fr; }
+        }
       </style>
     </head>
     <body>
@@ -632,10 +635,10 @@ async function generateHtmlPdf(caseData, opts = {}) {
       format: opts.format || 'A4',
       landscape: !!opts.landscape,
       printBackground: true,
-      margin: opts.margin || { top: '20mm', right: '12mm', bottom: '20mm', left: '12mm' },
+      margin: opts.margin || { top: '16mm', right: '14mm', bottom: '18mm', left: '14mm' },
       displayHeaderFooter: true,
-      headerTemplate: `<div style="font-size:10px; color:#6b7b93; padding-left:12mm; padding-right:12mm; width:100%;"><span>Case Report</span></div>`,
-      footerTemplate: `<div style="font-size:10px; color:#6b7b93; padding-left:12mm; padding-right:12mm; width:100%; display:flex; justify-content:space-between;">
+      headerTemplate: `<div style="font-size:10px; color:#6b7b93; padding:0 12mm; width:100%;"><span>Case Report</span></div>`,
+      footerTemplate: `<div style="font-size:10px; color:#6b7b93; padding:0 12mm; width:100%; display:flex; justify-content:space-between;">
         <span>Generated ${escapeHtml(new Date().toLocaleDateString())}</span>
         <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
       </div>`,
