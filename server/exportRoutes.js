@@ -208,7 +208,7 @@ function buildHtml(caseData) {
         .section-title { margin: 16px 0 8px; font-weight: 700; color: var(--secondary); font-size: 13px; }
         .section { border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 14px 16px; }
         .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
-        .field { display: grid; grid-template-columns: 180px 1fr; align-items: start; padding: 6px 0; gap: 8px; }
+        .field { display: flex; flex-direction: column; align-items: flex-start; padding: 6px 0; gap: 4px; }
         .label { color: #57606a; font-weight: 600; font-size: 12px; line-height: 1.4; }
         .value { font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
         .row { display: grid; grid-template-columns: 1fr; gap: 6px; }
@@ -222,7 +222,6 @@ function buildHtml(caseData) {
         .note { white-space: pre-wrap; font-size: 12px; border: 1px solid var(--border); background: #fafbfc; padding: 8px; border-radius: 6px; }
         @media print {
           .grid { grid-template-columns: 1fr 1fr; }
-          .field { grid-template-columns: 180px 1fr; }
         }
       </style>
     </head>
