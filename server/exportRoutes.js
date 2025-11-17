@@ -648,6 +648,33 @@ router.post('/case/pdf', auth, async (req, res) => {
   }
 });
 
+router.get('/case/:id/pdf-template', auth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = await fetchFullCaseById(id);
+    if (!data) return res.status(404).json({ message: 'Case not found' });
+    const pdfBytes = await fillPdfTemplate(data);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="case-${id}-template.pdf"`);
+    return res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    console.error('Template PDF export error:', err);
+    return res.status(500).json({ message: 'Failed to generate template PDF', error: err.message });
+  }
+});
+
+router.post('/case/pdf-template', auth, async (req, res) => {
+  try {
+    const pdfBytes = await fillPdfTemplate(req.body || {});
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="case-export-template.pdf"');
+    return res.send(Buffer.from(pdfBytes));
+  } catch (err) {
+    console.error('Template PDF export error:', err);
+    return res.status(500).json({ message: 'Failed to generate template PDF', error: err.message });
+  }
+});
+
 // GET: HTML-rendered PDF by case id (Puppeteer)
 router.get('/case/:id/pdf-html', auth, async (req, res) => {
   try {
