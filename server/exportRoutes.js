@@ -634,13 +634,8 @@ async function generateHtmlPdf(caseData, opts = {}) {
       format: opts.format || 'A4',
       landscape: !!opts.landscape,
       printBackground: true,
-      margin: opts.margin || { top: '16mm', right: '14mm', bottom: '18mm', left: '14mm' },
-      displayHeaderFooter: true,
-      headerTemplate: `<div style="font-size:10px; color:#6b7b93; padding:0 12mm; width:100%;"><span>Case Report</span></div>`,
-      footerTemplate: `<div style="font-size:10px; color:#6b7b93; padding:0 12mm; width:100%; display:flex; justify-content:space-between;">
-        <span>Generated ${escapeHtml(new Date().toLocaleDateString())}</span>
-        <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
-      </div>`,
+      margin: opts.margin || { top: '16mm', right: '14mm', bottom: '16mm', left: '14mm' },
+      displayHeaderFooter: false,
     });
     return pdf;
   } finally {
