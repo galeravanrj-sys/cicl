@@ -1041,7 +1041,8 @@ export const generateCaseReportWord = (caseData) => {
 };
 
 export const downloadCaseReportWord = async (caseData) => {
-  const templateUrl = '/template/GENERAL_INTAKEFORM_ASILO.docx';
+  const primaryUrl = '/template/GENERAL_INTAKEFORM_ASILO.docx';
+  const altUrl = '/template/GENERAL_INTAKEFORM_ASILO (1).docx';
   const fileName = `Case_Report_${caseData.lastName || 'Unknown'}_${caseData.firstName || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
 
   // Normalize data for cleaner output in templates and dynamic DOCX
@@ -1151,8 +1152,11 @@ export const downloadCaseReportWord = async (caseData) => {
   });
 
   try {
-    const res = await fetch(templateUrl);
-    if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+    let res = await fetch(primaryUrl);
+    if (!res.ok) {
+      res = await fetch(altUrl);
+      if (!res.ok) throw new Error(`Template fetch failed: ${res.status}`);
+    }
     const ab = await res.arrayBuffer();
     const zip = new PizZip(ab);
     const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
