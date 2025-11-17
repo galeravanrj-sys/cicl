@@ -240,7 +240,7 @@ const CaseDetailsPage = () => {
                       {renderField('Birthplace', caseData.birthplace)}
                       {renderField('Nationality', caseData.nationality)}
                       {renderField('Religion', caseData.religion)}
-                      {hasValue(caseData.status) && (
+                      {hasValue(caseData.status) && !isArchivedStatus(caseData.status) && (
                         <div className="mb-2">
                           <strong>Status:</strong>
                           <span className={`badge ${isArchivedStatus(caseData.status) ? 'bg-secondary' : 'bg-success'}`}>
@@ -311,7 +311,7 @@ const CaseDetailsPage = () => {
                       {renderField('Program Type', caseData.programType || caseData.program_type)}
                       {renderField('Admission Month', caseData.admissionMonth || caseData.admission_month)}
                       {renderField('Admission Year', caseData.admissionYear || caseData.admission_year)}
-                      {renderField('Discharged Date', caseData.archivedDate || caseData.archived_date, formatDate)}
+                      {null}
                     </div>
                   </div>
                 </div>
@@ -568,12 +568,7 @@ const CaseDetailsPage = () => {
                             {caseData.assessment || 'N/A'}
                           </div>
                         </div>
-                        <div className="col-md-4 mb-3">
-                          <strong>Progress:</strong>
-                          <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
-                            {caseData.progress || 'N/A'}
-                          </div>
-                        </div>
+                        {null}
                         <div className="col-md-4 mb-3">
                           <strong>Recommendation:</strong>
                           <div className="text-muted mt-1" style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
