@@ -791,12 +791,12 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
     const id = caseData && caseData.id;
     let resp;
     if (id) {
-      resp = await fetch(`${API_BASE}/export/case/${id}/pdf-template`, {
+      resp = await fetch(`${API_BASE}/export/case/${id}/pdf-html`, {
         method: 'GET',
         headers: { 'x-auth-token': token },
       });
     } else {
-      resp = await fetch(`${API_BASE}/export/case/pdf-template`, {
+      resp = await fetch(`${API_BASE}/export/case/pdf-html`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
         body: JSON.stringify(caseData || {}),
@@ -816,6 +816,28 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
     URL.revokeObjectURL(url);
     return;
   } catch (err) {
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const { API_BASE } = await import('./apiBase.js');
+      const id = caseData && caseData.id;
+      const alt = id
+        ? await fetch(`${API_BASE}/export/case/${id}/pdf-template`, { method: 'GET', headers: { 'x-auth-token': token } })
+        : await fetch(`${API_BASE}/export/case/pdf-template`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-auth-token': token }, body: JSON.stringify(caseData || {}) });
+      if (alt && alt.ok) {
+        const blob = await alt.blob();
+        const url = URL.createObjectURL(blob);
+        const normalized = normalizeCaseData(caseData || {});
+        const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fn;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (_) {}
     const normalized = normalizeCaseData(caseData || {});
     const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE SUMMARY' }, theme: options.theme });
     const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
