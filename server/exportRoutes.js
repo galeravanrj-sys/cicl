@@ -129,26 +129,69 @@ async function fillPdfTemplate(caseData) {
 
   const normalized = normalizeCaseData(caseData);
 
-  const entries = Object.entries(normalized).filter(([, v]) => v !== undefined && v !== null && v !== '');
-  for (const [fieldName, value] of entries) {
-    try {
-      if (typeof value === 'boolean') {
-        try {
-          const cb = form.getCheckBox(fieldName);
-          if (value) cb.check(); else cb.uncheck();
-          continue;
-        } catch (_) {
-          // not a checkbox, fall back to text
+  const fields = (() => { try { return form.getFields(); } catch (_) { return []; } })();
+  if (fields && fields.length > 0) {
+    const entries = Object.entries(normalized).filter(([, v]) => v !== undefined && v !== null && v !== '');
+    for (const [fieldName, value] of entries) {
+      try {
+        if (typeof value === 'boolean') {
+          try {
+            const cb = form.getCheckBox(fieldName);
+            if (value) cb.check(); else cb.uncheck();
+            continue;
+          } catch (_) {
+          }
         }
+        const field = form.getTextField(fieldName);
+        field.setText(String(value));
+        field.updateAppearances(helvetica);
+      } catch (e) {
       }
-      const field = form.getTextField(fieldName);
-      field.setText(String(value));
-      field.updateAppearances(helvetica);
-    } catch (e) {
-      // Field may not exist; skip silently
     }
+    form.flatten();
+    return await pdfDoc.save();
   }
-  form.flatten();
+
+  // Fallback: overlay text onto the static template using a clean grid
+  const page = pdfDoc.getPage(0);
+  const labelStyle = { size: 10, font: helvetica, color: undefined };
+  const valueStyle = { size: 11, font: helvetica };
+  const leftX = 40; const rightX = 315; let y = page.getSize().height - 120; const step = 26;
+  const drawField = (label, val, x, yPos, width = 240) => {
+    if (!val) return;
+    page.drawText(label, { x, y: yPos, ...labelStyle });
+    // paint a white strip to cover underlying line artifacts
+    page.drawRectangle({ x, y: yPos - 14, width, height: 16, color: pdfDoc.context.obj({}) });
+    page.drawText(String(val), { x, y: yPos - 12, ...valueStyle });
+  };
+  const pick = (k) => normalized[k];
+  // Identity
+  drawField('Last Name', pick('last_name') || pick('lastName'), leftX, y); drawField('First Name', pick('first_name') || pick('firstName'), rightX, y); y -= step;
+  drawField('Middle Name', pick('middle_name') || pick('middleName'), leftX, y); drawField('Sex', pick('sex'), rightX, y, 120); y -= step;
+  drawField('Birthdate', pick('birthdate'), leftX, y, 160); drawField('Age', pick('age'), rightX, y, 80); y -= step;
+  drawField('Civil Status', pick('civil_status'), leftX, y); drawField('Religion', pick('religion'), rightX, y); y -= step;
+  drawField('Present Address', pick('present_address') || pick('address'), leftX, y, 520); y -= step;
+  drawField('Provincial Address', pick('provincial_address'), leftX, y, 520); y -= step;
+  // Referral
+  drawField('Date of Referral', pick('date_of_referral'), leftX, y); drawField('Relation to Client', pick('relation_to_client'), rightX, y); y -= step;
+  drawField('Source of Referral', pick('source_of_referral'), leftX, y, 520); y -= step;
+  // Parents/Guardian
+  drawField('Father Name', pick('father_name'), leftX, y); drawField('Father Occupation', pick('father_occupation'), rightX, y); y -= step;
+  drawField('Mother Name', pick('mother_name'), leftX, y); drawField('Mother Occupation', pick('mother_occupation'), rightX, y); y -= step;
+  drawField('Guardian Name', pick('guardian_name'), leftX, y); drawField('Guardian Relation', pick('guardian_relation'), rightX, y); y -= step;
+  // Program
+  drawField('Case Type', pick('case_type'), leftX, y); drawField('Program Type', pick('program_type'), rightX, y); y -= step;
+  drawField('Assigned House Parent', pick('assigned_house_parent'), leftX, y); y -= step;
+  // Narrative
+  const narrativeStart = y - 10; const wrapWidth = page.getSize().width - 80;
+  const narrative = [ ['Brief Description', pick('brief_description')], ['Problem Presented', pick('problem_presented')], ['Brief History', pick('brief_history')], ['Economic Situation', pick('economic_situation')], ['Medical History', pick('medical_history')], ['Family Background', pick('family_background')], ['Assessment', pick('assessment')], ['Recommendation', pick('recommendation')] ];
+  for (const [label, val] of narrative) {
+    if (!val) continue;
+    page.drawText(label, { x: leftX, y: y, ...labelStyle });
+    page.drawRectangle({ x: leftX, y: y - 120, width: wrapWidth, height: 120, color: pdfDoc.context.obj({}) });
+    page.drawText(String(val), { x: leftX, y: y - 12, ...valueStyle });
+    y -= 140;
+  }
   return await pdfDoc.save();
 }
 
