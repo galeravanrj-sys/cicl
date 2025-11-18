@@ -284,9 +284,12 @@ function buildHtml(caseData) {
         }
         * { box-sizing: border-box; }
         body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); margin: 0; line-height: 1.5; }
-        .titlebar { padding: 14px 24px; border-bottom: 2px solid var(--primary); display: flex; align-items: center; justify-content: space-between; }
-        .titlebar .brand { font-weight: 700; color: var(--primary); letter-spacing: .2px; }
+        .titlebar { padding: 14px 24px; border-bottom: 2px solid var(--primary); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; }
+        .titlebar .brandwrap { display: flex; align-items: center; gap: 12px; }
+        .titlebar .brand { font-weight: 800; color: var(--primary); letter-spacing: .2px; font-size: 18px; }
         .titlebar .meta { font-size: 12px; color: #6b7b93; }
+        .titlebar .photoBox { width: 96px; height: 96px; border: 2px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden; }
+        .titlebar .photoBox img { width: 100%; height: 100%; object-fit: cover; }
         .container { padding: 18px 24px; }
         .section-title { margin: 16px 0 8px; font-weight: 700; color: var(--secondary); font-size: 13px; }
         .section { border: 1px solid var(--border); border-radius: 8px; background: #fff; padding: 14px 16px; }
@@ -309,8 +312,11 @@ function buildHtml(caseData) {
     </head>
     <body>
       <div class="titlebar">
-        <div class="brand">HOPETRACK</div>
-        <div class="meta">Generated ${escapeHtml(new Date().toLocaleString())}</div>
+        <div class="brandwrap">
+          <div class="brand">HOPETRACK</div>
+          <div class="meta">Generated ${escapeHtml(new Date().toLocaleString())}</div>
+        </div>
+        <div class="photoBox">${raw.profile_picture ? `<img src="${escapeHtml(raw.profile_picture)}" />` : `<span style="font-size:11px;color:#6b7b93;">Photo</span>`}</div>
       </div>
       <div class="container">
         <div class="section-title">Case Summary</div>
@@ -329,6 +335,7 @@ function buildHtml(caseData) {
             ${kv('Birthplace', c.birthplace)}
             ${kv('Present Address', c.present_address || c.address)}
             ${kv('Provincial Address', c.provincial_address)}
+            ${kv('Guardian Relation', raw.guardian_relation || c.guardian_relation)}
             ${kv('Date of Referral', c.date_of_referral)}
             ${kv('Source of Referral', c.source_of_referral)}
             ${kv('Other Source of Referral', raw.other_source_of_referral || raw.otherSourceOfReferral)}
@@ -339,6 +346,29 @@ function buildHtml(caseData) {
             ${kv('Case Creation Date', raw.created_at || raw.dateCreated)}
             ${kv('Last Update Date', raw.updated_at || raw.lastUpdated)}
           </table>
+        </div>
+
+        <div class="section-title">Civil Status</div>
+        <div class="section">
+          <table class="kv">
+            ${kv('Married in Church', (raw.married_in_church !== undefined ? (raw.married_in_church ? 'Yes' : 'No') : ''))}
+            ${kv('Live-in/Common Law', (raw.live_in_common_law !== undefined ? (raw.live_in_common_law ? 'Yes' : 'No') : ''))}
+            ${kv('Civil Marriage', (raw.civil_marriage !== undefined ? (raw.civil_marriage ? 'Yes' : 'No') : ''))}
+            ${kv('Separated', (raw.separated !== undefined ? (raw.separated ? 'Yes' : 'No') : ''))}
+            ${kv('Marriage Date/Place', raw.marriage_date_place || raw.marriageDatePlace)}
+          </table>
+        </div>
+
+        <div class="section-title">Parents / Guardian Details</div>
+        <div class="section">
+          ${renderTable(
+            ['Role','Name','Age','Education','Occupation','Other Skills','Address','Income','Living/Deceased','Relation'],
+            [
+              { Role:'Father', Name: raw.father_name, Age: raw.father_age, Education: raw.father_education, Occupation: raw.father_occupation, 'Other Skills': raw.father_other_skills, Address: raw.father_address, Income: raw.father_income, 'Living/Deceased': raw.father_living === true ? 'Living' : (raw.father_living === false ? 'Deceased' : ''), Relation: '' },
+              { Role:'Mother', Name: raw.mother_name, Age: raw.mother_age, Education: raw.mother_education, Occupation: raw.mother_occupation, 'Other Skills': raw.mother_other_skills, Address: raw.mother_address, Income: raw.mother_income, 'Living/Deceased': raw.mother_living === true ? 'Living' : (raw.mother_living === false ? 'Deceased' : ''), Relation: '' },
+              { Role:'Guardian', Name: raw.guardian_name, Age: raw.guardian_age, Education: raw.guardian_education, Occupation: raw.guardian_occupation, 'Other Skills': raw.guardian_other_skills, Address: raw.guardian_address, Income: raw.guardian_income, 'Living/Deceased': raw.guardian_deceased === true ? 'Deceased' : (raw.guardian_living === true ? 'Living' : ''), Relation: raw.guardian_relation }
+            ]
+          )}
         </div>
 
         <div class="section-title">Family Composition</div>
