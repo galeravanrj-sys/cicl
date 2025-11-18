@@ -3,6 +3,24 @@ const router = express.Router();
 const db = require('./db');
 const auth = require('./middleware/auth');
 
+// Utility: normalize various date inputs to YYYY-MM-DD (module scope for reuse)
+const toDateOnly = (d) => {
+  if (d === null || d === undefined) return null;
+  const s = String(d).trim();
+  if (!s) return null;
+  const dt = new Date(s);
+  if (!isNaN(dt.getTime())) return dt.toISOString().slice(0,10);
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (m) {
+    const mm = m[1].padStart(2,'0');
+    const dd = m[2].padStart(2,'0');
+    let yy = m[3];
+    if (yy.length === 2) yy = (parseInt(yy,10) >= 70 ? '19' : '20') + yy; // handle 2-digit
+    return `${yy}-${mm}-${dd}`;
+  }
+  return null;
+};
+
 // Get all cases for statistics (no pagination)
 router.get('/all', auth, async (req, res) => {
   try {
@@ -161,22 +179,6 @@ router.get('/:id', auth, async (req, res) => {
 // Create a new case
 router.post('/', auth, async (req, res) => {
   try {
-    const toDateOnly = (d) => {
-      if (d === null || d === undefined) return null;
-      const s = String(d).trim();
-      if (!s) return null;
-      const dt = new Date(s);
-      if (!isNaN(dt.getTime())) return dt.toISOString().slice(0,10);
-      const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-      if (m) {
-        const mm = m[1].padStart(2,'0');
-        const dd = m[2].padStart(2,'0');
-        let yy = m[3];
-        if (yy.length === 2) yy = (parseInt(yy,10) >= 70 ? '19' : '20') + yy; // handle 2-digit
-        return `${yy}-${mm}-${dd}`;
-      }
-      return null;
-    };
     console.log('=== CASE CREATION DEBUG ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
     
