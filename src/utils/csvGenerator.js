@@ -629,9 +629,66 @@ export const generateAllCasesCSV = (casesData) => {
 
 export const downloadAllCasesCSV = (casesData) => {
   try {
-    const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.csv`;
-    const csvText = generateAllCasesCSV(casesData || []);
-    const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8' });
+    const fileName = `HOPETRACK_All_Cases_${new Date().toISOString().split('T')[0]}.xls`;
+    const title = 'HOPETRACK All Cases';
+    const safe = (v) => (v === null || v === undefined) ? '' : String(v);
+    const formatDate = (dateString) => toDateOnly(dateString);
+    const calcAge = (birthdate) => {
+      if (!birthdate) return '';
+      const d = new Date(birthdate);
+      if (isNaN(d.getTime())) return '';
+      const now = new Date();
+      let age = now.getFullYear() - d.getFullYear();
+      const m = now.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+      return age;
+    };
+    const rowsHtml = (casesData || []).map((c) => {
+      const fullName = c?.name || `${c?.firstName || c?.first_name || ''} ${c?.middleName || c?.middle_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
+      const program = c?.caseType || c?.programType || c?.program_type || c?.case_type || '';
+      return `<tr>
+        <td>${safe(fullName)}</td>
+        <td style="text-align:center;">${safe(calcAge(c?.birthdate))}</td>
+        <td style="text-align:center;">${safe(program)}</td>
+        <td style="text-align:right;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
+      </tr>`;
+    }).join('');
+    const html = `<!DOCTYPE html>
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8" />
+      <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=utf-8" />
+      <meta name="ProgId" content="Excel.Sheet" />
+      <meta name="Generator" content="HOPETRACK" />
+      <title>${title}</title>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>All Cases</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <style>
+        body { font-family: Segoe UI, Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #cbd5e0; padding: 6px 8px; font-size: 12px; }
+        th { background: #edf2f7; }
+      </style>
+    </head><body>
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Age</th><th>Program</th><th>Last Updated</th></tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    </body></html>`;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
