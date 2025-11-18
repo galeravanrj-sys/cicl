@@ -69,6 +69,35 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/export', exportRoutes);
 
+// --- Simple Server-Sent Events (SSE) for realtime case updates ---
+const sseClients = new Set();
+app.locals.broadcastEvent = (evt) => {
+  const payload = typeof evt === 'string' ? evt : JSON.stringify(evt.data || evt);
+  const type = evt.type || 'message';
+  for (const res of sseClients) {
+    try {
+      res.write(`event: ${type}\n`);
+      res.write(`data: ${payload}\n\n`);
+    } catch (_) {}
+  }
+};
+
+app.get('/api/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders && res.flushHeaders();
+  res.write(': connected\n\n');
+  sseClients.add(res);
+  const heartbeat = setInterval(() => {
+    try { res.write(': ping\n\n'); } catch (_) {}
+  }, 30000);
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    sseClients.delete(res);
+  });
+});
+
 // Serve React build statically
 const buildPath = path.join(__dirname, '..', 'build');
 app.use(express.static(buildPath, {

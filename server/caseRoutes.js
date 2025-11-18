@@ -457,6 +457,19 @@ router.post('/', auth, async (req, res) => {
       }
     }
     
+    // Broadcast creation to SSE clients
+    try {
+      req.app.locals.broadcastEvent && req.app.locals.broadcastEvent({
+        type: 'case_created',
+        data: {
+          id: newCase.id,
+          status: newCase.status,
+          program_type: newCase.program_type,
+          last_updated: newCase.last_updated
+        }
+      });
+    } catch (_) {}
+
     res.status(201).json(newCase);
   } catch (err) {
     console.error('Error creating case:', err.message);
@@ -781,6 +794,19 @@ router.put('/:id', auth, async (req, res) => {
         }
       }
     }
+
+    // Broadcast realtime update to SSE clients
+    try {
+      req.app.locals.broadcastEvent && req.app.locals.broadcastEvent({
+        type: 'case_updated',
+        data: {
+          id: updatedCase.id,
+          status: updatedCase.status,
+          program_type: updatedCase.program_type,
+          last_updated: updatedCase.last_updated
+        }
+      });
+    } catch (_) {}
 
     res.json(updatedCase);
   } catch (err) {

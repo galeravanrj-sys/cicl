@@ -355,6 +355,31 @@ export const CaseProvider = ({ children }) => {
     deleteCase
   };
 
+  // Subscribe to server-sent events for realtime updates
+  useEffect(() => {
+    try {
+      const es = new EventSource(`${API_BASE}/events`);
+      es.addEventListener('case_updated', (ev) => {
+        try {
+          const d = JSON.parse(ev.data);
+          updateCase({
+            id: d.id,
+            status: d.status,
+            programType: d.program_type,
+            lastUpdated: d.last_updated || new Date().toISOString()
+          });
+        } catch (_) {}
+      });
+      es.addEventListener('case_created', () => {
+        fetchAllCases();
+      });
+      es.onerror = () => {
+        es.close();
+      };
+      return () => es.close();
+    } catch (_) {}
+  }, [updateCase, fetchAllCases]);
+
   return (
     <CaseContext.Provider value={value}>
       {children}
