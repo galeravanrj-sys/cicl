@@ -319,50 +319,32 @@ function buildHtml(caseData) {
             ${kv('First Name', c.first_name)}
             ${kv('Last Name', c.last_name)}
             ${kv('Middle Name', c.middle_name)}
+            ${kv('Nickname', c.nickname)}
             ${kv('Sex', c.sex)}
             ${kv('Birthdate', c.birthdate)}
             ${kv('Age', c.age)}
             ${kv('Status', c.status)}
-            ${kv('Religion', c.religion)}
             ${kv('Nationality', c.nationality)}
-            ${kv('Nickname', c.nickname)}
+            ${kv('Religion', c.religion)}
+            ${kv('Birthplace', c.birthplace)}
             ${kv('Present Address', c.present_address || c.address)}
             ${kv('Provincial Address', c.provincial_address)}
-            ${kv('Birthplace', c.birthplace)}
             ${kv('Date of Referral', c.date_of_referral)}
             ${kv('Source of Referral', c.source_of_referral)}
             ${kv('Other Source of Referral', raw.other_source_of_referral || raw.otherSourceOfReferral)}
             ${kv('Relation to Client', c.relation_to_client)}
             ${kv('Address & Tel', c.address_and_tel)}
-            ${kv('Case Type', c.case_type)}
-            ${kv('Program Type', c.program_type)}
-            ${kv('Assigned House Parent', c.assigned_house_parent)}
+            ${kv('Program', c.program_type)}
+            ${kv('Assigned Home', c.assigned_house_parent)}
             ${kv('Case Creation Date', raw.created_at || raw.dateCreated)}
             ${kv('Last Update Date', raw.updated_at || raw.lastUpdated)}
-            ${kv('Mother', c.mother_name)}
-            ${kv('Father', c.father_name)}
-            ${kv('Guardian', c.guardian_name)}
-            ${kv('Married in church', c.married_in_church ? 'Yes' : 'No')}
-            ${kv('Live-in/Common Law', c.live_in_common_law ? 'Yes' : 'No')}
-            ${kv('Civil Marriage', c.civil_marriage ? 'Yes' : 'No')}
-            ${kv('Separated', c.separated ? 'Yes' : 'No')}
-            ${kv('Date and Place', c.marriage_date_place)}
-            ${kv('Problem Presented', raw.problem_presented || raw.problemPresented)}
-            ${kv('Brief History', raw.brief_history || raw.briefHistory)}
-            ${kv('Economic Situation', raw.economic_situation || raw.economicSituation)}
-            ${kv('Medical History', raw.medical_history || raw.medicalHistory)}
-            ${kv('Family Background', raw.family_background || raw.familyBackground)}
-            ${kv('Client Description', raw.client_description || raw.clientDescription)}
-            ${kv("Parents' Description", raw.parents_description || raw.parentsDescription)}
-            ${kv('Recommendation', raw.recommendation)}
-            ${kv('Assessment', raw.assessment)}
           </table>
         </div>
 
         <div class="section-title">Family Composition</div>
         <div class="section">
           ${renderTable(
-            ['name','relation','age','sex','status','education','address','occupation','income'],
+            ['Name','Relation','Age','Sex','Status','Education','Address','Occupation','Income'],
             raw.familyMembers || raw.family_members || raw.family_members_rows || []
           )}
         </div>
@@ -370,7 +352,7 @@ function buildHtml(caseData) {
         <div class="section-title">Extended Family</div>
         <div class="section">
           ${renderTable(
-            ['name','relationship','age','sex','status','education','occupation','income'],
+            ['Name','Relationship','Age','Sex','Status','Education','Occupation','Income'],
             raw.extendedFamily || raw.extended_family || raw.extended_family_rows || []
           )}
         </div>
@@ -378,7 +360,7 @@ function buildHtml(caseData) {
         <div class="section-title">Educational Attainment</div>
         <div class="section">
           ${renderTable(
-            ['level','school_name','school_address','year_completed'],
+            ['Level','School Name','School Address','Year Completed'],
             raw.educationalAttainment || raw.educational_attainment || []
           )}
         </div>
@@ -386,7 +368,7 @@ function buildHtml(caseData) {
         <div class="section-title">Sacramental Records</div>
         <div class="section">
           ${renderTable(
-            ['sacrament','date_received','place_parish'],
+            ['Sacrament','Date Received','Place/Parish'],
             raw.sacramentalRecords || raw.sacramental_records || []
           )}
         </div>
@@ -394,7 +376,7 @@ function buildHtml(caseData) {
         <div class="section-title">Agencies / Persons</div>
         <div class="section">
           ${renderTable(
-            ['name','address_date_duration','services_received'],
+            ['Name','Address/Date/Duration','Services Received'],
             raw.agencies || raw.agencies_persons || []
           )}
         </div>
@@ -402,7 +384,7 @@ function buildHtml(caseData) {
         <div class="section-title">Life Skills</div>
         <div class="section">
           ${renderTable(
-            ['activity','date_completed','performance_rating','notes'],
+            ['Activity','Date Completed','Performance Rating','Notes'],
             raw.lifeSkills || raw.life_skills || []
           )}
         </div>
@@ -410,7 +392,7 @@ function buildHtml(caseData) {
         <div class="section-title">Vital Signs</div>
         <div class="section">
           ${renderTable(
-            ['date_recorded','blood_pressure','heart_rate','temperature','weight','height','notes'],
+            ['Date Recorded','Blood Pressure','Heart Rate','Temperature','Weight','Height','Notes'],
             raw.vitalSigns || raw.vital_signs || []
           )}
         </div>
@@ -554,7 +536,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Family Composition</div>
         <div class="section">
           ${renderTable(
-            ['name','relation','age','sex','status','education','address','occupation','income'],
+            ['Name','Relation','Age','Sex','Status','Education','Address','Occupation','Income'],
             raw.familyMembers || raw.family_members || raw.family_members_rows || []
           )}
         </div>
@@ -562,7 +544,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Extended Family</div>
         <div class="section">
           ${renderTable(
-            ['name','relationship','age','sex','status','education','occupation','income'],
+            ['Name','Relationship','Age','Sex','Status','Education','Occupation','Income'],
             raw.extendedFamily || raw.extended_family || raw.extended_family_rows || []
           )}
         </div>
@@ -570,7 +552,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Educational Attainment</div>
         <div class="section">
           ${renderTable(
-            ['level','school_name','school_address','year_completed'],
+            ['Level','School Name','School Address','Year Completed'],
             raw.educationalAttainment || raw.educational_attainment || []
           )}
         </div>
@@ -578,7 +560,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Sacramental Records</div>
         <div class="section">
           ${renderTable(
-            ['sacrament','date_received','place_parish'],
+            ['Sacrament','Date Received','Place/Parish'],
             raw.sacramentalRecords || raw.sacramental_records || []
           )}
         </div>
@@ -586,7 +568,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Agencies / Persons</div>
         <div class="section">
           ${renderTable(
-            ['name','address_date_duration','services_received'],
+            ['Name','Address/Date/Duration','Services Received'],
             raw.agencies || raw.agencies_persons || []
           )}
         </div>

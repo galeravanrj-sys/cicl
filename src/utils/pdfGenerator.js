@@ -791,24 +791,24 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
     const id = caseData && caseData.id;
     let resp;
     if (id) {
-      resp = await fetch(`${API_BASE}/export/case/${id}/pdf-template`, {
+      resp = await fetch(`${API_BASE}/export/case/${id}/pdf-html`, {
         method: 'GET',
         headers: { 'x-auth-token': token },
       });
       if (!resp.ok) {
-        resp = await fetch(`${API_BASE}/export/case/${id}/pdf-html`, {
+        resp = await fetch(`${API_BASE}/export/case/${id}/pdf-template`, {
           method: 'GET',
           headers: { 'x-auth-token': token },
         });
       }
     } else {
-      resp = await fetch(`${API_BASE}/export/case/pdf-template`, {
+      resp = await fetch(`${API_BASE}/export/case/pdf-html`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
         body: JSON.stringify(caseData || {}),
       });
       if (!resp.ok) {
-        resp = await fetch(`${API_BASE}/export/case/pdf-html`, {
+        resp = await fetch(`${API_BASE}/export/case/pdf-template`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
           body: JSON.stringify(caseData || {}),
