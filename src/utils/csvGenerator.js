@@ -665,10 +665,10 @@ export const downloadAllCasesCSV = (casesData) => {
         ? computedAge
         : (typeof c?.age === 'number' ? c.age : (c?.age || ''));
       return `<tr>
-        <td>${safe(fullName)}</td>
+        <td style="text-align:center;">${safe(fullName)}</td>
         <td style="text-align:center;">${safe(ageOut)}</td>
         <td style="text-align:center;">${safe(program)}</td>
-        <td style="text-align:right;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
+        <td style="text-align:center;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
       </tr>`;
     }).join('');
     const html = `<!DOCTYPE html>
@@ -693,7 +693,7 @@ export const downloadAllCasesCSV = (casesData) => {
       <style>
         body { font-family: Segoe UI, Arial, sans-serif; }
         table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #cbd5e0; padding: 6px 8px; font-size: 12px; }
+        th, td { border: 1px solid #cbd5e0; padding: 6px 8px; font-size: 12px; text-align: center; }
         th { background: #edf2f7; }
       </style>
     </head><body>

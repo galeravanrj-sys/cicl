@@ -368,13 +368,15 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
         cellPadding: 4,
         textColor: colors.text,
         lineColor: colors.primary,
-        lineWidth: 0.1
+        lineWidth: 0.1,
+        halign: 'center'
       },
       headStyles: { 
         fillColor: colors.primary,
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 9
+        fontSize: 9,
+        halign: 'center'
       },
       alternateRowStyles: {
         fillColor: [248, 249, 250]
@@ -382,7 +384,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
       margin: { left: margin, right: margin },
       tableWidth: 'auto',
       columnStyles: {
-        0: { fontStyle: 'bold', fillColor: [250, 250, 250] }
+        0: { fontStyle: 'bold', fillColor: [250, 250, 250], halign: 'center' }
       }
     });
     
@@ -748,17 +750,17 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
       startY: 30,
       head: [[ 'Name', 'Age', 'Program', 'Last Updated' ]],
       body: rows,
-      styles: { fontSize: theme.type.body, cellPadding: 4, textColor: theme.colors.text, lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak' },
+      styles: { fontSize: theme.type.body, cellPadding: 4, textColor: theme.colors.text, lineColor: [225, 228, 232], lineWidth: 0.1, overflow: 'linebreak', halign: 'center' },
       headStyles: { fillColor: theme.colors.primary, textColor: 255, halign: 'center', fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [245, 247, 250] },
       theme: 'striped',
       margin: { left: centerMargin, right: centerMargin },
       tableWidth: tableWidth,
       columnStyles: {
-        0: { cellWidth: 'auto', halign: 'left' },
+        0: { cellWidth: 'auto', halign: 'center' },
         1: { cellWidth: 22, halign: 'center' },
         2: { cellWidth: 40, halign: 'center' },
-        3: { cellWidth: 36, halign: 'right' }
+        3: { cellWidth: 36, halign: 'center' }
       }
     });
 
@@ -823,7 +825,8 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
   autoTable(doc, {
     startY: 20,
     body: kvRows,
-    styles: { fontSize: 10, cellPadding: 4 },
+    styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
+    headStyles: { halign: 'center' },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     theme: 'grid',
     margin: { left: margin, right: margin },
@@ -854,8 +857,8 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
       startY: doc.lastAutoTable.finalY + 10,
       head: [columns],
       body: rows.map((r) => columns.map((h) => normalizeCell(r[h] ?? r[h.replace(/\s+/g, '_').toLowerCase()] ?? '', h))),
-      styles: { fontSize: 10, cellPadding: 4 },
-      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
+      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold', halign: 'center' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       theme: 'grid',
       margin: { left: margin, right: margin },
