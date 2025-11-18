@@ -625,9 +625,13 @@ export const generateAllCasesCSV = (casesData) => {
   for (const c of casesData) {
     const fullName = c?.name || `${c?.firstName || c?.first_name || ''} ${c?.middleName || c?.middle_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
     const program = c?.caseType || c?.programType || c?.program_type || c?.case_type || '';
+    const computedAge = calcAge(c?.birthdate);
+    const ageOut = (computedAge !== '' && computedAge !== null && computedAge !== undefined)
+      ? computedAge
+      : (typeof c?.age === 'number' ? c.age : (c?.age || ''));
     const row = [
       q(fullName),
-      calcAge(c?.birthdate),
+      ageOut,
       q(program),
       formatDate(c?.lastUpdated || c?.updated_at || c?.created_at)
     ].join(',');
@@ -656,9 +660,13 @@ export const downloadAllCasesCSV = (casesData) => {
     const rowsHtml = (casesData || []).map((c) => {
       const fullName = c?.name || `${c?.firstName || c?.first_name || ''} ${c?.middleName || c?.middle_name || ''} ${c?.lastName || c?.last_name || ''}`.trim();
       const program = c?.caseType || c?.programType || c?.program_type || c?.case_type || '';
+      const computedAge = calcAge(c?.birthdate);
+      const ageOut = (computedAge !== '' && computedAge !== null && computedAge !== undefined)
+        ? computedAge
+        : (typeof c?.age === 'number' ? c.age : (c?.age || ''));
       return `<tr>
         <td>${safe(fullName)}</td>
-        <td style="text-align:center;">${safe(calcAge(c?.birthdate))}</td>
+        <td style="text-align:center;">${safe(ageOut)}</td>
         <td style="text-align:center;">${safe(program)}</td>
         <td style="text-align:right;">${safe(formatDate(c?.lastUpdated || c?.updated_at || c?.created_at))}</td>
       </tr>`;

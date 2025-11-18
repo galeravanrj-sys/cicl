@@ -168,6 +168,7 @@ const ArchivedCases = () => {
       updateCase({
         id: caseItem.id,
         name: `${fullDetails.first_name || caseItem.firstName || ''} ${fullDetails.last_name || caseItem.lastName || ''}`.trim(),
+  birthdate: fullDetails.birthdate || caseItem.birthdate,
         age: calculateAge(fullDetails.birthdate || caseItem.birthdate),
         programType: fullDetails.program_type || caseItem.programType,
         status: 'after care',
