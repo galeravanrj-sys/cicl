@@ -4,11 +4,11 @@ import { PDFDocument } from 'pdf-lib';
 import { fetchCaseDetailsForExport } from './exportHelpers';
 const pdfTheme = {
   colors: {
-    primary: [0, 0, 0],
-    secondary: [0, 0, 0],
-    accent: [0, 0, 0],
-    light: [255, 255, 255],
-    text: [0, 0, 0]
+    primary: [44, 72, 99],
+    secondary: [31, 41, 55],
+    accent: [99, 102, 241],
+    light: [248, 250, 252],
+    text: [17, 24, 39]
   },
   type: {
     h1: 18,
@@ -823,7 +823,8 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
   autoTable(doc, {
     startY: 20,
     body: kvRows,
-    styles: { fontSize: 10 },
+    styles: { fontSize: 10, cellPadding: 4 },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
     theme: 'grid',
     margin: { left: margin, right: margin },
     tableWidth: pageWidth - margin * 2
@@ -831,12 +832,31 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
 
   const addArrayTable = (title, columns, rows) => {
     if (!Array.isArray(rows) || rows.length === 0) return;
+    const normalizeCell = (val, header) => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).trim();
+      if (/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/.test(s)) {
+        return s.slice(0, 10);
+      }
+      if (/date|year/i.test(header)) {
+        const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (m) {
+          const mm = m[1].padStart(2, '0');
+          const dd = m[2].padStart(2, '0');
+          let yy = m[3];
+          if (yy.length === 2) yy = (parseInt(yy,10) >= 70 ? '19' : '20') + yy;
+          return `${yy}-${mm}-${dd}`;
+        }
+      }
+      return s;
+    };
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
       head: [columns],
-      body: rows.map((r) => columns.map((h) => r[h] ?? r[h.replace(/\s+/g, '_').toLowerCase()] ?? '')),
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [237, 242, 247], textColor: 0 },
+      body: rows.map((r) => columns.map((h) => normalizeCell(r[h] ?? r[h.replace(/\s+/g, '_').toLowerCase()] ?? '', h))),
+      styles: { fontSize: 10, cellPadding: 4 },
+      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
       theme: 'grid',
       margin: { left: margin, right: margin },
       tableWidth: pageWidth - margin * 2
