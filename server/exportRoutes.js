@@ -242,6 +242,21 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+function toDateOnly(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/);
+  if (m) return m[1];
+  const us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/);
+  if (us) {
+    const mm = us[1].padStart(2,'0');
+    const dd = us[2].padStart(2,'0');
+    const yyyy = us[3];
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return s;
+}
+
 function buildHtml(caseData) {
   const c = normalizeCaseData(caseData);
   const raw = caseData || {};
@@ -327,7 +342,7 @@ function buildHtml(caseData) {
             ${kv('Middle Name', c.middle_name)}
             ${kv('Nickname', c.nickname)}
             ${kv('Sex', c.sex)}
-            ${kv('Birthdate', c.birthdate)}
+            ${kv('Birthdate', toDateOnly(c.birthdate))}
             ${kv('Age', c.age)}
             ${kv('Status', c.status)}
             ${kv('Nationality', c.nationality)}
@@ -336,15 +351,15 @@ function buildHtml(caseData) {
             ${kv('Present Address', c.present_address || c.address)}
             ${kv('Provincial Address', c.provincial_address)}
             ${kv('Guardian Relation', raw.guardian_relation || c.guardian_relation)}
-            ${kv('Date of Referral', c.date_of_referral)}
+            ${kv('Date of Referral', toDateOnly(c.date_of_referral))}
             ${kv('Source of Referral', c.source_of_referral)}
             ${kv('Other Source of Referral', raw.other_source_of_referral || raw.otherSourceOfReferral)}
             ${kv('Relation to Client', c.relation_to_client)}
             ${kv('Address & Tel', c.address_and_tel)}
             ${kv('Program', c.program_type)}
             ${kv('Assigned Home', c.assigned_house_parent)}
-            ${kv('Case Creation Date', raw.created_at || raw.dateCreated)}
-            ${kv('Last Update Date', raw.updated_at || raw.lastUpdated)}
+            ${kv('Case Creation Date', toDateOnly(raw.created_at || raw.dateCreated))}
+            ${kv('Last Update Date', toDateOnly(raw.updated_at || raw.lastUpdated))}
           </table>
         </div>
 
@@ -399,7 +414,11 @@ function buildHtml(caseData) {
         <div class="section">
           ${renderTable(
             ['Sacrament','Date Received','Place/Parish'],
-            raw.sacramentalRecords || raw.sacramental_records || []
+            (raw.sacramentalRecords || raw.sacramental_records || []).map(r => ({
+              sacrament: r.sacrament,
+              date_received: toDateOnly(r.date_received || r.dateReceived),
+              place_parish: r.place_parish
+            }))
           )}
         </div>
 
@@ -415,7 +434,12 @@ function buildHtml(caseData) {
         <div class="section">
           ${renderTable(
             ['Activity','Date Completed','Performance Rating','Notes'],
-            raw.lifeSkills || raw.life_skills || []
+            (raw.lifeSkills || raw.life_skills || []).map(r => ({
+              activity: r.activity,
+              date_completed: toDateOnly(r.date_completed || r.dateCompleted),
+              performance_rating: r.performance_rating || r.performanceRating,
+              notes: r.notes
+            }))
           )}
         </div>
 
@@ -423,7 +447,15 @@ function buildHtml(caseData) {
         <div class="section">
           ${renderTable(
             ['Date Recorded','Blood Pressure','Heart Rate','Temperature','Weight','Height','Notes'],
-            raw.vitalSigns || raw.vital_signs || []
+            (raw.vitalSigns || raw.vital_signs || []).map(r => ({
+              date_recorded: toDateOnly(r.date_recorded || r.date),
+              blood_pressure: r.blood_pressure || r.bloodPressure,
+              heart_rate: r.heart_rate || r.heartRate,
+              temperature: r.temperature,
+              weight: r.weight,
+              height: r.height,
+              notes: r.notes
+            }))
           )}
         </div>
 
@@ -458,12 +490,7 @@ function buildHtml(caseData) {
 function buildMultiCaseHtml(casesList = [], options = {}) {
   const listOnly = !!options.listOnly;
   const list = Array.isArray(casesList) ? casesList : [];
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return String(dateString);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
+  const formatDate = (dateString) => toDateOnly(dateString);
 
   const calcAge = (birthdate) => {
     if (!birthdate) return '';
@@ -523,7 +550,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
             ${fld('Last Name', c.last_name)}
             ${fld('Middle Name', c.middle_name)}
             ${fld('Sex', c.sex)}
-            ${fld('Birthdate', c.birthdate)}
+            ${fld('Birthdate', toDateOnly(c.birthdate))}
             ${fld('Age', c.age)}
             ${fld('Status', c.status)}
             ${fld('Religion', c.religion)}
@@ -544,7 +571,7 @@ function buildMultiCaseHtml(casesList = [], options = {}) {
         <div class="section-title">Referral</div>
         <div class="section">
           <div class="grid">
-            ${fld('Date of Referral', c.date_of_referral)}
+            ${fld('Date of Referral', toDateOnly(c.date_of_referral))}
             ${fld('Source of Referral', c.source_of_referral)}
             ${fld('Relation to Client', c.relation_to_client)}
             ${fld('Address & Tel', c.address_and_tel)}

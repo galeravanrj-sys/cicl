@@ -956,6 +956,20 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const margin = 20;
+  const toDateOnly = (value) => {
+    if (value === null || value === undefined || value === '') return '';
+    const s = String(value).trim();
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/);
+    if (m) return m[1];
+    const us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/);
+    if (us) {
+      const mm = us[1].padStart(2,'0');
+      const dd = us[2].padStart(2,'0');
+      const yyyy = us[3];
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return s;
+  };
 
   const kvRows = [
     ['First Name', caseData.firstName || caseData.first_name || ''],
@@ -963,7 +977,7 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
     ['Middle Name', caseData.middleName || caseData.middle_name || ''],
     ['Nickname', caseData.nickname || ''],
     ['Sex', caseData.sex || ''],
-    ['Birthdate', caseData.birthdate || ''],
+    ['Birthdate', toDateOnly(caseData.birthdate)],
     ['Age', caseData.age || ''],
     ['Status', caseData.status || caseData.civil_status || ''],
     ['Nationality', caseData.nationality || ''],
@@ -971,15 +985,15 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
     ['Birthplace', caseData.birthplace || ''],
     ['Present Address', caseData.presentAddress || caseData.present_address || caseData.address || ''],
     ['Provincial Address', caseData.provincialAddress || caseData.provincial_address || ''],
-    ['Date of Referral', caseData.dateOfReferral || caseData.date_of_referral || ''],
+    ['Date of Referral', toDateOnly(caseData.dateOfReferral || caseData.date_of_referral)],
     ['Source of Referral', caseData.sourceOfReferral || caseData.source_of_referral || ''],
     ['Other Source of Referral', caseData.otherSourceOfReferral || caseData.other_source_of_referral || ''],
     ['Relation to Client', caseData.relationToClient || caseData.relation_to_client || ''],
     ['Address & Tel', caseData.addressAndTel || caseData.address_and_tel || ''],
     ['Program', caseData.programType || caseData.program_type || caseData.caseType || ''],
     ['Assigned Home', caseData.assignedHouseParent || caseData.assigned_house_parent || ''],
-    ['Case Creation Date', caseData.created_at || caseData.dateCreated || ''],
-    ['Last Update Date', caseData.updated_at || caseData.lastUpdated || '']
+    ['Case Creation Date', toDateOnly(caseData.created_at || caseData.dateCreated)],
+    ['Last Update Date', toDateOnly(caseData.updated_at || caseData.lastUpdated)]
   ];
 
   autoTable(doc, {
