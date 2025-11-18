@@ -387,143 +387,15 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
     return (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 10 : startY + 50;
   };
 
-  // Educational Attainment with enhanced styling
-  if (caseData.educationalAttainment) {
-    yPosition = addSectionHeader('X. EDUCATIONAL ATTAINMENT', yPosition);
+  
 
-    const levels = [
-      { key: 'elementary', label: 'Elementary' },
-      { key: 'highSchool', label: 'High School' },
-      { key: 'seniorHighSchool', label: 'Senior High School' },
-      { key: 'vocationalCourse', label: 'Vocational Course' },
-      { key: 'college', label: 'College' },
-      { key: 'others', label: 'Others' },
-    ];
+  
 
-    const eduRows = levels.map(({ key, label }) => {
-      const level = caseData.educationalAttainment[key] || {};
-      const hasAny = level.schoolName || level.schoolAddress || level.year;
-      if (!hasAny) return null;
-      return [label, level.schoolName || '', level.schoolAddress || '', level.year || ''];
-    }).filter(Boolean);
+  
 
-    if (eduRows.length > 0) {
-      yPosition = createProfessionalTable(
-        yPosition,
-        ['Level', 'School Name', 'School Address', 'Year'],
-        eduRows,
-        'Educational Attainment'
-      );
-    }
-  }
+  
 
-  // Sacramental Record with enhanced styling
-  if (caseData.sacramentalRecord) {
-    yPosition = addSectionHeader('XI. SACRAMENTAL RECORD', yPosition);
-
-    const sacraments = [
-      { key: 'baptism', label: 'Baptism' },
-      { key: 'firstCommunion', label: 'First Communion' },
-      { key: 'confirmation', label: 'Confirmation' },
-      { key: 'others', label: 'Others' },
-    ];
-
-    const sacrRows = sacraments.map(({ key, label }) => {
-      const s = caseData.sacramentalRecord[key] || {};
-      const hasAny = s.dateReceived || s.placeParish;
-      if (!hasAny) return null;
-      return [label, s.dateReceived || '', s.placeParish || ''];
-    }).filter(Boolean);
-
-    if (sacrRows.length > 0) {
-      yPosition = createProfessionalTable(
-        yPosition,
-        ['Sacrament', 'Date Received', 'Place/Parish'],
-        sacrRows,
-        'Sacramental Record'
-      );
-    }
-  }
-
-  // Family Members Section
-  if (caseData.familyMembers && caseData.familyMembers.length > 0) {
-    yPosition = addSectionHeader('XII. FAMILY MEMBERS (SIBLINGS/CHILDREN)', yPosition);
-
-    const familyTableData = caseData.familyMembers
-      .filter(member => member.name) // Only include members with names
-      .map(member => [
-        member.name || '',
-        member.relation || '',
-        member.age || '',
-        member.sex || '',
-        member.status || '',
-        member.education || '',
-        member.occupation || '',
-        member.income ? `₱${member.income}` : ''
-      ]);
-
-    if (familyTableData.length > 0) {
-      yPosition = createProfessionalTable(
-        yPosition,
-        ['Name', 'Relation', 'Age', 'Sex', 'Status', 'Education', 'Occupation', 'Income'],
-        familyTableData,
-        'Family Members'
-      );
-    }
-  }
-
-  // Extended Family Section
-  if (caseData.extendedFamily && caseData.extendedFamily.length > 0) {
-    // Check if we need a new page
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    yPosition = addSectionHeader('XIII. EXTENDED FAMILY', yPosition);
-
-    const extendedTableData = caseData.extendedFamily
-      .filter(member => member.name) // Only include members with names
-      .map(member => [
-        member.name || '',
-        member.relationship || '',
-        member.age || '',
-        member.sex || '',
-        member.status || '',
-        member.education || '',
-        member.occupation || '',
-        member.income ? `₱${member.income}` : ''
-      ]);
-
-    if (extendedTableData.length > 0) {
-      yPosition = createProfessionalTable(
-        yPosition,
-        ['Name', 'Relationship', 'Age', 'Sex', 'Status', 'Education', 'Occupation', 'Income'],
-        extendedTableData,
-        'Extended Family'
-      );
-    }
-  }
-
-  // Agencies/Persons
-  if (caseData.agencies) {
-    yPosition = addSectionHeader('XIV. AGENCIES/PERSONS', yPosition);
-    if (Array.isArray(caseData.agencies)) {
-      const agencyRows = caseData.agencies
-        .filter(a => a && (a.name || a.addressDateDuration || a.servicesReceived))
-        .map(a => [a.name || '', a.addressDateDuration || '', a.servicesReceived || '']);
-      if (agencyRows.length > 0) {
-        yPosition = createProfessionalTable(
-          doc,
-          ['Name', 'Address/Date/Duration', 'Services Received'],
-          agencyRows,
-          yPosition
-        );
-      }
-    } else {
-      yPosition = addTextArea('Agencies/Persons', caseData.agencies, yPosition, 30);
-    }
-  }
+  
 
   // Assessment & Recommendation
   yPosition = addSectionHeader('XV. ASSESSMENT & RECOMMENDATION', yPosition);
@@ -532,57 +404,7 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
   yPosition = addTextArea('Notes', caseData.notes || caseData.additional_notes, yPosition, 30);
   yPosition = addTextArea('Progress', caseData.progress, yPosition, 30);
 
-  // Life Skills & Vital Signs Section
-  if (caseData.lifeSkills && caseData.lifeSkills.length > 0) {
-    // Check if we need a new page
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    yPosition = addSectionHeader('XVI. LIFE SKILLS TRACKING', yPosition);
-
-    const lifeSkillsTableData = caseData.lifeSkills.map(skill => [
-      skill.activity || '',
-      skill.date_completed ? new Date(skill.date_completed).toLocaleDateString() : '',
-      skill.performance_rating || '',
-      skill.notes || ''
-    ]);
-
-    yPosition = createProfessionalTable(
-      doc,
-      ['Activity', 'Date Completed', 'Performance Rating', 'Notes'],
-      lifeSkillsTableData,
-      yPosition
-    );
-  }
-
-  if (caseData.vitalSigns && caseData.vitalSigns.length > 0) {
-    // Check if we need a new page
-    if (yPosition > 200) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    yPosition = addSectionHeader('XVII. VITAL SIGNS MONITORING', yPosition);
-
-    const vitalSignsTableData = caseData.vitalSigns.map(vital => [
-      vital.date_recorded ? new Date(vital.date_recorded).toLocaleDateString() : '',
-      vital.blood_pressure || '',
-      vital.heart_rate || '',
-      vital.temperature || '',
-      vital.weight || '',
-      vital.height || '',
-      vital.notes || ''
-    ]);
-
-    yPosition = createProfessionalTable(
-      doc,
-      ['Date', 'Blood Pressure', 'Heart Rate (BPM)', 'Temperature (°C)', 'Weight (KG)', 'Height (CM)', 'Notes'],
-      vitalSignsTableData,
-      yPosition
-    );
-  }
+  
 
   // Intervention Plan Section
   if (caseData.checklist) {

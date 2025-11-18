@@ -4,7 +4,6 @@ import { isArchivedStatus, getArchivedDisplayText } from '../utils/statusHelpers
 import Pagination from './Pagination';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
-import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -149,37 +148,8 @@ const ArchivedCases = () => {
       }
 
       const updatedCaseData = {
-        firstName: fullDetails.first_name,
-        lastName: fullDetails.last_name,
-        middleName: fullDetails.middle_name,
-        sex: fullDetails.sex,
-        birthdate: fullDetails.birthdate,
         status: 'after care',
-        religion: fullDetails.religion,
-        address: fullDetails.address,
-        sourceOfReferral: fullDetails.source_of_referral,
-        caseType: fullDetails.case_type,
-        programType: fullDetails.program_type,
-        problemPresented: fullDetails.problem_presented,
-        briefHistory: fullDetails.brief_history,
-        economicSituation: fullDetails.economic_situation,
-        medicalHistory: fullDetails.medical_history,
-        familyBackground: fullDetails.family_background,
-        guardianName: fullDetails.guardian_name,
-        guardianAge: fullDetails.guardian_age,
-        guardianEducation: fullDetails.guardian_education,
-        guardianOccupation: fullDetails.guardian_occupation,
-        guardianOtherSkills: fullDetails.guardian_other_skills,
-        guardianRelation: fullDetails.guardian_relation,
-        guardianAddress: fullDetails.guardian_address,
-        guardianIncome: fullDetails.guardian_income,
-        guardianLiving: fullDetails.guardian_living,
-        guardianDeceased: fullDetails.guardian_deceased,
-        clientDescription: fullDetails.client_description,
-        parentsDescription: fullDetails.parents_description,
-        recommendation: fullDetails.recommendation,
-        assessment: fullDetails.assessment,
-        checklist: fullDetails.checklist,
+        program_type: fullDetails.program_type || caseItem.programType || null,
         lastUpdated: new Date().toISOString()
       };
 
@@ -248,11 +218,7 @@ const ArchivedCases = () => {
     await downloadCaseReportPDF(caseData);
   };
 
-  const exportSingleCaseToWord = async (caseItem) => {
-    const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
-    const caseData = fullDetails || caseItem;
-    await downloadCaseReportWord(caseData);
-  };
+  
 
   // Export single case to CSV
   const exportSingleCaseToCSV = async (caseItem) => {
@@ -279,19 +245,7 @@ const ArchivedCases = () => {
     })();
   };
 
-  const exportAllToWord = async () => {
-    if (filteredArchivedCases.length === 0) {
-      alert('No archived cases to export');
-      return;
-    }
-    const fullCases = await Promise.all(
-      filteredArchivedCases.map(async (c) => {
-        const details = await fetchCaseDetailsForExport(c.id);
-        return details || c;
-      })
-    );
-    await downloadAllCasesWord(fullCases);
-  };
+  
 
   // CSV Export Function using centralized utility
   const exportToCSV = async () => {
@@ -374,11 +328,6 @@ const ArchivedCases = () => {
             <li>
               <button className="dropdown-item" onClick={exportToCSV}>
                 <i className="fas fa-file-csv me-2"></i>Export All to CSV
-              </button>
-            </li>
-            <li>
-              <button className="dropdown-item" onClick={exportAllToWord}>
-                <i className="fas fa-file-word me-2"></i>Export All to Word
               </button>
             </li>
             {/* Removed global "All Discharged (Ignoring filters)" export options */}
@@ -616,18 +565,7 @@ const ArchivedCases = () => {
                                   <i className="fas fa-file-pdf me-2"></i>PDF
                                 </button>
                               </li>
-                              <li>
-                                <button 
-                                  className="dropdown-item" 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    exportSingleCaseToWord(caseItem);
-                                  }}
-                                >
-                                  <i className="fas fa-file-word me-2"></i>Word
-                                </button>
-                              </li>
+                              
                               <li>
                                 <button 
                                   className="dropdown-item" 
