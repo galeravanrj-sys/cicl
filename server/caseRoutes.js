@@ -161,6 +161,22 @@ router.get('/:id', auth, async (req, res) => {
 // Create a new case
 router.post('/', auth, async (req, res) => {
   try {
+    const toDateOnly = (d) => {
+      if (d === null || d === undefined) return null;
+      const s = String(d).trim();
+      if (!s) return null;
+      const dt = new Date(s);
+      if (!isNaN(dt.getTime())) return dt.toISOString().slice(0,10);
+      const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+      if (m) {
+        const mm = m[1].padStart(2,'0');
+        const dd = m[2].padStart(2,'0');
+        let yy = m[3];
+        if (yy.length === 2) yy = (parseInt(yy,10) >= 70 ? '19' : '20') + yy; // handle 2-digit
+        return `${yy}-${mm}-${dd}`;
+      }
+      return null;
+    };
     console.log('=== CASE CREATION DEBUG ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
     
@@ -282,9 +298,10 @@ router.post('/', auth, async (req, res) => {
     }
     
     // Enforce uniqueness on case-insensitive name + birthdate
+    const normalizedBirthdate = toDateOnly(birthdate);
     const dupCheck = await db.query(
       'SELECT 1 FROM cases WHERE LOWER(first_name) = LOWER($1) AND LOWER(last_name) = LOWER($2) AND birthdate IS NOT DISTINCT FROM $3',
-      [actualFirstName, actualLastName, birthdate || null]
+      [actualFirstName, actualLastName, normalizedBirthdate]
     );
     if (dupCheck.rows.length > 0) {
       return res.status(400).json({ 
@@ -295,6 +312,7 @@ router.post('/', auth, async (req, res) => {
     // Use program_type if provided, otherwise use programType, caseType (resolved), then fallback to default
     const actualProgramType = program_type || programType || actualCaseType || 'Children';
     
+    const normalizedDateOfReferral = toDateOnly(actualDateOfReferral);
     const result = await db.query(
       `INSERT INTO cases (
         first_name, last_name, middle_name, sex, birthdate, status, religion,
@@ -318,12 +336,12 @@ router.post('/', auth, async (req, res) => {
         $59, $60, $61, $62, $63
       ) RETURNING *`,
       [
-        actualFirstName, actualLastName, actualMiddleName, sex, birthdate, status, religion,
+        actualFirstName, actualLastName, actualMiddleName, sex, normalizedBirthdate, status, religion,
         address, actualSourceOfReferral, actualCaseType, actualAssignedHouseParent, actualProgramType,
         actualProblemPresented, actualBriefHistory, actualEconomicSituation, actualMedicalHistory,
         actualFamilyBackground, actualClientDescription || '', actualParentsDescription || '', JSON.stringify(checklist || []), recommendation, assessment || '', new Date(),
         actualNickname, actualBirthplace, actualNationality, actualProvincialAddress, actualPresentAddress,
-        actualOtherSourceOfReferral, actualDateOfReferral, actualAddressAndTel, actualRelationToClient,
+        actualOtherSourceOfReferral, normalizedDateOfReferral, actualAddressAndTel, actualRelationToClient,
         actualFatherName, actualFatherAge, actualFatherEducation, actualFatherOccupation, actualFatherOtherSkills,
         actualFatherAddress, actualFatherIncome, actualFatherLiving,
         actualMotherName, actualMotherAge, actualMotherEducation, actualMotherOccupation, actualMotherOtherSkills,
@@ -590,9 +608,10 @@ router.put('/:id', auth, async (req, res) => {
     }
     
     // Enforce uniqueness on case-insensitive name + birthdate for updates
+    const normalizedBirthdate = toDateOnly(birthdate);
     const duplicateCheck = await db.query(
       'SELECT 1 FROM cases WHERE LOWER(first_name) = LOWER($1) AND LOWER(last_name) = LOWER($2) AND birthdate IS NOT DISTINCT FROM $3 AND id != $4',
-      [actualFirstName, actualLastName, birthdate || null, id]
+      [actualFirstName, actualLastName, normalizedBirthdate, id]
     );
     if (duplicateCheck.rows.length > 0) {
       return res.status(400).json({ message: 'Another case with this name and birthdate already exists.' });
@@ -603,6 +622,7 @@ router.put('/:id', auth, async (req, res) => {
     
     console.log("Update case - Program type received:", { programType, program_type, caseType: actualCaseType, actualProgramType });
     
+    const normalizedDateOfReferral = toDateOnly(dateOfReferral || date_of_referral);
     const result = await db.query(
       `UPDATE cases SET
         first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name), middle_name = COALESCE($3, middle_name), sex = COALESCE($4, sex), birthdate = COALESCE($5, birthdate),
@@ -624,13 +644,13 @@ router.put('/:id', auth, async (req, res) => {
         client_description = COALESCE($63, client_description), parents_description = COALESCE($64, parents_description)
         WHERE id = $65 RETURNING *`,
       [
-        actualFirstName, actualLastName, actualMiddleName, sex, birthdate, status, religion,
+        actualFirstName, actualLastName, actualMiddleName, sex, normalizedBirthdate, status, religion,
         address, actualSourceOfReferral, actualCaseType, actualAssignedHouseParent, actualProgramType,
         actualProblemPresented, actualBriefHistory, actualEconomicSituation, actualMedicalHistory,
         actualFamilyBackground, checklist !== undefined ? JSON.stringify(checklist) : null, recommendation, assessment !== undefined ? assessment : null,
         profilePicture !== undefined ? profilePicture : null, new Date(),
         actualNickname, actualBirthplace, actualNationality, actualProvincialAddress, actualPresentAddress,
-        actualOtherSourceOfReferral, actualDateOfReferral, actualAddressAndTel, actualRelationToClient,
+        actualOtherSourceOfReferral, normalizedDateOfReferral, actualAddressAndTel, actualRelationToClient,
         actualFatherName, actualFatherAge, actualFatherEducation, actualFatherOccupation, actualFatherOtherSkills,
         actualFatherAddress, actualFatherIncome, actualFatherLiving,
         actualMotherName, actualMotherAge, actualMotherEducation, actualMotherOccupation, actualMotherOtherSkills,
