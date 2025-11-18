@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../utils/apiBase';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
+import { downloadAllCasesPDF } from '../utils/pdfGenerator';
+import { downloadAllCasesCSV } from '../utils/csvGenerator';
 
 const AfterCare = () => {
   const { allCases, fetchAllCases, lastUpdate, updateCase } = useCases();
@@ -60,6 +62,31 @@ const AfterCare = () => {
   const handleItemsPerPageChange = (n) => { setItemsPerPage(n); setCurrentPage(1); };
   // Navigate to After Care details page
   const handleViewCase = (caseId) => navigate(`/after-care/${caseId}`);
+
+  // Export All - list PDF and CSV
+  const exportAllToPDF = async () => {
+    if (sortedCases.length === 0) {
+      alert('No After Care cases to export');
+      return;
+    }
+    try {
+      await downloadAllCasesPDF(sortedCases.map(c => c.id));
+    } catch (err) {
+      console.error('Error exporting After Care list to PDF:', err);
+    }
+  };
+
+  const exportAllToCSV = async () => {
+    if (sortedCases.length === 0) {
+      console.info('No After Care cases to export');
+      return;
+    }
+    try {
+      await downloadAllCasesCSV(sortedCases);
+    } catch (err) {
+      console.error('Error exporting After Care list to CSV:', err);
+    }
+  };
 
   // Discharge an After Care case back to archived (server + state + redirect)
   const handleDischarge = async (caseItem) => {
@@ -162,6 +189,43 @@ const AfterCare = () => {
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <h2 className="mb-4 border-bottom pb-3 text-dark">After Care ({totalItems})</h2>
+
+      <div className="d-flex justify-content-end mb-3">
+        <div className="dropdown">
+          <button
+            className="btn btn-warning btn-sm dropdown-toggle"
+            type="button"
+            id="exportAfterCareDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style={{
+              borderRadius: '6px',
+              padding: '8px 12px',
+              fontWeight: '500',
+              border: 'none',
+              backgroundColor: '#ffc107',
+              color: '#212529',
+              transition: 'all 0.3s ease',
+              fontSize: '14px'
+            }}
+            title="Export all After Care cases"
+          >
+            <i className="fas fa-download me-1"></i>Export All
+          </button>
+          <ul className="dropdown-menu" aria-labelledby="exportAfterCareDropdown">
+            <li>
+              <button className="dropdown-item" onClick={exportAllToPDF}>
+                <i className="fas fa-file-pdf me-2"></i>Export All to PDF
+              </button>
+            </li>
+            <li>
+              <button className="dropdown-item" onClick={exportAllToCSV}>
+                <i className="fas fa-file-csv me-2"></i>Export All to CSV
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       {/* Cases Table */}
       <div className="card border-0 rounded-4 shadow-sm">
