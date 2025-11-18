@@ -149,16 +149,10 @@ const ArchivedCases = () => {
 
       const updatedCaseData = {
         status: 'after care',
-        program_type: fullDetails.program_type || caseItem.programType || null,
-        lastUpdated: new Date().toISOString()
+        program_type: fullDetails.program_type || caseItem.programType || null
       };
 
-      const response = await axios.put(
-        `${API_BASE}/cases/${caseItem.id}`,
-        updatedCaseData,
-        config
-      );
-
+      // Optimistic UI: update local state and navigate immediately
       const calculateAge = (birthdate) => {
         if (!birthdate) return 'N/A';
         const today = new Date();
@@ -171,19 +165,26 @@ const ArchivedCases = () => {
         return age;
       };
 
-      const updatedCase = {
-        id: response.data.id,
-        name: `${response.data.first_name} ${response.data.last_name}`,
-        age: calculateAge(response.data.birthdate),
-        programType: response.data.program_type,
+      updateCase({
+        id: caseItem.id,
+        name: `${fullDetails.first_name || caseItem.firstName || ''} ${fullDetails.last_name || caseItem.lastName || ''}`.trim(),
+        age: calculateAge(fullDetails.birthdate || caseItem.birthdate),
+        programType: fullDetails.program_type || caseItem.programType,
         status: 'after care',
-        lastUpdated: response.data.last_updated || response.data.updated_at || new Date().toISOString(),
-        profile_picture: response.data.profile_picture
-      };
+        lastUpdated: new Date().toISOString(),
+        profile_picture: fullDetails.profile_picture || caseItem.profile_picture
+      });
 
-      updateCase(updatedCase);
-      // Navigate to After Care page for immediate feedback
       navigate('/after-care', { state: { triggerRefresh: true } });
+
+      // Background server update; log but don't block UX
+      axios.put(
+        `${API_BASE}/cases/${caseItem.id}`,
+        updatedCaseData,
+        config
+      ).catch(err => {
+        console.error('Background After Care update failed:', err);
+      });
     } catch (err) {
       console.error('Error moving case to After Care:', err);
       alert(err.response?.data?.message || 'Failed to move case to After Care');
