@@ -441,6 +441,16 @@ export const downloadCaseReportCSV = (caseData) => {
         checklistItems = Array.isArray(parsed) ? parsed : [];
       }
     } catch {}
+    const calcAge = (birthdate) => {
+      if (!birthdate) return '';
+      const bd = new Date(birthdate);
+      if (isNaN(bd.getTime())) return '';
+      const today = new Date();
+      let age = today.getFullYear() - bd.getFullYear();
+      const m = today.getMonth() - bd.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+      return age;
+    };
     const hasRows = (arr) => Array.isArray(arr) && arr.length > 0;
     const familyRows = hasRows(fm) ? fm.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relation)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.address)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
     const extRows = hasRows(ef) ? ef.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relationship)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
@@ -494,7 +504,7 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Nickname</td><td>${safe(d.nickname)}</td></tr>
         <tr><td class="label">Sex</td><td>${safe(d.sex)}</td></tr>
         <tr><td class="label">Birthdate</td><td>${safe(toDateOnly(d.birthdate))}</td></tr>
-        <tr><td class="label">Age</td><td>${safe(d.age)}</td></tr>
+        <tr><td class="label">Age</td><td>${safe(calcAge(d.birthdate))}</td></tr>
         <tr><td class="label">Status</td><td>${safe(d.status)}</td></tr>
         <tr><td class="label">Nationality</td><td>${safe(d.nationality)}</td></tr>
         <tr><td class="label">Religion</td><td>${safe(d.religion)}</td></tr>
