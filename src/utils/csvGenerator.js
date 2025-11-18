@@ -296,9 +296,6 @@ export const generateCaseReportCSV = (caseData) => {
     'Mother - Living Status',
     'Guardian - Full Name',
     'Guardian - Relationship to Client',
-    'Guardian - Age',
-    'Guardian - Educational Background',
-    'Guardian - Primary Occupation',
     'Guardian - Current Address',
     'Parents - Married in Church',
     'Parents - Living in Common Law',
@@ -380,9 +377,6 @@ export const generateCaseReportCSV = (caseData) => {
     formatTextForCSV(formatBoolean(caseData.motherLiving)),
     formatTextForCSV(caseData.guardianName || ''),
     formatTextForCSV(caseData.guardianRelation || ''),
-    formatTextForCSV(caseData.guardianAge || ''),
-    formatTextForCSV(caseData.guardianEducation || ''),
-    formatTextForCSV(caseData.guardianOccupation || ''),
     formatTextForCSV(caseData.guardianAddress || ''),
     formatTextForCSV(formatBoolean(caseData.marriedInChurch)),
     formatTextForCSV(formatBoolean(caseData.liveInCommonLaw)),
@@ -549,12 +543,6 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Mother Address</td><td>${safe(t.mother_address || d.motherAddress || d.mother_address)}</td></tr>
         <tr><td class="label">Guardian Name</td><td>${safe(t.guardian_name || d.guardianName || d.guardian_name)}</td></tr>
         <tr><td class="label">Guardian Relation</td><td>${safe(t.guardian_relation || d.guardianRelation || d.guardian_relation)}</td></tr>
-        <tr><td class="label">Guardian Age</td><td>${safe(t.guardian_age || d.guardianAge || d.guardian_age)}</td></tr>
-        <tr><td class="label">Guardian Education</td><td>${safe(t.guardian_education || d.guardianEducation || d.guardian_education)}</td></tr>
-        <tr><td class="label">Guardian Living</td><td>${livingDisplay(d.guardianLiving ?? d.guardian_living)}</td></tr>
-        <tr><td class="label">Guardian Occupation</td><td>${safe(t.guardian_occupation || d.guardianOccupation || d.guardian_occupation)}</td></tr>
-        <tr><td class="label">Guardian Other Skills</td><td>${safe(t.guardian_other_skills || d.guardianOtherSkills || d.guardian_other_skills)}</td></tr>
-        <tr><td class="label">Guardian Income</td><td>${safe(t.guardian_income || d.guardianIncome || d.guardian_income)}</td></tr>
         <tr><td class="label">Guardian Address</td><td>${safe(t.guardian_address || d.guardianAddress || d.guardian_address)}</td></tr>
       </table>
       <div class="section-title">Civil Status of Parents</div>
