@@ -446,6 +446,17 @@ export const downloadCaseReportCSV = (caseData) => {
     const edu = d.educationalAttainment || d.educational_attainment || [];
     const sac = d.sacramentalRecord || d.sacramental_records || [];
     const ag = d.agencies || d.agencies_persons || [];
+    const ls = d.lifeSkills || d.life_skills || [];
+    const vs = d.vitalSigns || d.vital_signs || [];
+    let checklistItems = [];
+    try {
+      const cl = d.checklist;
+      if (Array.isArray(cl)) checklistItems = cl;
+      else if (typeof cl === 'string' && cl.trim() !== '') {
+        const parsed = JSON.parse(cl);
+        checklistItems = Array.isArray(parsed) ? parsed : [];
+      }
+    } catch {}
     const hasRows = (arr) => Array.isArray(arr) && arr.length > 0;
     const familyRows = hasRows(fm) ? fm.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relation)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.address)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
     const extRows = hasRows(ef) ? ef.map(x => `<tr><td>${safe(x.name)}</td><td>${safe(x.relationship)}</td><td>${safe(x.age)}</td><td>${safe(x.sex)}</td><td>${safe(x.status)}</td><td>${safe(x.education)}</td><td>${safe(x.occupation)}</td><td>${safe(x.income)}</td></tr>`).join('') : '';
@@ -578,6 +589,16 @@ export const downloadCaseReportCSV = (caseData) => {
         <thead><tr><th>Name of agencies/persons</th><th>Address/date/duration</th><th>Services received</th></tr></thead>
         <tbody>${agRows}</tbody>
       </table>` : ''}
+      ${hasRows(ls) ? `<div class="section-title">Life Skills</div>
+      <table>
+        <thead><tr><th>Activity</th><th>Date Completed</th><th>Performance Rating</th><th>Notes</th></tr></thead>
+        <tbody>${ls.map(x => `<tr><td>${safe(x.activity)}</td><td>${safe(toDateOnly(x.date_completed || x.dateCompleted))}</td><td>${safe(x.performance_rating || x.performanceRating)}</td><td>${safe(x.notes)}</td></tr>`).join('')}</tbody>
+      </table>` : ''}
+      ${hasRows(vs) ? `<div class="section-title">Vital Signs</div>
+      <table>
+        <thead><tr><th>Date Recorded</th><th>Blood Pressure</th><th>Heart Rate</th><th>Temperature</th><th>Weight</th><th>Height</th><th>Notes</th></tr></thead>
+        <tbody>${vs.map(x => `<tr><td>${safe(toDateOnly(x.date_recorded || x.date))}</td><td>${safe(x.blood_pressure || x.bloodPressure)}</td><td>${safe(x.heart_rate || x.heartRate)}</td><td>${safe(x.temperature)}</td><td>${safe(x.weight)}</td><td>${safe(x.height)}</td><td>${safe(x.notes)}</td></tr>`).join('')}</tbody>
+      </table>` : ''}
       <div class="section-title">Narrative</div>
       <table>
         <tr><td class="label">Client</td><td>${safe(d.client_description || d.clientDescription)}</td></tr>
@@ -590,6 +611,11 @@ export const downloadCaseReportCSV = (caseData) => {
         <tr><td class="label">Recommendation</td><td>${safe(d.recommendation)}</td></tr>
         <tr><td class="label">Assessment</td><td>${safe(d.assessment)}</td></tr>
       </table>
+      ${hasRows(checklistItems) ? `<div class="section-title">Intervention Plan</div>
+      <table>
+        <thead><tr><th>Item</th><th>Timestamp</th></tr></thead>
+        <tbody>${checklistItems.map(x => `<tr><td>${safe(x.text || '')}</td><td>${safe(x.timestamp || '')}</td></tr>`).join('')}</tbody>
+      </table>` : ''}
     </body></html>`;
     const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
