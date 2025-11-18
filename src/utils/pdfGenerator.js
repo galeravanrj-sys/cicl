@@ -52,10 +52,12 @@ export const generateCaseReportPDF = (caseData, opts = {}) => {
       doc.text(title, pageWidth / 2, 15, { align: 'center' });
     }
     
-    doc.setFontSize(theme.type.h2);
-    doc.setFont('helvetica', 'normal');
-    const sub = (opts.branding && opts.branding.subtitle) || 'INTAKE FORM';
-    doc.text(sub, pageWidth / 2, 25, { align: 'center' });
+    const sub = (opts.branding && opts.branding.subtitle) || '';
+    if (sub && String(sub).trim()) {
+      doc.setFontSize(theme.type.h2);
+      doc.setFont('helvetica', 'normal');
+      doc.text(sub, pageWidth / 2, 25, { align: 'center' });
+    }
 
     try {
       if (opts.logoDataUrl) {
@@ -652,7 +654,7 @@ export const downloadCaseReportPDF = async (caseData, options = {}) => {
     return;
   } catch (err) {
     const normalized = normalizeCaseData(caseData || {});
-    const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE SUMMARY' }, theme: options.theme });
+    const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: '' }, theme: options.theme });
     const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(fn);
   }
@@ -820,10 +822,8 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
 
   autoTable(doc, {
     startY: 20,
-    head: [['Field', 'Value']],
     body: kvRows,
     styles: { fontSize: 10 },
-    headStyles: { fillColor: [237, 242, 247], textColor: 0 },
     theme: 'grid',
     margin: { left: margin, right: margin },
     tableWidth: pageWidth - margin * 2
@@ -856,7 +856,7 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
 
 export const downloadCleanCaseSummaryPDF = async (caseData, options = {}) => {
   const normalized = normalizeCaseData(caseData || {});
-  const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: 'CASE SUMMARY' }, theme: options.theme });
+  const doc = generateCleanCaseSummaryPDF(normalized, { branding: { title: 'HOPETRACK', subtitle: '' }, theme: options.theme });
   const fn = options.filename || `HOPETRACK_Case_Summary_${(normalized.lastName || normalized.last_name || 'Unknown')}_${(normalized.firstName || normalized.first_name || 'Unknown')}_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fn);
 };
