@@ -1,4 +1,5 @@
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle, TabStopType, Tab } from 'docx';
+import { API_BASE } from './apiBase';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 
@@ -1856,13 +1857,40 @@ export const downloadIntakeFormWord = async (caseData) => {
   ] }] });
 
   const buffer = await Packer.toBlob(doc);
-  const fileName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
-  const url = window.URL.createObjectURL(buffer);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
+  const wordUrl = window.URL.createObjectURL(buffer);
+  const wordLink = document.createElement('a');
+  wordLink.href = wordUrl;
+  wordLink.download = `${baseName}.docx`;
+  document.body.appendChild(wordLink);
+  wordLink.click();
+  document.body.removeChild(wordLink);
+  window.URL.revokeObjectURL(wordUrl);
+
+  try {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    const res = await fetch(`${API_BASE}/export/case/pdf-html`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': token
+      },
+      body: JSON.stringify(caseData)
+    });
+    if (res.ok) {
+      const pdfBlob = await res.blob();
+      const pdfUrl = window.URL.createObjectURL(pdfBlob);
+      const pdfLink = document.createElement('a');
+      pdfLink.href = pdfUrl;
+      pdfLink.download = `${baseName}.pdf`;
+      document.body.appendChild(pdfLink);
+      pdfLink.click();
+      document.body.removeChild(pdfLink);
+      window.URL.revokeObjectURL(pdfUrl);
+    } else {
+      console.error('Failed to generate PDF from server:', await res.text());
+    }
+  } catch (err) {
+    console.error('Error converting Word export to PDF:', err);
+  }
 };
