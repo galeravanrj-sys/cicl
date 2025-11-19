@@ -1409,10 +1409,10 @@ export const downloadIntakeFormWord = async (caseData) => {
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
-  const inlineField = (label, _value, position = 7200, lineLength = 28) => {
+  const inlineField = (label, _value, position = 7200, lineLength = 28, indentLeft = 720) => {
     return new Paragraph({
       tabStops: [{ type: TabStopType.LEFT, position }],
-      indent: { left: 720 },
+      indent: { left: indentLeft },
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
         new Tab(),
@@ -1525,9 +1525,9 @@ export const downloadIntakeFormWord = async (caseData) => {
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
-    inlineField('Date', caseData.intakeDate || caseData.date || '', 7000, 28),
-    inlineField('Time', caseData.intakeTime || caseData.time || '', 7000, 28),
-    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7000, 28),
+    inlineField('Date', caseData.intakeDate || caseData.date || '', 7000, 28, 1440),
+    inlineField('Time', caseData.intakeTime || caseData.time || '', 7000, 28, 1440),
+    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7000, 28, 1440),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
     inlineRow(['Name', 'Nickname/a.k.a'], [9800], 24),
     inlineRow(['Birthdate', 'Age', 'Sex'], [7600, 10400], 12),
