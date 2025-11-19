@@ -1406,6 +1406,20 @@ export const downloadIntakeFormWord = async (caseData) => {
   const textColor = '000000';
   const box = (checked) => (checked ? '☑' : '☐');
   const val = (v) => (v === undefined || v === null ? '' : String(v));
+  const formatDateYYYYMMDD = (d) => {
+    if (!d) return '';
+    try {
+      const dt = typeof d === 'string' ? new Date(d) : d;
+      if (isNaN(dt?.getTime())) {
+        const m = String(d).match(/^(\d{4}-\d{2}-\d{2})/);
+        return m ? m[1] : '';
+      }
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    } catch { return ''; }
+  };
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: textColor }) ], spacing: { before: 240, after: 120 } });
   const inlineField = (label, _value, position = 7200, lineLength = 28, indentLeft = 720) => {
@@ -1458,8 +1472,8 @@ export const downloadIntakeFormWord = async (caseData) => {
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
         new TextRun({ text: ' ' + (val(nameValue) || '_'.repeat(nameLen)), color: textColor }),
-        new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☑' : '☐') + ' Deceased ', color: textColor }),
-        new TextRun({ text: '_'.repeat(trailLen), color: textColor })
+        new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☑' : '☐') + ' Deceased', color: textColor }),
+        ...(trailLen > 0 ? [ new TextRun({ text: ' ' + '_'.repeat(trailLen), color: textColor }) ] : [])
       ],
       spacing: { after: 120 }
     });
@@ -1560,7 +1574,6 @@ export const downloadIntakeFormWord = async (caseData) => {
     new TableCell({ children: [ new Paragraph(String(m.sex || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.status || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.education || '')) ] }),
-    new TableCell({ children: [ new Paragraph(String(m.address || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.occupation || '')) ] })
   ] }));
   const agencyRows = (Array.isArray(caseData.agencies) ? caseData.agencies : []).map((ag, i) => new TableRow({ children: [
@@ -1577,7 +1590,7 @@ export const downloadIntakeFormWord = async (caseData) => {
     return out;
   };
   const familyRowsPadded = padRows(familyRows, 4, 8);
-  const extRowsPadded = padRows(extRows, 3, 8);
+  const extRowsPadded = padRows(extRows, 3, 7);
   const agencyRowsPadded = padRows(agencyRows, 3, 3);
 
   const doc = new Document({
@@ -1613,7 +1626,7 @@ export const downloadIntakeFormWord = async (caseData) => {
         ] }),
         new TableRow({ children: [
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(birthdate)) ] }),
+          new TableCell({ children: [ new Paragraph(formatDateYYYYMMDD(birthdate)) ] }),
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
           new TableCell({ children: [ new Paragraph(val(age)) ] }),
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ] }) ] }),
@@ -1643,7 +1656,7 @@ export const downloadIntakeFormWord = async (caseData) => {
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Source of Referral:', bold: true }) ] }) ] }),
           new TableCell({ children: [ new Paragraph(val(sourceOfReferral)) ] }),
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date of Referral:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(dateOfReferral)) ] }),
+          new TableCell({ children: [ new Paragraph(formatDateYYYYMMDD(dateOfReferral)) ] }),
         ] }),
         new TableRow({ children: [
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. #:', bold: true }) ] }) ] }),
@@ -1673,17 +1686,17 @@ export const downloadIntakeFormWord = async (caseData) => {
         const label = key === 'firstCommunion' ? 'First Communion' : key === 'confirmation' ? 'Confirmation' : key === 'baptism' ? 'Baptism' : 'Others';
         return new TableRow({ children: [
           new TableCell({ children: [ new Paragraph(label) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.dateReceived)) ] }),
+          new TableCell({ children: [ new Paragraph(formatDateYYYYMMDD(row.dateReceived)) ] }),
           new TableCell({ children: [ new Paragraph(val(row.placeParish)) ] })
         ] });
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    nameCheckboxLine('Husband/Father', 22, father.living, 720, 14, father.name),
+    nameCheckboxLine('Husband/Father', 22, father.living, 720, 0, father.name),
     inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', father.age, father.education]),
     inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [father.occupation, father.otherSkills, father.income]),
     inlineField('Address and Tel. Nos.', father.address, 9600, 40),
-    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 14, mother.name),
+    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 0, mother.name),
     inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', mother.age, mother.education]),
     inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [mother.occupation, mother.otherSkills, mother.income]),
     inlineField('Address and Tel. Nos.', mother.address, 9600, 40),
