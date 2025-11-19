@@ -1422,6 +1422,20 @@ export const downloadIntakeFormWord = async (caseData) => {
       spacing: { after: 120 }
     });
   };
+  const inlineRow = (labels = [], positions = [], lineLength = 28) => {
+    return new Paragraph({
+      tabStops: positions.map(p => ({ type: TabStopType.LEFT, position: p })),
+      indent: { left: 720 },
+      children: labels.flatMap((lab, i) => {
+        const runs = [];
+        if (i > 0) runs.push(new Tab());
+        runs.push(new TextRun({ text: lab + ':', bold: true, color: textColor }));
+        runs.push(new TextRun({ text: ' ' + '_'.repeat(lineLength), color: textColor }));
+        return runs;
+      }),
+      spacing: { after: 120 }
+    });
+  };
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
     new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
     ...bodyRows
@@ -1516,20 +1530,14 @@ export const downloadIntakeFormWord = async (caseData) => {
     inlineField('Time', caseData.intakeTime || caseData.time || '', 7000),
     inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7000),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
-    inlineField('Name', name),
-    inlineField('Birthdate', birthdate),
-    inlineField('Age', age),
-    inlineField('Sex', sex),
-    inlineField('Status', status),
-    inlineField('Nationality', nationality),
-    inlineField('Religion', religion),
-    inlineField('Birthplace', birthplace),
+    inlineRow(['Name', 'Nickname/a.k.a'], [10000], 38),
+    inlineRow(['Birthdate', 'Age', 'Sex'], [7800, 10800], 14),
+    inlineRow(['Status', 'Nationality'], [10000], 28),
+    inlineRow(['Religion', 'Birthplace'], [10000], 28),
     inlineField('Provincial/Permanent Address', provincialAddress),
     inlineField('Present Address', presentAddress),
-    inlineField('Source of Referral', sourceOfReferral),
-    inlineField('Date of Referral', dateOfReferral),
-    inlineField('Address and Tel. #', addressAndTel),
-    inlineField('Relation to client', relationToClient),
+    inlineRow(['Source of Referral', 'Date of Referral'], [10000], 28),
+    inlineRow(['Address and Tel. #', 'Relation to client'], [10000], 28),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
