@@ -5,6 +5,7 @@ const auth = require('./middleware/auth');
 const db = require('./db');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
+const axios = require('axios');
 const { spawn } = require('child_process');
 const os = require('os');
 
@@ -1110,31 +1111,65 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     if (!docxBuffer || !docxBuffer.length) {
       return res.status(400).json({ message: 'No DOCX payload provided' });
     }
-
-    // Write temp DOCX
     const tmpDir = os.tmpdir();
     const id = `${Date.now()}-${Math.floor(Math.random()*1e9)}`;
     const docxPath = path.join(tmpDir, `intake-${id}.docx`);
     const pdfPath = path.join(tmpDir, `intake-${id}.pdf`);
-    fs.writeFileSync(docxPath, docxBuffer);
-
-    // Try soffice (LibreOffice) headless conversion
     const sofficeCmd = process.env.LIBREOFFICE_PATH || 'soffice';
-    const args = ['--headless', '--convert-to', 'pdf', '--outdir', tmpDir, docxPath];
-    await new Promise((resolve, reject) => {
-      const p = spawn(sofficeCmd, args, { stdio: 'ignore' });
-      p.on('error', reject);
-      p.on('exit', (code) => {
-        if (code === 0 && fs.existsSync(pdfPath)) return resolve();
-        reject(new Error(`LibreOffice conversion failed with code ${code}`));
+    const tryLibre = async () => {
+      fs.writeFileSync(docxPath, docxBuffer);
+      const args = ['--headless', '--convert-to', 'pdf', '--outdir', tmpDir, docxPath];
+      await new Promise((resolve, reject) => {
+        const p = spawn(sofficeCmd, args, { stdio: 'ignore' });
+        p.on('error', reject);
+        p.on('exit', (code) => {
+          if (code === 0 && fs.existsSync(pdfPath)) return resolve();
+          reject(new Error(`LibreOffice conversion failed with code ${code}`));
+        });
       });
-    });
-
-    const pdfBytes = fs.readFileSync(pdfPath);
+      const pdfBytes = fs.readFileSync(pdfPath);
+      try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
+      return pdfBytes;
+    };
+    const tryCloudConvert = async () => {
+      const apiKey = process.env.CLOUDCONVERT_API_KEY;
+      if (!apiKey) throw new Error('CloudConvert API key missing');
+      const jobRes = await axios.post('https://api.cloudconvert.com/v2/jobs', {
+        tasks: {
+          'import-1': { operation: 'import/base64', file: Buffer.from(docxBuffer).toString('base64'), filename: 'intake.docx' },
+          'convert-1': { operation: 'convert', input: 'import-1', input_format: 'docx', output_format: 'pdf' },
+          'export-1': { operation: 'export/url', input: 'convert-1' }
+        }
+      }, { headers: { Authorization: `Bearer ${apiKey}` } });
+      const jobId = jobRes.data?.data?.id;
+      const wait = async (ms) => new Promise(r => setTimeout(r, ms));
+      for (let i = 0; i < 30; i++) {
+        const poll = await axios.get(`https://api.cloudconvert.com/v2/jobs/${jobId}`, { headers: { Authorization: `Bearer ${apiKey}` } });
+        const tasks = poll.data?.data?.tasks || [];
+        const exp = tasks.find(t => t.operation === 'export/url');
+        if (exp?.result?.files?.length) {
+          const url = exp.result.files[0].url;
+          const dl = await axios.get(url, { responseType: 'arraybuffer' });
+          return Buffer.from(dl.data);
+        }
+        await wait(2000);
+      }
+      throw new Error('CloudConvert timeout');
+    };
+    let pdfBytes;
+    try {
+      pdfBytes = await tryLibre();
+    } catch (_) {
+      try {
+        pdfBytes = await tryCloudConvert();
+      } catch (e2) {
+        console.error('CloudConvert error:', e2?.message || e2);
+        return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: e2.message || String(e2) });
+      }
+    }
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
     res.send(Buffer.from(pdfBytes));
-    try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
   } catch (err) {
     console.error('DOCX->PDF conversion error:', err);
     return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: err.message });
