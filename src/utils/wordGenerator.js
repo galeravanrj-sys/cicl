@@ -1408,19 +1408,11 @@ export const downloadIntakeFormWord = async (caseData) => {
   const box = (checked) => (checked ? '☑' : '☐');
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
-  const labelCell = (label, widthPct = 35) => new TableCell({
-    width: { size: widthPct, type: WidthType.PERCENTAGE },
-    children: [ new Paragraph({ children: [ new TextRun({ text: label, bold: true, color: textColor }) ] }) ]
-  });
-  const valueCell = (value, widthPct = 65) => new TableCell({
-    width: { size: widthPct, type: WidthType.PERCENTAGE },
-    borders: { bottom: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' } },
-    children: [ new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ] }) ]
-  });
-  const lineRow = (label, value, labelWidth = 35, valueWidth = 65) => new TableRow({ children: [ labelCell(label, labelWidth), valueCell(value, valueWidth) ] });
-  const twoUpRow = (leftLabel, leftVal, rightLabel, rightVal) => new TableRow({ children: [ labelCell(leftLabel, 25), valueCell(leftVal, 25), labelCell(rightLabel, 25), valueCell(rightVal, 25) ] });
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
-  const thinTable = (rows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows });
+  const lineField = (label, value) => [
+    new Paragraph({ children: [ new TextRun({ text: label + ':', bold: true, color: textColor }) ] }),
+    new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ], border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 120 } })
+  ];
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
     new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
     ...bodyRows
@@ -1510,25 +1502,25 @@ export const downloadIntakeFormWord = async (caseData) => {
       },
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [ new TableCell({ shading: { fill: primaryColor }, children: [ new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: 'FFFFFF' }) ] , alignment: AlignmentType.CENTER }) ] }) ] })
-    ] }),
-    thinTable([
-      twoUpRow('Date', caseData.intakeDate || caseData.date || '', 'Time', caseData.intakeTime || caseData.time || ''),
-      lineRow('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '')
-    ] ),
+    new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
+    ...lineField('Date', caseData.intakeDate || caseData.date || ''),
+    ...lineField('Time', caseData.intakeTime || caseData.time || ''),
+    ...lineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || ''),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
-    thinTable([
-      lineRow('Name', name),
-      twoUpRow('Birthdate', birthdate, 'Age', age),
-      lineRow('Sex', sex),
-      twoUpRow('Status', status, 'Nationality', nationality),
-      twoUpRow('Religion', religion, 'Birthplace', birthplace),
-      lineRow('Provincial/Permanent Address', provincialAddress),
-      lineRow('Present Address', presentAddress),
-      twoUpRow('Source of Referral', sourceOfReferral, 'Date of Referral', dateOfReferral),
-      twoUpRow('Address and Tel. #', addressAndTel, 'Relation to client', relationToClient)
-    ] ),
+    ...lineField('Name', name),
+    ...lineField('Birthdate', birthdate),
+    ...lineField('Age', age),
+    ...lineField('Sex', sex),
+    ...lineField('Status', status),
+    ...lineField('Nationality', nationality),
+    ...lineField('Religion', religion),
+    ...lineField('Birthplace', birthplace),
+    ...lineField('Provincial/Permanent Address', provincialAddress),
+    ...lineField('Present Address', presentAddress),
+    ...lineField('Source of Referral', sourceOfReferral),
+    ...lineField('Date of Referral', dateOfReferral),
+    ...lineField('Address and Tel. #', addressAndTel),
+    ...lineField('Relation to client', relationToClient),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
@@ -1555,32 +1547,33 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    thinTable([
-      lineRow('Husband/Father', father.name),
-      twoUpRow('Living', box(father.living), 'Deceased', ''),
-      twoUpRow('Birthdate', '', 'Age', father.age),
-      lineRow('Educational Attainment', father.education),
-      twoUpRow('Occupation', father.occupation, 'Other Skills', father.otherSkills),
-      twoUpRow('Income', father.income, 'Address and Tel. Nos.', father.address),
-      lineRow('Mother/Wife', mother.name),
-      twoUpRow('Living', box(mother.living), 'Deceased', ''),
-      twoUpRow('Birthdate', '', 'Age', mother.age),
-      lineRow('Educational Attainment', mother.education),
-      twoUpRow('Occupation', mother.occupation, 'Other Skills', mother.otherSkills),
-      twoUpRow('Income', mother.income, 'Address and Tel. Nos.', mother.address),
-      twoUpRow('Guardian', guardian.name, 'Relation to the client', guardian.relation),
-      lineRow('Address', guardian.address)
-    ] ),
+    ...lineField('Husband/Father', father.name),
+    new Paragraph(box(father.living) + ' Living      ' + box(false) + ' Deceased'),
+    ...lineField('Birthdate', ''),
+    ...lineField('Age', father.age),
+    ...lineField('Educational Attainment', father.education),
+    ...lineField('Occupation', father.occupation),
+    ...lineField('Other Skills', father.otherSkills),
+    ...lineField('Income', father.income),
+    ...lineField('Address and Tel. Nos.', father.address),
+    ...lineField('Mother/Wife', mother.name),
+    new Paragraph(box(mother.living) + ' Living      ' + box(false) + ' Deceased'),
+    ...lineField('Birthdate', ''),
+    ...lineField('Age', mother.age),
+    ...lineField('Educational Attainment', mother.education),
+    ...lineField('Occupation', mother.occupation),
+    ...lineField('Other Skills', mother.otherSkills),
+    ...lineField('Income', mother.income),
+    ...lineField('Address and Tel. Nos.', mother.address),
+    ...lineField('Guardian', guardian.name),
+    ...lineField('Relation to the client', guardian.relation),
+    ...lineField('Address', guardian.address),
     sectionTitle('CIVIL STATUS OF PARENTS'),
-    thinTable([
-      new TableRow({ children: [
-        new TableCell({ children: [ new Paragraph(box(marriedInChurch) + ' Married in church') ] }),
-        new TableCell({ children: [ new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law') ] }),
-        new TableCell({ children: [ new Paragraph(box(civilMarriage) + ' Civil Marriage') ] }),
-        new TableCell({ children: [ new Paragraph(box(separated) + ' Separated') ] })
-      ] }),
-      twoUpRow('Date and Place', marriageDatePlace, '', '')
-    ] ),
+    new Paragraph(box(marriedInChurch) + ' Married in church'),
+    new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law'),
+    new Paragraph(box(civilMarriage) + ' Civil Marriage'),
+    new Paragraph(box(separated) + ' Separated'),
+    ...lineField('Date and Place', marriageDatePlace),
     sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
     tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
       ...familyRows
