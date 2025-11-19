@@ -1402,13 +1402,12 @@ function createCasesOverviewTable(casesData) {
 }
 
 export const downloadIntakeFormWord = async (caseData) => {
-  const primaryColor = '2C5282';
-  const textColor = '2D3748';
-  const headerShade = 'E6EEF7';
+  const primaryColor = '000000';
+  const textColor = '000000';
   const box = (checked) => (checked ? '☑' : '☐');
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
-  const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
+  const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: textColor }) ], spacing: { before: 240, after: 120 } });
   const inlineField = (label, _value, position = 7200, lineLength = 28, indentLeft = 720) => {
     return new Paragraph({
       tabStops: [{ type: TabStopType.LEFT, position }],
@@ -1463,7 +1462,7 @@ export const downloadIntakeFormWord = async (caseData) => {
     });
   };
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-    new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
+    new TableRow({ children: headerTexts.map(h => new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: textColor }) ] }) ] })) }),
     ...bodyRows
   ] });
 
@@ -1551,7 +1550,7 @@ export const downloadIntakeFormWord = async (caseData) => {
       },
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
-    new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 180 } }),
+    new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: textColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 180 } }),
     inlineField('Date', caseData.intakeDate || caseData.date || '', 7600, 24, 3600),
     inlineField('Time', caseData.intakeTime || caseData.time || '', 7600, 24, 3600),
     inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7600, 24, 3600),
