@@ -1404,24 +1404,27 @@ function createCasesOverviewTable(casesData) {
 export const downloadIntakeFormWord = async (caseData) => {
   const primaryColor = '2C5282';
   const textColor = '2D3748';
+  const headerShade = 'E6EEF7';
   const box = (checked) => (checked ? '☑' : '☐');
   const val = (v) => (v === undefined || v === null ? '' : String(v));
-  const lineRow = (label, value, labelWidth = 35, valueWidth = 65) => new TableRow({
-    children: [
-      new TableCell({ width: { size: labelWidth, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: label, bold: true, color: textColor }) ] }) ] }),
-      new TableCell({ width: { size: valueWidth, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ] }) ] })
-    ]
+
+  const labelCell = (label, widthPct = 35) => new TableCell({
+    width: { size: widthPct, type: WidthType.PERCENTAGE },
+    children: [ new Paragraph({ children: [ new TextRun({ text: label, bold: true, color: textColor }) ] }) ]
   });
-  const twoUpRow = (leftLabel, leftVal, rightLabel, rightVal) => new TableRow({
-    children: [
-      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: leftLabel, bold: true, color: textColor }) ] }) ] }),
-      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(leftVal), color: textColor }) ] }) ] }),
-      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: rightLabel, bold: true, color: textColor }) ] }) ] }),
-      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(rightVal), color: textColor }) ] }) ] })
-    ]
+  const valueCell = (value, widthPct = 65) => new TableCell({
+    width: { size: widthPct, type: WidthType.PERCENTAGE },
+    borders: { bottom: { style: BorderStyle.SINGLE, size: 2, color: 'CCCCCC' } },
+    children: [ new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ] }) ]
   });
-  const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 22, color: primaryColor }) ], spacing: { before: 300, after: 150 } });
+  const lineRow = (label, value, labelWidth = 35, valueWidth = 65) => new TableRow({ children: [ labelCell(label, labelWidth), valueCell(value, valueWidth) ] });
+  const twoUpRow = (leftLabel, leftVal, rightLabel, rightVal) => new TableRow({ children: [ labelCell(leftLabel, 25), valueCell(leftVal, 25), labelCell(rightLabel, 25), valueCell(rightVal, 25) ] });
+  const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
   const thinTable = (rows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows });
+  const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+    new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
+    ...bodyRows
+  ] });
 
   const name = [caseData.firstName || caseData.first_name || '', caseData.middleName || caseData.middle_name || '', caseData.lastName || caseData.last_name || ''].filter(Boolean).join(' ');
   const birthdate = caseData.birthdate || '';
@@ -1498,14 +1501,24 @@ export const downloadIntakeFormWord = async (caseData) => {
     new TableCell({ children: [ new Paragraph(String(ag.servicesReceived || ag.services_received || '')) ] })
   ] }));
 
-  const doc = new Document({ sections: [{ properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: [
-    new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER }),
+  const doc = new Document({
+    styles: {
+      default: {
+        document: { run: { font: 'Calibri', size: 22, color: textColor }, paragraph: { spacing: { line: 276 } } },
+        heading1: { run: { font: 'Calibri', size: 32, color: primaryColor } },
+        heading2: { run: { font: 'Calibri', size: 26, color: primaryColor } },
+      },
+    },
+    sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [ new TableCell({ shading: { fill: primaryColor }, children: [ new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: 'FFFFFF' }) ] , alignment: AlignmentType.CENTER }) ] }) ] })
+    ] }),
+    thinTable([
       twoUpRow('Date', caseData.intakeDate || caseData.date || '', 'Time', caseData.intakeTime || caseData.time || ''),
       lineRow('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '')
-    ] }),
-    sectionTitle('I. CLIENT\'S IDENTIFYING INFORMATION'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+    ] ),
+    sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
+    thinTable([
       lineRow('Name', name),
       twoUpRow('Birthdate', birthdate, 'Age', age),
       lineRow('Sex', sex),
@@ -1515,15 +1528,9 @@ export const downloadIntakeFormWord = async (caseData) => {
       lineRow('Present Address', presentAddress),
       twoUpRow('Source of Referral', sourceOfReferral, 'Date of Referral', dateOfReferral),
       twoUpRow('Address and Tel. #', addressAndTel, 'Relation to client', relationToClient)
-    ] }),
+    ] ),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [
-        new TableCell({ children: [ new Paragraph({ text: 'LEVEL', bold: true }) ] }),
-        new TableCell({ children: [ new Paragraph({ text: 'NAME OF SCHOOL', bold: true }) ] }),
-        new TableCell({ children: [ new Paragraph({ text: 'SCHOOL ADDRESS', bold: true }) ] }),
-        new TableCell({ children: [ new Paragraph({ text: 'YEAR', bold: true }) ] })
-      ] }),
+    tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
         const row = (edu && edu[key]) || {};
         const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
@@ -1534,14 +1541,9 @@ export const downloadIntakeFormWord = async (caseData) => {
           new TableCell({ children: [ new Paragraph(val(row.year || '')) ] })
         ] });
       })
-    ] }),
+    ] ),
     sectionTitle('SACRAMENTAL RECORD'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [
-        new TableCell({ children: [ new Paragraph({ text: 'Sacrament', bold: true }) ] }),
-        new TableCell({ children: [ new Paragraph({ text: 'Date Received', bold: true }) ] }),
-        new TableCell({ children: [ new Paragraph({ text: 'Place/Parish', bold: true }) ] })
-      ] }),
+    tableWithHeader(['Sacrament','Date Received','Place/Parish'], [
       ...['baptism','firstCommunion','confirmation','others'].map(key => {
         const row = (sacr && sacr[key]) || {};
         const label = key === 'firstCommunion' ? 'First Communion' : key === 'confirmation' ? 'Confirmation' : key === 'baptism' ? 'Baptism' : 'Others';
@@ -1551,9 +1553,9 @@ export const downloadIntakeFormWord = async (caseData) => {
           new TableCell({ children: [ new Paragraph(val(row.placeParish || '')) ] })
         ] });
       })
-    ] }),
+    ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+    thinTable([
       lineRow('Husband/Father', father.name),
       twoUpRow('Living', box(father.living), 'Deceased', ''),
       twoUpRow('Birthdate', '', 'Age', father.age),
@@ -1568,9 +1570,9 @@ export const downloadIntakeFormWord = async (caseData) => {
       twoUpRow('Income', mother.income, 'Address and Tel. Nos.', mother.address),
       twoUpRow('Guardian', guardian.name, 'Relation to the client', guardian.relation),
       lineRow('Address', guardian.address)
-    ] }),
+    ] ),
     sectionTitle('CIVIL STATUS OF PARENTS'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+    thinTable([
       new TableRow({ children: [
         new TableCell({ children: [ new Paragraph(box(marriedInChurch) + ' Married in church') ] }),
         new TableCell({ children: [ new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law') ] }),
@@ -1578,35 +1580,32 @@ export const downloadIntakeFormWord = async (caseData) => {
         new TableCell({ children: [ new Paragraph(box(separated) + ' Separated') ] })
       ] }),
       twoUpRow('Date and Place', marriageDatePlace, '', '')
-    ] }),
+    ] ),
     sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [ 'Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }) ,
+    tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
       ...familyRows
-    ] }),
+    ] ),
     sectionTitle('OTHERS EXTENDED FAMILY'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [ 'Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }) ,
+    tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
       ...extRows
-    ] }),
+    ] ),
     sectionTitle('SERVICES RECEIVED FROM OTHER AGENCIES/INDIVIDUALS'),
-    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
-      new TableRow({ children: [ 'Name of agencies/persons','Address/date/duration','Services Received' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }),
+    tableWithHeader(['Name of agencies/persons','Address/date/duration','Services Received'], [
       ...agencyRows
-    ] }),
+    ] ),
     sectionTitle('III. BRIEF DESCRIPTION OF THE CLIENT UPON INTAKE'),
     new Paragraph({ children: [ new TextRun({ text: 'Client:', bold: true }) ] }),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     new Paragraph({ children: [ new TextRun({ text: 'Parents / Relatives / Guardian:', bold: true }) ] }),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     sectionTitle('IV. PROBLEM PRESENTED'),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     sectionTitle('V. BRIEF HISTORY OF THE PROBLEM'),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     sectionTitle('VI. MEDICAL HISTORY / HEALTH STATUS'),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     sectionTitle('VII. ECONOMIC SITUATION'),
-    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
     sectionTitle('VIII. FAMILY BACKGROUND'),
     new Paragraph(val(caseData.familyBackground || caseData.family_background || '')),
     sectionTitle('IX. ASSESSMENT'),
