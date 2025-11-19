@@ -486,6 +486,105 @@ function buildHtml(caseData) {
   </html>`;
 }
 
+// Build Intake Form-like HTML (mirrors Word layout and signature block)
+function buildIntakeHtml(caseData) {
+  const c = normalizeCaseData(caseData);
+  const raw = caseData || {};
+  const toDateOnly = (value) => {
+    if (value === null || value === undefined || value === '') return '';
+    const s = String(value).trim();
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})(?:[T\s].*)?$/);
+    if (m) return m[1];
+    const us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:.*)?$/);
+    if (us) {
+      const mm = us[1].padStart(2,'0');
+      const dd = us[2].padStart(2,'0');
+      const yyyy = us[3];
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return s;
+  };
+  const fld = (label, value) => `
+    <div class="rowline">
+      <div class="label">${escapeHtml(label)}:</div>
+      <div class="value">${escapeHtml(value || '')}</div>
+    </div>`;
+  const long = (label, value) => `
+    <div class="block">
+      <div class="label">${escapeHtml(label)}</div>
+      <div class="long">${escapeHtml(value || '')}</div>
+    </div>`;
+  return `<!doctype html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <title>General Intake Form</title>
+      <style>
+        :root { --text:#222; --muted:#666; --line:#222; }
+        * { box-sizing: border-box; }
+        body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--text); margin: 28px; }
+        h1 { font-size: 16px; margin: 0 0 12px; }
+        .rowline { display: grid; grid-template-columns: 220px 1fr; align-items: center; gap: 12px; margin: 6px 0; }
+        .rowline .label { font-weight: 600; color: var(--muted); }
+        .rowline .value { border-bottom: 1px solid #999; min-height: 18px; }
+        .block { margin: 10px 0 14px; }
+        .block .label { font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+        .block .long { border: 1px solid #bbb; min-height: 56px; padding: 8px; border-radius: 6px; }
+        .sig-top { display: flex; justify-content: center; margin-top: 16px; }
+        .sig-line { width: 50%; border-bottom: 2px solid var(--line); height: 0; }
+        .sig-title { text-align: center; margin-top: 6px; font-size: 12px; }
+        .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 18px; }
+        .sig-col { }
+        .sig-narrow { display: grid; grid-template-columns: 20% 60% 20%; }
+        .sig-narrow > div:nth-child(2) { border-bottom: 2px solid var(--line); height: 0; }
+        .sig-label { text-align: center; margin: 10px 0; font-size: 12px; }
+        .sig-name { text-align: center; margin-top: 6px; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <h1>General Intake Form</h1>
+      ${fld('Last Name', c.last_name)}
+      ${fld('First Name', c.first_name)}
+      ${fld('Middle Name', c.middle_name)}
+      ${fld('Sex', c.sex)}
+      ${fld('Birthdate', toDateOnly(c.birthdate))}
+      ${fld('Age', c.age)}
+      ${fld('Civil Status', c.civil_status)}
+      ${fld('Religion', c.religion)}
+      ${fld('Present Address', c.present_address || c.address)}
+      ${fld('Provincial Address', c.provincial_address)}
+      ${fld('Case Type', c.case_type)}
+      ${fld('Assigned House Parent', c.assigned_house_parent)}
+      ${fld('Guardian Name', c.guardian_name)}
+      ${fld('Guardian Relation', c.guardian_relation)}
+      ${long('III. Brief Description of the Client upon Intake', raw.brief_description || raw.client_description || '')}
+      ${long('Problem Presented', raw.problem_presented || '')}
+      ${long('Brief History', raw.brief_history || '')}
+      ${long('Economic Situation', raw.economic_situation || '')}
+      ${long('Medical History', raw.medical_history || '')}
+      ${long('Family Background', raw.family_background || '')}
+      ${long('Assessment', raw.assessment || '')}
+      ${long('Recommendation', raw.recommendation || '')}
+
+      <div class="sig-top"><div class="sig-line"></div></div>
+      <div class="sig-title">Intake Worker</div>
+
+      <div class="sig-grid">
+        <div class="sig-col">
+          <div class="sig-label">Recommending Approval:</div>
+          <div class="sig-narrow"><div></div><div></div><div></div></div>
+          <div class="sig-name">Head, DSWD</div>
+        </div>
+        <div class="sig-col">
+          <div class="sig-label">Approved by:</div>
+          <div class="sig-narrow"><div></div><div></div><div></div></div>
+          <div class="sig-name">Administrator</div>
+        </div>
+      </div>
+    </body>
+  </html>`;
+}
+
 // Build consolidated HTML for multiple cases with summary table and per-case sections
 function buildMultiCaseHtml(casesList = [], options = {}) {
   const listOnly = !!options.listOnly;
@@ -776,6 +875,28 @@ async function generateHtmlPdf(caseData, opts = {}) {
   }
 }
 
+async function generateIntakeHtmlPdf(caseData, opts = {}) {
+  const noSandbox = String(process.env.PUPPETEER_NO_SANDBOX).toLowerCase() === 'true';
+  const args = ['--disable-dev-shm-usage', '--disable-gpu'];
+  if (noSandbox) { args.push('--no-sandbox', '--disable-setuid-sandbox'); }
+  const browser = await puppeteer.launch({ headless: 'new', args });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(buildIntakeHtml(caseData), { waitUntil: 'domcontentloaded' });
+    await page.emulateMediaType('screen');
+    const pdf = await page.pdf({
+      format: opts.format || 'A4',
+      landscape: !!opts.landscape,
+      printBackground: true,
+      margin: opts.margin || { top: '16mm', right: '14mm', bottom: '16mm', left: '14mm' },
+      displayHeaderFooter: false,
+    });
+    return pdf;
+  } finally {
+    await browser.close();
+  }
+}
+
 // GET: generate PDF by case id
 router.get('/case/:id/pdf', auth, async (req, res) => {
   try {
@@ -893,6 +1014,20 @@ router.post('/case/pdf-html', auth, async (req, res) => {
   } catch (err) {
     console.error('HTML PDF export error:', err);
     return res.status(500).json({ message: 'Failed to generate HTML PDF', error: err.message });
+  }
+});
+
+// POST: Intake-form styled PDF (mirrors Word export layout)
+router.post('/case/pdf-intake', auth, async (req, res) => {
+  try {
+    const opts = { format: (req.query.format || 'A4'), landscape: false };
+    const pdf = await generateIntakeHtmlPdf(req.body || {}, opts);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
+    return res.send(pdf);
+  } catch (err) {
+    console.error('Intake PDF export error:', err);
+    return res.status(500).json({ message: 'Failed to generate Intake PDF', error: err.message });
   }
 });
 

@@ -1887,7 +1887,7 @@ export const downloadIntakeFormWord = async (caseData) => {
 export const downloadIntakeFormPDF = async (caseData) => {
   const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
   const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-  const res = await fetch(`${API_BASE}/export/case/pdf-html`, {
+  const res = await fetch(`${API_BASE}/export/case/pdf-intake`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
