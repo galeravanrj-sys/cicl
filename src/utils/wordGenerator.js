@@ -1456,7 +1456,7 @@ export const downloadIntakeFormWord = async (caseData) => {
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
         new TextRun({ text: ' ' + '_'.repeat(nameLen), color: textColor }),
-        new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☐' : '☑') + ' Deceased ', color: textColor }),
+        new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☑' : '☐') + ' Deceased ', color: textColor }),
         new TextRun({ text: '_'.repeat(12), color: textColor })
       ],
       spacing: { after: 120 }
