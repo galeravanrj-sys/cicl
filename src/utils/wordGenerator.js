@@ -1890,17 +1890,26 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
 export const downloadIntakeFormPDF = async (caseData) => {
   const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
   // Build DOCX in-memory using the same generator used for Word export
-  const docxBlob = await downloadIntakeFormWord(caseData, { noDownload: true });
   const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-  const res = await fetch(`${API_BASE}/export/case/pdf-from-docx`, {
-    method: 'POST',
-    headers: {
-      'x-auth-token': token
-    },
-    body: docxBlob
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const pdfBlob = await res.blob();
+  let pdfBlob;
+  try {
+    const docxBlob = await downloadIntakeFormWord(caseData, { noDownload: true });
+    const res1 = await fetch(`${API_BASE}/export/case/pdf-from-docx`, {
+      method: 'POST',
+      headers: { 'x-auth-token': token },
+      body: docxBlob
+    });
+    if (!res1.ok) throw new Error(await res1.text());
+    pdfBlob = await res1.blob();
+  } catch (err) {
+    const res2 = await fetch(`${API_BASE}/export/case/pdf-intake`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+      body: JSON.stringify(caseData)
+    });
+    if (!res2.ok) throw new Error(await res2.text());
+    pdfBlob = await res2.blob();
+  }
   const pdfUrl = window.URL.createObjectURL(pdfBlob);
   const pdfLink = document.createElement('a');
   pdfLink.href = pdfUrl;
