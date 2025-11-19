@@ -369,7 +369,7 @@ const customInputStyle = {
         birthdate: formData.birthdate || fullCaseData.birthdate,
         status: fullCaseData.status,
         religion: fullCaseData.religion,
-        address: fullCaseData.address,
+        address: (fullCaseData?.present_address || fullCaseData?.presentAddress || fullCaseData?.provincial_address || fullCaseData?.provincialAddress || fullCaseData?.address || ''),
         sourceOfReferral: fullCaseData.source_of_referral,
         caseType: fullCaseData.case_type,
         programType: fullCaseData.program_type,
@@ -452,7 +452,7 @@ const customInputStyle = {
         birthdate: fullCaseData.birthdate,
         status: 'archived', // Using lowercase to match comparison in filter
         religion: fullCaseData.religion,
-        address: fullCaseData.address,
+        address: (fullCaseData?.present_address || fullCaseData?.presentAddress || fullCaseData?.provincial_address || fullCaseData?.provincialAddress || fullCaseData?.address || ''),
         sourceOfReferral: fullCaseData.source_of_referral,
         caseType: fullCaseData.case_type,
         programType: fullCaseData.program_type,
@@ -636,7 +636,21 @@ const customInputStyle = {
                       <i className="fas fa-map-marker-alt me-2 text-warning"></i>Address
                     </label>
                     <div className="p-3 bg-white rounded-2 border shadow-sm">
-                      <span className="text-dark">{fullCaseData?.address || 'N/A'}</span>
+                      {(() => {
+                        const present = fullCaseData?.present_address || fullCaseData?.presentAddress || '';
+                        const provincial = fullCaseData?.provincial_address || fullCaseData?.provincialAddress || '';
+                        const base = fullCaseData?.address || '';
+                        const primary = (present && present.trim()) || (provincial && provincial.trim()) || (base && base.trim()) || '';
+                        if (!primary) return <span className="text-muted">N/A</span>;
+                        return (
+                          <div className="d-flex flex-column gap-1">
+                            <span className="text-dark fw-medium">{primary}</span>
+                            {(present && present.trim()) && (provincial && provincial.trim()) && (
+                              <small className="text-muted">Present: {present} · Provincial: {provincial}</small>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   <div className="col-md-6 mb-3">
