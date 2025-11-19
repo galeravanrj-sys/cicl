@@ -1518,7 +1518,7 @@ export const downloadIntakeFormWord = async (caseData) => {
 
   const edu = caseData.educationalAttainment || {};
   const sacr = caseData.sacramentalRecord || {};
-  const familyRows = (Array.isArray(caseData.familyComposition) ? caseData.familyComposition : caseData.family || []).map((m, i) => new TableRow({ children: [
+  const familyRows = (Array.isArray(caseData.familyComposition) ? caseData.familyComposition : (Array.isArray(caseData.familyMembers) ? caseData.familyMembers : (caseData.family || []))).map((m, i) => new TableRow({ children: [
     new TableCell({ children: [ new Paragraph(String(m.name || i + 1)) ] }),
     new TableCell({ children: [ new Paragraph(String(m.relation || m.relationToClient || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.age || '')) ] }),
