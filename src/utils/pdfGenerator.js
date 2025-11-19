@@ -736,12 +736,14 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 18, { align: 'center' });
 
     // List table: Name, Age, Program, Last Updated
-    const rows = (items || []).map((c) => [
-      c.name || `${c.firstName || c.first_name || ''} ${c.middleName || c.middle_name || ''} ${c.lastName || c.last_name || ''}`.trim(),
-      String(c.age ?? calcAge(c.birthdate) ?? ''),
-      c.caseType || c.programType || c.program_type || c.case_type || '',
-      formatDate(c.lastUpdated || c.updated_at || c.created_at)
-    ]);
+    const rows = (items || []).map((c) => {
+      const nm = (c.name && String(c.name).trim()) || `${c.firstName || c.first_name || ''} ${c.middleName || c.middle_name || ''} ${c.lastName || c.last_name || ''}`.trim();
+      const nameOut = nm && nm.length ? nm : 'Unknown';
+      const ageOut = c.age ?? calcAge(c.birthdate);
+      const programOut = c.caseType || c.programType || c.program_type || c.case_type || '';
+      const dateOut = formatDate(c.lastUpdated || c.updated_at || c.created_at) || '—';
+      return [ nameOut, String(ageOut ?? '—'), programOut || '—', dateOut ];
+    });
 
     const tableWidth = Math.min(pageWidth * 0.8, pageWidth - margin * 2);
     const centerMargin = (pageWidth - tableWidth) / 2;
@@ -757,10 +759,10 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
       margin: { left: centerMargin, right: centerMargin },
       tableWidth: tableWidth,
       columnStyles: {
-        0: { cellWidth: 'auto', halign: 'center' },
+        0: { cellWidth: 70, halign: 'center' },
         1: { cellWidth: 22, halign: 'center' },
-        2: { cellWidth: 40, halign: 'center' },
-        3: { cellWidth: 36, halign: 'center' }
+        2: { cellWidth: 42, halign: 'center' },
+        3: { cellWidth: 42, halign: 'center' }
       }
     });
 
@@ -851,18 +853,37 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
           return `${yy}-${mm}-${dd}`;
         }
       }
-      return s;
+      return s || '—';
     };
+    const toTitle = (h) => h.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+    const displayHeaders = columns.map(toTitle);
+    const colStyles = {};
+    columns.forEach((h, idx) => {
+      const key = h.toLowerCase();
+      let width;
+      if (key === 'name') width = 40;
+      else if (key === 'relationship' || key === 'relation') width = 32;
+      else if (key === 'address' || key === 'address_date_duration' || key === 'place_parish') width = 42;
+      else if (key === 'education' || key === 'occupation' || key === 'services_received') width = 36;
+      else if (key === 'notes') width = 42;
+      else if (key === 'income') width = 26;
+      else if (key === 'status') width = 28;
+      else if (key === 'sacrament') width = 32;
+      else if (key === 'school_name' || key === 'school_address') width = 40;
+      else width = 24;
+      colStyles[idx] = { halign: 'center', cellWidth: width };
+    });
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
-      head: [columns],
+      head: [displayHeaders],
       body: rows.map((r) => columns.map((h) => normalizeCell(r[h] ?? r[h.replace(/\s+/g, '_').toLowerCase()] ?? '', h))),
-      styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
-      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold', halign: 'center' },
+      styles: { fontSize: 10, cellPadding: 4, halign: 'center', valign: 'middle', overflow: 'linebreak' },
+      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle' },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       theme: 'grid',
       margin: { left: margin, right: margin },
-      tableWidth: pageWidth - margin * 2
+      tableWidth: pageWidth - margin * 2,
+      columnStyles: colStyles
     });
   };
 
