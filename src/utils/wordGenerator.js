@@ -1409,18 +1409,19 @@ export const downloadIntakeFormWord = async (caseData) => {
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: textColor }) ], spacing: { before: 240, after: 120 } });
   const inlineField = (label, _value, position = 7200, lineLength = 28, indentLeft = 720) => {
+    const valueText = val(_value);
     return new Paragraph({
       tabStops: [{ type: TabStopType.LEFT, position }],
       indent: { left: indentLeft },
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
         new Tab(),
-        new TextRun({ text: '_'.repeat(lineLength), color: textColor })
+        new TextRun({ text: valueText || '_'.repeat(lineLength), color: textColor })
       ],
       spacing: { after: 120 }
     });
   };
-  const inlineRow = (labels = [], positions = [], lineLength = 28) => {
+  const inlineRow = (labels = [], positions = [], lineLength = 28, values = []) => {
     return new Paragraph({
       tabStops: positions.map(p => ({ type: TabStopType.LEFT, position: p })),
       indent: { left: 720 },
@@ -1428,7 +1429,8 @@ export const downloadIntakeFormWord = async (caseData) => {
         const runs = [];
         if (i > 0) runs.push(new Tab());
         runs.push(new TextRun({ text: lab + ':', bold: true, color: textColor }));
-        runs.push(new TextRun({ text: ' ' + '_'.repeat(lineLength), color: textColor }));
+        const v = val(values[i]);
+        runs.push(new TextRun({ text: ' ' + (v || '_'.repeat(lineLength)), color: textColor }));
         return runs;
       }),
       spacing: { after: 120 }
@@ -1566,14 +1568,14 @@ export const downloadIntakeFormWord = async (caseData) => {
     inlineField('Time', caseData.intakeTime || caseData.time || '', 7600, 24, 3600),
     inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7600, 24, 3600),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
-    inlineRow(['Name', 'Nickname/a.k.a'], [9000, 12600], 24),
-    inlineRow(['Birthdate', 'Age', 'Sex'], [7200, 9800, 11800], 12),
-    inlineRow(['Status', 'Nationality'], [9800], 22),
-    inlineRow(['Religion', 'Birthplace'], [9800], 22),
+    inlineRow(['Name', 'Nickname/a.k.a'], [9000, 12600], 24, [name, caseData.nickname || '']),
+    inlineRow(['Birthdate', 'Age', 'Sex'], [7200, 9800, 11800], 12, [birthdate, age, sex]),
+    inlineRow(['Status', 'Nationality'], [9800], 22, [status, nationality]),
+    inlineRow(['Religion', 'Birthplace'], [9800], 22, [religion, birthplace]),
     inlineField('Provincial/Permanent Address', provincialAddress, 9600, 28),
     inlineField('Present Address', presentAddress, 9600, 28),
-    inlineRow(['Source of Referral', 'Date of Referral'], [9800], 22),
-    inlineRow(['Address and Tel. #', 'Relation to client'], [9800], 22),
+    inlineRow(['Source of Referral', 'Date of Referral'], [9800], 22, [sourceOfReferral, dateOfReferral]),
+    inlineRow(['Address and Tel. #', 'Relation to client'], [9800], 22, [addressAndTel, relationToClient]),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
