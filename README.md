@@ -313,9 +313,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- Development Team
-- QA Team
-- DevOps Team
+- COLLADO, REYMUND LUIS P.
+- GALERA, VANRJ M.
+- GALICIA, ANDREI JOSHUA C
+- MACARAEG, JAZZENT NICO D.
 
 ## 📞 Support
 
@@ -326,4 +327,3 @@ For support and questions:
 
 ---
 
-**Happy Coding! 🎉**

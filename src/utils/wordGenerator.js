@@ -1533,9 +1533,22 @@ export const downloadIntakeFormWord = async (caseData) => {
 
   const edu = caseData.educationalAttainment || caseData.educational_attainment || [];
   const getEduRow = (key) => {
+    const normalize = (s) => String(s || '').toLowerCase().replace(/\s+/g, '');
+    const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
+    const variants = {
+      elementary: ['elementary', 'elementaryeducation', 'elem'],
+      highSchool: ['highschool', 'hs'],
+      seniorHighSchool: ['seniorhighschool', 'shs'],
+      vocationalCourse: ['vocationalcourse', 'vocational', 'technical', 'techvoc'],
+      college: ['college', 'university', 'tertiary'],
+      others: ['others', 'other']
+    };
+    const matches = variants[key] || [normalize(label)];
     if (Array.isArray(edu)) {
-      const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
-      const item = edu.find(e => String(e.level || '').toLowerCase() === String(label).toLowerCase());
+      const item = edu.find(e => {
+        const lvl = normalize(e.level || e.Level || '');
+        return matches.some(m => lvl.includes(m));
+      });
       return {
         schoolName: item?.school_name ?? item?.schoolName ?? '',
         schoolAddress: item?.school_address ?? item?.schoolAddress ?? '',
@@ -1575,6 +1588,7 @@ export const downloadIntakeFormWord = async (caseData) => {
     new TableCell({ children: [ new Paragraph(String(m.sex || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.status || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.education || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.address || '')) ] }),
     new TableCell({ children: [ new Paragraph(String(m.occupation || '')) ] })
   ] }));
   const agencyRows = (Array.isArray(caseData.agencies) ? caseData.agencies : []).map((ag, i) => new TableRow({ children: [
@@ -1591,7 +1605,7 @@ export const downloadIntakeFormWord = async (caseData) => {
     return out;
   };
   const familyRowsPadded = padRows(familyRows, 4, 8);
-  const extRowsPadded = padRows(extRows, 3, 7);
+  const extRowsPadded = padRows(extRows, 3, 8);
   const agencyRowsPadded = padRows(agencyRows, 3, 3);
 
   const doc = new Document({
