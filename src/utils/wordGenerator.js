@@ -1569,14 +1569,65 @@ export const downloadIntakeFormWord = async (caseData) => {
     inlineField('Time', caseData.intakeTime || caseData.time || '', 7600, 24, 3600),
     inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7600, 24, 3600),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
-    inlineRow(['Name', 'Nickname/a.k.a'], [9000, 12600], 24, [name, caseData.nickname || '']),
-    inlineRow(['Birthdate', 'Age', 'Sex'], [7200, 9800, 11800], 12, [birthdate, age, sex]),
-    inlineRow(['Status', 'Nationality'], [9800], 22, [status, nationality]),
-    inlineRow(['Religion', 'Birthplace'], [9800], 22, [religion, birthplace]),
-    inlineField('Provincial/Permanent Address', provincialAddress, 9600, 28),
-    inlineField('Present Address', presentAddress, 9600, 28),
-    inlineRow(['Source of Referral', 'Date of Referral'], [9800], 22, [sourceOfReferral, dateOfReferral]),
-    inlineRow(['Address and Tel. #', 'Relation to client'], [9800], 22, [addressAndTel, relationToClient]),
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.NONE },
+        bottom: { style: BorderStyle.NONE },
+        left: { style: BorderStyle.NONE },
+        right: { style: BorderStyle.NONE },
+        insideHorizontal: { style: BorderStyle.NONE },
+        insideVertical: { style: BorderStyle.NONE },
+      },
+      rows: [
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Name:', bold: true }) ] }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(val(name)) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nickname/a.k.a:', bold: true }) ] }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(val(caseData.nickname || '')) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(birthdate)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(age)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(sex)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(status)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nationality:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(nationality)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Religion:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(religion)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthplace:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(birthplace)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Provincial/Permanent Address:', bold: true }) ] }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(val(provincialAddress)) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Present Address:', bold: true }) ] }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(val(presentAddress)) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Source of Referral:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(sourceOfReferral)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date of Referral:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(dateOfReferral)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. #:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(addressAndTel)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to client:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(relationToClient)) ] }),
+        ] }),
+      ]
+    }),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
