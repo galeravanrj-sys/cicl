@@ -1631,25 +1631,25 @@ export const downloadIntakeFormWord = async (caseData) => {
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(marriedInChurch)} Married in church`) ] }),
-            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+            new TableCell({ children: [ new Paragraph('') ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`) ] }),
-            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+            new TableCell({ children: [ new Paragraph('') ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(civilMarriage)} Civil Marriage`) ] }),
-            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+            new TableCell({ children: [ new Paragraph('') ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(separated)} Separated`) ] }),
-            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+            new TableCell({ children: [ new Paragraph('') ] }),
           ],
         }),
       ],
