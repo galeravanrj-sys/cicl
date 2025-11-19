@@ -1406,6 +1406,7 @@ export const downloadIntakeFormWord = async (caseData) => {
   const textColor = '000000';
   const box = (checked) => (checked ? '☑' : '☐');
   const val = (v) => (v === undefined || v === null ? '' : String(v));
+  const oneLine = (s) => val(s).replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
   const formatDateYYYYMMDD = (d) => {
     if (!d) return '';
     try {
@@ -1619,50 +1620,50 @@ export const downloadIntakeFormWord = async (caseData) => {
       },
       rows: [
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Name:', bold: true }) ] }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph(val(name)) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nickname/a.k.a:', bold: true }) ] }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph(val(caseData.nickname || '')) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Name:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(name)) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nickname/a.k.a:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(caseData.nickname || '')) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(formatDateYYYYMMDD(birthdate)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(age)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(sex)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 16, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(formatDateYYYYMMDD(birthdate))) ] , width: { size: 18, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(age))) ] , width: { size: 14, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 10, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(sex))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(status)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nationality:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(nationality)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(status))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Nationality:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(nationality))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Religion:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(religion)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthplace:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(birthplace)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Religion:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(religion))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthplace:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(birthplace))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Provincial/Permanent Address:', bold: true }) ] }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph(val(provincialAddress)) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Provincial/Permanent Address:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(provincialAddress))) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Present Address:', bold: true }) ] }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph(val(presentAddress)) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Present Address:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(presentAddress))) ] , width: { size: 70, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Source of Referral:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(sourceOfReferral)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date of Referral:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(formatDateYYYYMMDD(dateOfReferral)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Source of Referral:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(sourceOfReferral))) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date of Referral:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(formatDateYYYYMMDD(dateOfReferral))) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. #:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(addressAndTel)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to client:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(relationToClient)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. #:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(addressAndTel))) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to client:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(relationToClient))) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
         ] }),
       ]
     }),
@@ -1697,64 +1698,64 @@ export const downloadIntakeFormWord = async (caseData) => {
       borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
       rows: [
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Husband/Father:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.name)) ] }),
-          new TableCell({ children: [ new Paragraph((father.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Husband/Father:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.name))) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph((father.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] , width: { size: 25, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph('') ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.age)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.education)) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 16, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph('') ] , width: { size: 18, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.age))) ] , width: { size: 14, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.education))) ] , width: { size: 20, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.occupation)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.otherSkills)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.income)) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.occupation))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.otherSkills))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.income))) ] , width: { size: 18, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(father.address)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(father.address))) ] , width: { size: 75, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Mother/Wife:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.name)) ] }),
-          new TableCell({ children: [ new Paragraph((mother.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Mother/Wife:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.name))) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph((mother.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] , width: { size: 25, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph('') ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.age)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.education)) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 16, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph('') ] , width: { size: 18, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.age))) ] , width: { size: 14, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.education))) ] , width: { size: 20, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.occupation)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.otherSkills)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.income)) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.occupation))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.otherSkills))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.income))) ] , width: { size: 18, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(mother.address)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(mother.address))) ] , width: { size: 75, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Guardian:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(guardian.name)) ] }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to the client:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(guardian.relation)) ] })
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Guardian:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(guardian.name))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to the client:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 20, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(guardian.relation))) ] , width: { size: 30, type: WidthType.PERCENTAGE } })
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address:', bold: true }) ] }) ] }),
-          new TableCell({ children: [ new Paragraph(val(guardian.address)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(guardian.address))) ] , width: { size: 75, type: WidthType.PERCENTAGE } }),
         ] }),
       ]
     }),
@@ -1772,32 +1773,32 @@ export const downloadIntakeFormWord = async (caseData) => {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status', bold: true }) ], alignment: AlignmentType.CENTER }) ] }),
-            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }) ] }),
+            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status', bold: true }) ], alignment: AlignmentType.CENTER, spacing: { after: 40 } }) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER, spacing: { after: 40 } }) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph(`${box(marriedInChurch)} Married in church`) ] }),
-            new TableCell({ children: [ new Paragraph(marriedInChurch ? marriageDatePlace : '') ] }),
+            new TableCell({ children: [ new Paragraph(`${box(marriedInChurch)} Married in church`) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [ new Paragraph(oneLine(marriedInChurch ? marriageDatePlace : '')) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`) ] }),
-            new TableCell({ children: [ new Paragraph(liveInCommonLaw ? marriageDatePlace : '') ] }),
+            new TableCell({ children: [ new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [ new Paragraph(oneLine(liveInCommonLaw ? marriageDatePlace : '')) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph(`${box(civilMarriage)} Civil Marriage`) ] }),
-            new TableCell({ children: [ new Paragraph(civilMarriage ? marriageDatePlace : '') ] }),
+            new TableCell({ children: [ new Paragraph(`${box(civilMarriage)} Civil Marriage`) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [ new Paragraph(oneLine(civilMarriage ? marriageDatePlace : '')) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
           ],
         }),
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph(`${box(separated)} Separated`) ] }),
-            new TableCell({ children: [ new Paragraph('') ] }),
+            new TableCell({ children: [ new Paragraph(`${box(separated)} Separated`) ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
+            new TableCell({ children: [ new Paragraph('') ] , width: { size: 50, type: WidthType.PERCENTAGE } }),
           ],
         }),
       ],
