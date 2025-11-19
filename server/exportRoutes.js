@@ -1101,6 +1101,44 @@ router.post('/case/pdf-intake', auth, async (req, res) => {
   }
 });
 
+// POST raw DOCX -> PDF via LibreOffice headless (exact 1:1 from Word)
+router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb' }), async (req, res) => {
+  try {
+    const docxBuffer = req.body;
+    if (!docxBuffer || !docxBuffer.length) {
+      return res.status(400).json({ message: 'No DOCX payload provided' });
+    }
+
+    // Write temp DOCX
+    const tmpDir = os.tmpdir();
+    const id = uuidv4();
+    const docxPath = path.join(tmpDir, `intake-${id}.docx`);
+    const pdfPath = path.join(tmpDir, `intake-${id}.pdf`);
+    fs.writeFileSync(docxPath, docxBuffer);
+
+    // Try soffice (LibreOffice) headless conversion
+    const sofficeCmd = process.env.LIBREOFFICE_PATH || 'soffice';
+    const args = ['--headless', '--convert-to', 'pdf', '--outdir', tmpDir, docxPath];
+    await new Promise((resolve, reject) => {
+      const p = spawn(sofficeCmd, args, { stdio: 'ignore' });
+      p.on('error', reject);
+      p.on('exit', (code) => {
+        if (code === 0 && fs.existsSync(pdfPath)) return resolve();
+        reject(new Error(`LibreOffice conversion failed with code ${code}`));
+      });
+    });
+
+    const pdfBytes = fs.readFileSync(pdfPath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
+    res.send(Buffer.from(pdfBytes));
+    try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
+  } catch (err) {
+    console.error('DOCX->PDF conversion error:', err);
+    return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: err.message });
+  }
+});
+
 // POST: HTML-rendered consolidated PDF for multiple cases (Puppeteer)
 router.post('/cases/pdf-html', auth, async (req, res) => {
   try {
@@ -1193,3 +1231,6 @@ router.get('/sample/pdf', async (req, res) => {
 });
 
 module.exports = router;
+const { spawn } = require('child_process');
+const os = require('os');
+const { v4: uuidv4 } = require('uuid');

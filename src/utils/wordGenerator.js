@@ -1385,7 +1385,7 @@ function createCasesOverviewTable(casesData) {
   });
 }
 
-export const downloadIntakeFormWord = async (caseData) => {
+export const downloadIntakeFormWord = async (caseData, options = {}) => {
   const primaryColor = '000000';
   const textColor = '000000';
   const box = (checked) => (checked ? '☑' : '☐');
@@ -1874,30 +1874,32 @@ export const downloadIntakeFormWord = async (caseData) => {
 
   const buffer = await Packer.toBlob(doc);
   const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
-  const wordUrl = window.URL.createObjectURL(buffer);
-  const wordLink = document.createElement('a');
-  wordLink.href = wordUrl;
-  wordLink.download = `${baseName}.docx`;
-  document.body.appendChild(wordLink);
-  wordLink.click();
-  document.body.removeChild(wordLink);
-  window.URL.revokeObjectURL(wordUrl);
+  if (!options?.noDownload) {
+    const wordUrl = window.URL.createObjectURL(buffer);
+    const wordLink = document.createElement('a');
+    wordLink.href = wordUrl;
+    wordLink.download = `${baseName}.docx`;
+    document.body.appendChild(wordLink);
+    wordLink.click();
+    document.body.removeChild(wordLink);
+    window.URL.revokeObjectURL(wordUrl);
+  }
+  return buffer;
 };
 
 export const downloadIntakeFormPDF = async (caseData) => {
   const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
+  // Build DOCX in-memory using the same generator used for Word export
+  const docxBlob = await downloadIntakeFormWord(caseData, { noDownload: true });
   const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-  const res = await fetch(`${API_BASE}/export/case/pdf-intake`, {
+  const res = await fetch(`${API_BASE}/export/case/pdf-from-docx`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       'x-auth-token': token
     },
-    body: JSON.stringify(caseData)
+    body: docxBlob
   });
-  if (!res.ok) {
-    throw new Error(await res.text());
-  }
+  if (!res.ok) throw new Error(await res.text());
   const pdfBlob = await res.blob();
   const pdfUrl = window.URL.createObjectURL(pdfBlob);
   const pdfLink = document.createElement('a');
