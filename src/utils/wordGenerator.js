@@ -1692,16 +1692,72 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    nameCheckboxLine('Husband/Father', 22, father.living, 720, 0, father.name),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', father.age, father.education]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [father.occupation, father.otherSkills, father.income]),
-    inlineField('Address and Tel. Nos.', father.address, 9600, 40),
-    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 0, mother.name),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', mother.age, mother.education]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [mother.occupation, mother.otherSkills, mother.income]),
-    inlineField('Address and Tel. Nos.', mother.address, 9600, 40),
-    inlineRowCustom(['Guardian','Relation to the client'], [10400], [20, 20], 720, [guardian.name, guardian.relation]),
-    inlineField('Address', guardian.address, 9600, 48),
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
+      rows: [
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Husband/Father:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.name)) ] }),
+          new TableCell({ children: [ new Paragraph((father.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph('') ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.age)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.education)) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.occupation)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.otherSkills)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.income)) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(father.address)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Mother/Wife:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.name)) ] }),
+          new TableCell({ children: [ new Paragraph((mother.living ? '☑ Living  ☐ Deceased' : '☐ Living  ☑ Deceased')) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph('') ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.age)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Educational Attainment:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.education)) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Occupation:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.occupation)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Other Skills:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.otherSkills)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Income:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.income)) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address and Tel. Nos.:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(mother.address)) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Guardian:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(guardian.name)) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Relation to the client:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(guardian.relation)) ] })
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address:', bold: true }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph(val(guardian.address)) ] }),
+        ] }),
+      ]
+    }),
     sectionTitle('CIVIL STATUS OF PARENTS'),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
