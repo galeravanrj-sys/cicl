@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle, TabStopType, TabStopLeader, Tab } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle, TabStopType, Tab } from 'docx';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 
@@ -1409,11 +1409,12 @@ export const downloadIntakeFormWord = async (caseData) => {
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
-  const inlineField = (label, value, position = 9000) => new Paragraph({
-    tabStops: [{ type: TabStopType.LEFT, position, leader: TabStopLeader.UNDERSCORE }],
+  const inlineField = (label, value, position = 7000) => new Paragraph({
+    tabStops: [{ type: TabStopType.LEFT, position }],
     children: [
       new TextRun({ text: label + ':', bold: true, color: textColor }),
       new Tab(),
+      new TextRun({ text: ' '.repeat(40), underline: true, color: textColor }),
       new TextRun({ text: val(value), color: textColor })
     ],
     spacing: { after: 80 }
