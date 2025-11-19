@@ -1508,9 +1508,9 @@ export const downloadIntakeFormWord = async (caseData) => {
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
-    inlineField('Date', caseData.intakeDate || caseData.date || ''),
-    inlineField('Time', caseData.intakeTime || caseData.time || ''),
-    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || ''),
+    inlineField('Date', caseData.intakeDate || caseData.date || '', 7000),
+    inlineField('Time', caseData.intakeTime || caseData.time || '', 7000),
+    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7000),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
     inlineField('Name', name),
     inlineField('Birthdate', birthdate),
