@@ -875,26 +875,97 @@ async function generateHtmlPdf(caseData, opts = {}) {
   }
 }
 
-async function generateIntakeHtmlPdf(caseData, opts = {}) {
-  const noSandbox = String(process.env.PUPPETEER_NO_SANDBOX).toLowerCase() === 'true';
-  const args = ['--disable-dev-shm-usage', '--disable-gpu'];
-  if (noSandbox) { args.push('--no-sandbox', '--disable-setuid-sandbox'); }
-  const browser = await puppeteer.launch({ headless: 'new', args });
-  try {
-    const page = await browser.newPage();
-    await page.setContent(buildIntakeHtml(caseData), { waitUntil: 'domcontentloaded' });
-    await page.emulateMediaType('screen');
-    const pdf = await page.pdf({
-      format: opts.format || 'A4',
-      landscape: !!opts.landscape,
-      printBackground: true,
-      margin: opts.margin || { top: '16mm', right: '14mm', bottom: '16mm', left: '14mm' },
-      displayHeaderFooter: false,
-    });
-    return pdf;
-  } finally {
-    await browser.close();
-  }
+async function generateIntakePdf(caseData) {
+  const pdfDoc = await PDFDocument.create();
+  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const page = pdfDoc.addPage([595, 842]);
+  const labelSize = 10;
+  const valueSize = 11;
+  const drawText = (t, x, y, size = 11) => page.drawText(String(t || ''), { x, y, size, font: helvetica });
+  const textWidth = (t, size) => helvetica.widthOfTextAtSize(String(t || ''), size);
+  const wrap = (t, maxWidth, size) => {
+    const s = String(t || '');
+    const words = s.split(/\s+/);
+    const lines = [];
+    let line = '';
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (textWidth(test, size) <= maxWidth) line = test; else { if (line) lines.push(line); line = w; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  };
+  const drawRow = (label, value, y) => {
+    const xLabel = 40;
+    const xValue = 250;
+    const maxW = 300;
+    drawText(label + ':', xLabel, y, labelSize);
+    page.drawRectangle({ x: xValue, y: y - 2, width: maxW, height: 0.8, color: undefined });
+    if (value) {
+      const lines = wrap(value, maxW, valueSize);
+      let yy = y + 2;
+      for (const ln of lines) { drawText(ln, xValue, yy, valueSize); yy -= 12; }
+    }
+  };
+  const drawBlock = (label, value, yStart) => {
+    const x = 40;
+    const w = 515;
+    const h = 80;
+    drawText(label, x, yStart, labelSize);
+    page.drawRectangle({ x, y: yStart - h - 6, width: w, height: h, borderWidth: 1, color: undefined, borderColor: undefined });
+    const lines = wrap(value, w - 12, valueSize);
+    let yy = yStart - 16;
+    for (const ln of lines) { if (yy < 80) break; drawText(ln, x + 6, yy, valueSize); yy -= 12; }
+    return yStart - h - 20;
+  };
+  let y = 780;
+  drawText('General Intake Form', 40, y, 12);
+  y -= 24;
+  const n = (k) => caseData[k] || caseData[k.replace(/([A-Z])/g, '_$1').toLowerCase()];
+  const toDateOnly = (v) => {
+    if (!v) return '';
+    const s = String(v);
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (m) return m[1];
+    const us = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (us) { const mm = us[1].padStart(2,'0'); const dd = us[2].padStart(2,'0'); return `${us[3]}-${mm}-${dd}`; }
+    return s;
+  };
+  const row = (label, val) => { drawRow(label, val, y); y -= 22; };
+  row('Last Name', n('lastName') || n('last_name'));
+  row('First Name', n('firstName') || n('first_name'));
+  row('Middle Name', n('middleName') || n('middle_name'));
+  row('Sex', n('sex'));
+  row('Birthdate', toDateOnly(n('birthdate')));
+  row('Age', n('age'));
+  row('Civil Status', n('civil_status') || n('status'));
+  row('Religion', n('religion'));
+  row('Present Address', n('present_address') || n('presentAddress') || n('address'));
+  row('Provincial Address', n('provincial_address') || n('provincialAddress'));
+  row('Case Type', n('case_type') || n('caseType'));
+  row('Assigned House Parent', n('assigned_house_parent') || n('assignedHouseParent'));
+  row('Guardian Name', n('guardian_name') || n('guardianName'));
+  row('Guardian Relation', n('guardian_relation') || n('guardianRelation'));
+  y = drawBlock('III. Brief Description of the Client upon Intake', n('brief_description') || n('client_description') || n('clientDescription') || '', y - 12);
+  y = drawBlock('Problem Presented', n('problem_presented') || n('problemPresented') || '', y - 6);
+  y = drawBlock('Brief History', n('brief_history') || n('briefHistory') || '', y - 6);
+  y = drawBlock('Economic Situation', n('economic_situation') || n('economicSituation') || '', y - 6);
+  y = drawBlock('Medical History', n('medical_history') || n('medicalHistory') || '', y - 6);
+  y = drawBlock('Family Background', n('family_background') || n('familyBackground') || '', y - 6);
+  y = drawBlock('Assessment', n('assessment') || '', y - 6);
+  y = drawBlock('Recommendation', n('recommendation') || '', y - 6);
+  const centerX = 297.5;
+  page.drawRectangle({ x: centerX - 110, y: y - 16, width: 220, height: 1.2, color: undefined });
+  drawText('Intake Worker', centerX - textWidth('Intake Worker', 12) / 2, y - 30, 12);
+  const leftX = 90;
+  const rightX = 405;
+  drawText('Recommending Approval:', leftX, y - 56, 12);
+  page.drawRectangle({ x: leftX, y: y - 78, width: 220, height: 1.2, color: undefined });
+  drawText('Head, DSWD', leftX + 110 - textWidth('Head, DSWD', 12) / 2, y - 92, 12);
+  drawText('Approved by:', rightX, y - 56, 12);
+  page.drawRectangle({ x: rightX, y: y - 78, width: 220, height: 1.2, color: undefined });
+  drawText('Administrator', rightX + 110 - textWidth('Administrator', 12) / 2, y - 92, 12);
+  return await pdfDoc.save();
 }
 
 // GET: generate PDF by case id
@@ -1020,11 +1091,10 @@ router.post('/case/pdf-html', auth, async (req, res) => {
 // POST: Intake-form styled PDF (mirrors Word export layout)
 router.post('/case/pdf-intake', auth, async (req, res) => {
   try {
-    const opts = { format: (req.query.format || 'A4'), landscape: false };
-    const pdf = await generateIntakeHtmlPdf(req.body || {}, opts);
+    const pdfBytes = await generateIntakePdf(req.body || {});
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
-    return res.send(pdf);
+    return res.send(Buffer.from(pdfBytes));
   } catch (err) {
     console.error('Intake PDF export error:', err);
     return res.status(500).json({ message: 'Failed to generate Intake PDF', error: err.message });
