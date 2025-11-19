@@ -1116,32 +1116,6 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     const docxPath = path.join(tmpDir, `intake-${id}.docx`);
     const pdfPath = path.join(tmpDir, `intake-${id}.pdf`);
     const sofficeCmd = process.env.LIBREOFFICE_PATH || 'soffice';
-    const tryGraph = async () => {
-      const tenant = process.env.AZURE_TENANT_ID;
-      const client = process.env.AZURE_CLIENT_ID;
-      const secret = process.env.AZURE_CLIENT_SECRET;
-      const driveId = process.env.GRAPH_DRIVE_ID;
-      if (!tenant || !client || !secret || !driveId) throw new Error('Graph config missing');
-      const tokenRes = await axios.post(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, new URLSearchParams({
-        client_id: client,
-        client_secret: secret,
-        scope: 'https://graph.microsoft.com/.default',
-        grant_type: 'client_credentials'
-      }));
-      const accessToken = tokenRes.data && tokenRes.data.access_token;
-      if (!accessToken) throw new Error('Graph token error');
-      const upRes = await axios.put(`https://graph.microsoft.com/v1.0/drives/${driveId}/root:/intake.docx:/content`, docxBuffer, {
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/octet-stream' }
-      });
-      const itemId = upRes.data && upRes.data.id;
-      if (!itemId) throw new Error('Graph upload error');
-      const pdfRes = await axios.get(`https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content?format=pdf`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        responseType: 'arraybuffer'
-      });
-      return Buffer.from(pdfRes.data);
-    };
-
     const tryLibre = async () => {
       fs.writeFileSync(docxPath, docxBuffer);
       const args = ['--headless', '--convert-to', 'pdf', '--outdir', tmpDir, docxPath];
@@ -1184,17 +1158,13 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     };
     let pdfBytes;
     try {
-      pdfBytes = await tryGraph();
+      pdfBytes = await tryLibre();
     } catch (_) {
       try {
-        pdfBytes = await tryLibre();
-      } catch (__){
-        try {
-          pdfBytes = await tryCloudConvert();
-        } catch (e2) {
-          console.error('CloudConvert error:', e2?.message || e2);
-          return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: e2.message || String(e2) });
-        }
+        pdfBytes = await tryCloudConvert();
+      } catch (e2) {
+        console.error('CloudConvert error:', e2?.message || e2);
+        return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: e2.message || String(e2) });
       }
     }
     res.setHeader('Content-Type', 'application/pdf');

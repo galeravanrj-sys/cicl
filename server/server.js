@@ -260,14 +260,6 @@ async function loadAppSecrets() {
     if (cc.rows && cc.rows[0] && cc.rows[0].value) process.env.CLOUDCONVERT_API_KEY = cc.rows[0].value;
     const lo = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['libreoffice_path']);
     if (lo.rows && lo.rows[0] && lo.rows[0].value) process.env.LIBREOFFICE_PATH = lo.rows[0].value;
-    const t = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['azure_tenant_id']);
-    if (t.rows && t.rows[0] && t.rows[0].value) process.env.AZURE_TENANT_ID = t.rows[0].value;
-    const cid = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['azure_client_id']);
-    if (cid.rows && cid.rows[0] && cid.rows[0].value) process.env.AZURE_CLIENT_ID = cid.rows[0].value;
-    const cs = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['azure_client_secret']);
-    if (cs.rows && cs.rows[0] && cs.rows[0].value) process.env.AZURE_CLIENT_SECRET = cs.rows[0].value;
-    const did = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['graph_drive_id']);
-    if (did.rows && did.rows[0] && did.rows[0].value) process.env.GRAPH_DRIVE_ID = did.rows[0].value;
   } catch (e) {
     console.error('Failed to load app secrets:', e.message);
   }

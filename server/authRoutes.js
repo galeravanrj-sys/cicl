@@ -116,42 +116,6 @@ router.post('/admin/secrets/libreoffice', auth, async (req, res) => {
   }
 });
 
-router.post('/admin/secrets/graph', auth, async (req, res) => {
-  try {
-    const { tenantId, clientId, clientSecret, driveId } = req.body || {};
-    if (!tenantId || !clientId || !clientSecret || !driveId) {
-      return res.status(400).json({ message: 'tenantId, clientId, clientSecret, driveId required' });
-    }
-    await db.query(
-      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
-      ['azure_tenant_id', tenantId]
-    );
-    await db.query(
-      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
-      ['azure_client_id', clientId]
-    );
-    await db.query(
-      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
-      ['azure_client_secret', clientSecret]
-    );
-    await db.query(
-      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
-      ['graph_drive_id', driveId]
-    );
-    process.env.AZURE_TENANT_ID = tenantId;
-    process.env.AZURE_CLIENT_ID = clientId;
-    process.env.AZURE_CLIENT_SECRET = clientSecret;
-    process.env.GRAPH_DRIVE_ID = driveId;
-    return res.json({ success: true });
-  } catch (e) {
-    return res.status(500).json({ message: 'Failed to set Graph secrets' });
-  }
-});
-
 // Set or change password (authenticated)
 router.post('/set-password', auth, async (req, res) => {
   try {
