@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, BorderStyle, TabStopType, TabStopLeader, Tab } from 'docx';
 import Docxtemplater from 'docxtemplater';
 import PizZip from 'pizzip';
 
@@ -1409,10 +1409,15 @@ export const downloadIntakeFormWord = async (caseData) => {
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
-  const lineField = (label, value) => [
-    new Paragraph({ children: [ new TextRun({ text: label + ':', bold: true, color: textColor }) ] }),
-    new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ], border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 120 } })
-  ];
+  const inlineField = (label, value, position = 9000) => new Paragraph({
+    tabStops: [{ type: TabStopType.LEFT, position, leader: TabStopLeader.UNDERSCORE }],
+    children: [
+      new TextRun({ text: label + ':', bold: true, color: textColor }),
+      new Tab(),
+      new TextRun({ text: val(value), color: textColor })
+    ],
+    spacing: { after: 80 }
+  });
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
     new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
     ...bodyRows
@@ -1503,24 +1508,24 @@ export const downloadIntakeFormWord = async (caseData) => {
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
-    ...lineField('Date', caseData.intakeDate || caseData.date || ''),
-    ...lineField('Time', caseData.intakeTime || caseData.time || ''),
-    ...lineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || ''),
+    inlineField('Date', caseData.intakeDate || caseData.date || ''),
+    inlineField('Time', caseData.intakeTime || caseData.time || ''),
+    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || ''),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
-    ...lineField('Name', name),
-    ...lineField('Birthdate', birthdate),
-    ...lineField('Age', age),
-    ...lineField('Sex', sex),
-    ...lineField('Status', status),
-    ...lineField('Nationality', nationality),
-    ...lineField('Religion', religion),
-    ...lineField('Birthplace', birthplace),
-    ...lineField('Provincial/Permanent Address', provincialAddress),
-    ...lineField('Present Address', presentAddress),
-    ...lineField('Source of Referral', sourceOfReferral),
-    ...lineField('Date of Referral', dateOfReferral),
-    ...lineField('Address and Tel. #', addressAndTel),
-    ...lineField('Relation to client', relationToClient),
+    inlineField('Name', name),
+    inlineField('Birthdate', birthdate),
+    inlineField('Age', age),
+    inlineField('Sex', sex),
+    inlineField('Status', status),
+    inlineField('Nationality', nationality),
+    inlineField('Religion', religion),
+    inlineField('Birthplace', birthplace),
+    inlineField('Provincial/Permanent Address', provincialAddress),
+    inlineField('Present Address', presentAddress),
+    inlineField('Source of Referral', sourceOfReferral),
+    inlineField('Date of Referral', dateOfReferral),
+    inlineField('Address and Tel. #', addressAndTel),
+    inlineField('Relation to client', relationToClient),
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
@@ -1547,33 +1552,33 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    ...lineField('Husband/Father', father.name),
+    inlineField('Husband/Father', father.name),
     new Paragraph(box(father.living) + ' Living      ' + box(false) + ' Deceased'),
-    ...lineField('Birthdate', ''),
-    ...lineField('Age', father.age),
-    ...lineField('Educational Attainment', father.education),
-    ...lineField('Occupation', father.occupation),
-    ...lineField('Other Skills', father.otherSkills),
-    ...lineField('Income', father.income),
-    ...lineField('Address and Tel. Nos.', father.address),
-    ...lineField('Mother/Wife', mother.name),
+    inlineField('Birthdate', ''),
+    inlineField('Age', father.age),
+    inlineField('Educational Attainment', father.education),
+    inlineField('Occupation', father.occupation),
+    inlineField('Other Skills', father.otherSkills),
+    inlineField('Income', father.income),
+    inlineField('Address and Tel. Nos.', father.address),
+    inlineField('Mother/Wife', mother.name),
     new Paragraph(box(mother.living) + ' Living      ' + box(false) + ' Deceased'),
-    ...lineField('Birthdate', ''),
-    ...lineField('Age', mother.age),
-    ...lineField('Educational Attainment', mother.education),
-    ...lineField('Occupation', mother.occupation),
-    ...lineField('Other Skills', mother.otherSkills),
-    ...lineField('Income', mother.income),
-    ...lineField('Address and Tel. Nos.', mother.address),
-    ...lineField('Guardian', guardian.name),
-    ...lineField('Relation to the client', guardian.relation),
-    ...lineField('Address', guardian.address),
+    inlineField('Birthdate', ''),
+    inlineField('Age', mother.age),
+    inlineField('Educational Attainment', mother.education),
+    inlineField('Occupation', mother.occupation),
+    inlineField('Other Skills', mother.otherSkills),
+    inlineField('Income', mother.income),
+    inlineField('Address and Tel. Nos.', mother.address),
+    inlineField('Guardian', guardian.name),
+    inlineField('Relation to the client', guardian.relation),
+    inlineField('Address', guardian.address),
     sectionTitle('CIVIL STATUS OF PARENTS'),
     new Paragraph(box(marriedInChurch) + ' Married in church'),
     new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law'),
     new Paragraph(box(civilMarriage) + ' Civil Marriage'),
     new Paragraph(box(separated) + ' Separated'),
-    ...lineField('Date and Place', marriageDatePlace),
+    inlineField('Date and Place', marriageDatePlace),
     sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
     tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
       ...familyRows
