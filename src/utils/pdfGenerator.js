@@ -840,12 +840,9 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
     headStyles: { halign: 'center' },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     theme: 'grid',
+    // Center and fill the width
     margin: { left: margin, right: margin },
-    tableWidth: pageWidth - margin * 2,
-    columnStyles: {
-      0: { cellWidth: 'wrap', halign: 'left' },
-      1: { cellWidth: 'wrap', halign: 'center' }
-    }
+    tableWidth: pageWidth - margin * 2
   });
 
   const addArrayTable = (title, columns, rows) => {
@@ -868,26 +865,22 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
       }
       return s || '—';
     };
-    const toTitle = (h) => h.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+    const headerDisplayMap = {
+      relationship: 'Relationship',
+      relation: 'Relationship',
+      address_date_duration: 'Address/Duration',
+      services_received: 'Services',
+      date_completed: 'Date',
+      performance_rating: 'Rating',
+      year_completed: 'Year',
+      blood_pressure: 'BP',
+      heart_rate: 'HR',
+      temperature: 'Temp',
+      weight: 'Weight',
+      height: 'Height'
+    };
+    const toTitle = (h) => headerDisplayMap[h] || h.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
     const displayHeaders = columns.map(toTitle);
-    const colStyles = {};
-    columns.forEach((h, idx) => {
-      const key = h.toLowerCase();
-      let width;
-      if (key === 'name') width = 60;
-      else if (key === 'relationship' || key === 'relation') width = 40;
-      else if (key === 'address' || key === 'address_date_duration' || key === 'place_parish') width = 70;
-      else if (key === 'education' || key === 'occupation' || key === 'services_received') width = 55;
-      else if (key === 'notes') width = 70;
-      else if (key === 'income') width = 32;
-      else if (key === 'status') width = 30;
-      else if (key === 'sacrament') width = 40;
-      else if (key === 'school_name' || key === 'school_address') width = 60;
-      else if (key === 'year_completed' || key === 'date_completed' || key === 'date_received') width = 32;
-      else if (key === 'heart_rate' || key === 'temperature' || key === 'weight' || key === 'height' || key === 'blood_pressure') width = 32;
-      else width = 26;
-      colStyles[idx] = { halign: 'center', cellWidth: width };
-    });
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
       head: [displayHeaders],
@@ -896,9 +889,9 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
       headStyles: { fillColor: theme.colors.primary, textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 9 },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       theme: 'grid',
+      // Center the table across the available width
       margin: { left: margin, right: margin },
-      tableWidth: pageWidth - margin * 2,
-      columnStyles: colStyles
+      tableWidth: pageWidth - margin * 2
     });
   };
 
