@@ -285,7 +285,6 @@ const CaseManagement = () => {
     try {
       const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
       const caseData = fullDetails || caseItem;
-      await downloadIntakeFormWord(caseData);
       await downloadIntakeFormPDF(caseData);
     } catch (error) {
       console.error('Error downloading PDF:', error);
