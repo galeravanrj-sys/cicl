@@ -5,6 +5,7 @@ import Pagination from './Pagination';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
+import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -220,6 +221,12 @@ const ArchivedCases = () => {
     await downloadCaseReportPDF(caseData);
   };
 
+  const exportSingleCaseToWord = async (caseItem) => {
+    const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
+    const caseData = fullDetails || caseItem;
+    await downloadCaseReportWord(caseData);
+  };
+
   
 
   // Export single case to CSV
@@ -244,6 +251,20 @@ const ArchivedCases = () => {
     // Consolidated professional summary PDF for archived cases
     (async () => {
       await downloadAllCasesPDF(filteredArchivedCases.map(c => c.id));
+    })();
+  };
+
+  const exportToWord = () => {
+    if (filteredArchivedCases.length === 0) {
+      alert('No archived cases to export');
+      return;
+    }
+    (async () => {
+      const payload = await Promise.all(filteredArchivedCases.map(async (c) => {
+        const full = await fetchCaseDetailsForExport(c.id);
+        return full || c;
+      }));
+      await downloadAllCasesWord(payload);
     })();
   };
 
@@ -330,6 +351,11 @@ const ArchivedCases = () => {
             <li>
               <button className="dropdown-item" onClick={exportToCSV}>
                 <i className="fas fa-file-csv me-2"></i>Export All to CSV
+              </button>
+            </li>
+            <li>
+              <button className="dropdown-item" onClick={exportToWord}>
+                <i className="fas fa-file-word me-2"></i>Export All to Word
               </button>
             </li>
             {/* Removed global "All Discharged (Ignoring filters)" export options */}
@@ -564,9 +590,21 @@ const ArchivedCases = () => {
                                     exportSingleCaseToPDF(caseItem);
                                   }}
                                 >
-                                  <i className="fas fa-file-pdf me-2"></i>PDF
-                                </button>
-                              </li>
+                              <i className="fas fa-file-pdf me-2"></i>PDF
+                            </button>
+                          </li>
+                          <li>
+                            <button 
+                              className="dropdown-item" 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                exportSingleCaseToWord(caseItem);
+                              }}
+                            >
+                              <i className="fas fa-file-word me-2"></i>Word
+                            </button>
+                          </li>
                               
                               <li>
                                 <button 

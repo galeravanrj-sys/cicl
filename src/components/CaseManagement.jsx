@@ -5,6 +5,7 @@ import EditCaseForm from './EditCaseForm';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
+import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { API_BASE } from '../utils/apiBase';
 
@@ -77,6 +78,22 @@ const CaseManagement = () => {
     } catch (error) {
       console.error('Error exporting PDFs:', error);
       // Avoid intrusive alerts for success; keep error feedback minimal
+    }
+  };
+
+  const handleExportAllWord = async () => {
+    if (sortedCases.length === 0) {
+      alert('No cases to export');
+      return;
+    }
+    try {
+      const payload = await Promise.all(sortedCases.map(async (c) => {
+        const full = await fetchCaseDetailsForExport(c.id);
+        return full || c;
+      }));
+      await downloadAllCasesWord(payload);
+    } catch (error) {
+      console.error('Error exporting Word:', error);
     }
   };
 
@@ -275,6 +292,17 @@ const CaseManagement = () => {
     }
   };
 
+  const handleDownloadWord = async (caseItem) => {
+    try {
+      const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
+      const caseData = fullDetails || caseItem;
+      await downloadCaseReportWord(caseData);
+    } catch (error) {
+      console.error('Error downloading Word:', error);
+      alert('Error generating Word. Please try again.');
+    }
+  };
+
   const handleDownloadCSV = async (caseItem) => {
     try {
       const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
@@ -413,6 +441,14 @@ const CaseManagement = () => {
                     onClick={handleExportAllCSV}
                   >
                     <i className="fas fa-file-csv me-2"></i>Export All as CSV
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className="dropdown-item" 
+                    onClick={handleExportAllWord}
+                  >
+                    <i className="fas fa-file-word me-2"></i>Export All as Word
                   </button>
                 </li>
               </ul>
@@ -581,9 +617,21 @@ const CaseManagement = () => {
                                     handleDownloadPDF(caseItem);
                                   }}
                                 >
-                                  <i className="fas fa-file-pdf me-2"></i>Export as PDF
-                              </button>
-                            </li>
+                              <i className="fas fa-file-pdf me-2"></i>Export as PDF
+                          </button>
+                        </li>
+                        <li>
+                          <button 
+                            className="dropdown-item" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDownloadWord(caseItem);
+                            }}
+                          >
+                            <i className="fas fa-file-word me-2"></i>Export as Word
+                          </button>
+                        </li>
                             <li>
                               <button 
                                 className="dropdown-item" 
