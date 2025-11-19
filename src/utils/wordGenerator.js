@@ -1624,24 +1624,32 @@ export const downloadIntakeFormWord = async (caseData) => {
       rows: [
         new TableRow({
           children: [
-            new TableCell({
-              width: { size: 50, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph(`${box(marriedInChurch)} Married in church`),
-                new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`),
-                new Paragraph(`${box(civilMarriage)} Civil Marriage`),
-                new Paragraph(`${box(separated)} Separated`),
-              ],
-            }),
-            new TableCell({
-              width: { size: 50, type: WidthType.PERCENTAGE },
-              children: [
-                new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }),
-                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
-                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
-                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
-              ],
-            }),
+            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: ' ', size: 1 }) ] }) ] }),
+            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }) ] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [ new Paragraph(`${box(marriedInChurch)} Married in church`) ] }),
+            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [ new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`) ] }),
+            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [ new Paragraph(`${box(civilMarriage)} Civil Marriage`) ] }),
+            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [ new Paragraph(`${box(separated)} Separated`) ] }),
+            new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }) ] }),
           ],
         }),
       ],
