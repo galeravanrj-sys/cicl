@@ -1400,3 +1400,242 @@ function createCasesOverviewTable(casesData) {
     ],
   });
 }
+
+export const downloadIntakeFormWord = async (caseData) => {
+  const primaryColor = '2C5282';
+  const textColor = '2D3748';
+  const box = (checked) => (checked ? '☑' : '☐');
+  const val = (v) => (v === undefined || v === null ? '' : String(v));
+  const lineRow = (label, value, labelWidth = 35, valueWidth = 65) => new TableRow({
+    children: [
+      new TableCell({ width: { size: labelWidth, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: label, bold: true, color: textColor }) ] }) ] }),
+      new TableCell({ width: { size: valueWidth, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(value), color: textColor }) ] }) ] })
+    ]
+  });
+  const twoUpRow = (leftLabel, leftVal, rightLabel, rightVal) => new TableRow({
+    children: [
+      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: leftLabel, bold: true, color: textColor }) ] }) ] }),
+      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(leftVal), color: textColor }) ] }) ] }),
+      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, children: [ new Paragraph({ children: [ new TextRun({ text: rightLabel, bold: true, color: textColor }) ] }) ] }),
+      new TableCell({ width: { size: 25, type: WidthType.PERCENTAGE }, borders: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' } }, children: [ new Paragraph({ children: [ new TextRun({ text: val(rightVal), color: textColor }) ] }) ] })
+    ]
+  });
+  const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 22, color: primaryColor }) ], spacing: { before: 300, after: 150 } });
+  const thinTable = (rows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows });
+
+  const name = [caseData.firstName || caseData.first_name || '', caseData.middleName || caseData.middle_name || '', caseData.lastName || caseData.last_name || ''].filter(Boolean).join(' ');
+  const birthdate = caseData.birthdate || '';
+  const age = caseData.age || '';
+  const sex = caseData.sex || '';
+  const status = caseData.status || caseData.civil_status || '';
+  const nationality = caseData.nationality || '';
+  const religion = caseData.religion || '';
+  const birthplace = caseData.birthplace || caseData.birth_place || '';
+  const presentAddress = caseData.presentAddress || caseData.present_address || caseData.address || '';
+  const provincialAddress = caseData.provincialAddress || caseData.provincial_address || '';
+  const sourceOfReferral = caseData.sourceOfReferral || caseData.source_of_referral || '';
+  const dateOfReferral = caseData.dateOfReferral || caseData.date_of_referral || '';
+  const addressAndTel = caseData.addressAndTel || caseData.address_and_tel || '';
+  const relationToClient = caseData.relationToClient || caseData.relation_to_client || '';
+
+  const marriedInChurch = !!(caseData.marriedInChurch ?? caseData.married_in_church);
+  const liveInCommonLaw = !!(caseData.liveInCommonLaw ?? caseData.live_in_common_law);
+  const civilMarriage = !!(caseData.civilMarriage ?? caseData.civil_marriage);
+  const separated = !!(caseData.separated);
+  const marriageDatePlace = caseData.marriageDatePlace || caseData.marriage_date_place || '';
+
+  const father = {
+    name: caseData.fatherName || caseData.father_name || '',
+    age: caseData.fatherAge || caseData.father_age || '',
+    education: caseData.fatherEducation || caseData.father_education || '',
+    occupation: caseData.fatherOccupation || caseData.father_occupation || '',
+    otherSkills: caseData.fatherOtherSkills || caseData.father_other_skills || '',
+    income: caseData.fatherIncome || caseData.father_income || '',
+    address: caseData.fatherAddress || caseData.father_address || '',
+    living: !!(caseData.fatherLiving)
+  };
+  const mother = {
+    name: caseData.motherName || caseData.mother_name || '',
+    age: caseData.motherAge || caseData.mother_age || '',
+    education: caseData.motherEducation || caseData.mother_education || '',
+    occupation: caseData.motherOccupation || caseData.mother_occupation || '',
+    otherSkills: caseData.motherOtherSkills || caseData.mother_other_skills || '',
+    income: caseData.motherIncome || caseData.mother_income || '',
+    address: caseData.motherAddress || caseData.mother_address || '',
+    living: !!(caseData.motherLiving)
+  };
+  const guardian = {
+    name: caseData.guardianName || caseData.guardian_name || '',
+    relation: caseData.guardianRelation || caseData.guardian_relation || '',
+    address: caseData.guardianAddress || caseData.guardian_address || ''
+  };
+
+  const edu = caseData.educationalAttainment || {};
+  const sacr = caseData.sacramentalRecord || {};
+  const familyRows = (Array.isArray(caseData.familyComposition) ? caseData.familyComposition : caseData.family || []).map((m, i) => new TableRow({ children: [
+    new TableCell({ children: [ new Paragraph(String(m.name || i + 1)) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.relation || m.relationToClient || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.age || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.sex || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.status || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.education || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.address || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.occupation || '')) ] })
+  ] }));
+  const extRows = (Array.isArray(caseData.extendedFamily) ? caseData.extendedFamily : []).map((m, i) => new TableRow({ children: [
+    new TableCell({ children: [ new Paragraph(String(m.name || i + 1)) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.relation || m.relationship || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.age || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.sex || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.status || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.education || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.address || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(m.occupation || '')) ] })
+  ] }));
+  const agencyRows = (Array.isArray(caseData.agencies) ? caseData.agencies : []).map((ag, i) => new TableRow({ children: [
+    new TableCell({ children: [ new Paragraph(String(ag.name || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(ag.addressDateDuration || ag.address_date_duration || '')) ] }),
+    new TableCell({ children: [ new Paragraph(String(ag.servicesReceived || ag.services_received || '')) ] })
+  ] }));
+
+  const doc = new Document({ sections: [{ properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: [
+    new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: primaryColor }) ], alignment: AlignmentType.CENTER }),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      twoUpRow('Date', caseData.intakeDate || caseData.date || '', 'Time', caseData.intakeTime || caseData.time || ''),
+      lineRow('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '')
+    ] }),
+    sectionTitle('I. CLIENT\'S IDENTIFYING INFORMATION'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      lineRow('Name', name),
+      twoUpRow('Birthdate', birthdate, 'Age', age),
+      lineRow('Sex', sex),
+      twoUpRow('Status', status, 'Nationality', nationality),
+      twoUpRow('Religion', religion, 'Birthplace', birthplace),
+      lineRow('Provincial/Permanent Address', provincialAddress),
+      lineRow('Present Address', presentAddress),
+      twoUpRow('Source of Referral', sourceOfReferral, 'Date of Referral', dateOfReferral),
+      twoUpRow('Address and Tel. #', addressAndTel, 'Relation to client', relationToClient)
+    ] }),
+    sectionTitle('EDUCATIONAL ATTAINMENT'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [
+        new TableCell({ children: [ new Paragraph({ text: 'LEVEL', bold: true }) ] }),
+        new TableCell({ children: [ new Paragraph({ text: 'NAME OF SCHOOL', bold: true }) ] }),
+        new TableCell({ children: [ new Paragraph({ text: 'SCHOOL ADDRESS', bold: true }) ] }),
+        new TableCell({ children: [ new Paragraph({ text: 'YEAR', bold: true }) ] })
+      ] }),
+      ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
+        const row = (edu && edu[key]) || {};
+        const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
+        return new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph(label) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.schoolName || '')) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.schoolAddress || '')) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.year || '')) ] })
+        ] });
+      })
+    ] }),
+    sectionTitle('SACRAMENTAL RECORD'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [
+        new TableCell({ children: [ new Paragraph({ text: 'Sacrament', bold: true }) ] }),
+        new TableCell({ children: [ new Paragraph({ text: 'Date Received', bold: true }) ] }),
+        new TableCell({ children: [ new Paragraph({ text: 'Place/Parish', bold: true }) ] })
+      ] }),
+      ...['baptism','firstCommunion','confirmation','others'].map(key => {
+        const row = (sacr && sacr[key]) || {};
+        const label = key === 'firstCommunion' ? 'First Communion' : key === 'confirmation' ? 'Confirmation' : key === 'baptism' ? 'Baptism' : 'Others';
+        return new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph(label) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.dateReceived || '')) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.placeParish || '')) ] })
+        ] });
+      })
+    ] }),
+    sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      lineRow('Husband/Father', father.name),
+      twoUpRow('Living', box(father.living), 'Deceased', ''),
+      twoUpRow('Birthdate', '', 'Age', father.age),
+      lineRow('Educational Attainment', father.education),
+      twoUpRow('Occupation', father.occupation, 'Other Skills', father.otherSkills),
+      twoUpRow('Income', father.income, 'Address and Tel. Nos.', father.address),
+      lineRow('Mother/Wife', mother.name),
+      twoUpRow('Living', box(mother.living), 'Deceased', ''),
+      twoUpRow('Birthdate', '', 'Age', mother.age),
+      lineRow('Educational Attainment', mother.education),
+      twoUpRow('Occupation', mother.occupation, 'Other Skills', mother.otherSkills),
+      twoUpRow('Income', mother.income, 'Address and Tel. Nos.', mother.address),
+      twoUpRow('Guardian', guardian.name, 'Relation to the client', guardian.relation),
+      lineRow('Address', guardian.address)
+    ] }),
+    sectionTitle('CIVIL STATUS OF PARENTS'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [
+        new TableCell({ children: [ new Paragraph(box(marriedInChurch) + ' Married in church') ] }),
+        new TableCell({ children: [ new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law') ] }),
+        new TableCell({ children: [ new Paragraph(box(civilMarriage) + ' Civil Marriage') ] }),
+        new TableCell({ children: [ new Paragraph(box(separated) + ' Separated') ] })
+      ] }),
+      twoUpRow('Date and Place', marriageDatePlace, '', '')
+    ] }),
+    sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [ 'Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }) ,
+      ...familyRows
+    ] }),
+    sectionTitle('OTHERS EXTENDED FAMILY'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [ 'Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }) ,
+      ...extRows
+    ] }),
+    sectionTitle('SERVICES RECEIVED FROM OTHER AGENCIES/INDIVIDUALS'),
+    new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+      new TableRow({ children: [ 'Name of agencies/persons','Address/date/duration','Services Received' ].map(h => new TableCell({ children: [ new Paragraph({ text: h, bold: true }) ] })) }),
+      ...agencyRows
+    ] }),
+    sectionTitle('III. BRIEF DESCRIPTION OF THE CLIENT UPON INTAKE'),
+    new Paragraph({ children: [ new TextRun({ text: 'Client:', bold: true }) ] }),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    new Paragraph({ children: [ new TextRun({ text: 'Parents / Relatives / Guardian:', bold: true }) ] }),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    sectionTitle('IV. PROBLEM PRESENTED'),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    sectionTitle('V. BRIEF HISTORY OF THE PROBLEM'),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    sectionTitle('VI. MEDICAL HISTORY / HEALTH STATUS'),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    sectionTitle('VII. ECONOMIC SITUATION'),
+    new Paragraph(''), new Paragraph(''), new Paragraph(''),
+    sectionTitle('VIII. FAMILY BACKGROUND'),
+    new Paragraph(val(caseData.familyBackground || caseData.family_background || '')),
+    sectionTitle('IX. ASSESSMENT'),
+    new Paragraph(val(caseData.assessment || '')),
+    new Paragraph({ children: [ new TextRun({ text: 'Client is eligible for the following programs/services:', bold: true }) ] }),
+    new Paragraph(box(caseData.programType === 'Children') + ' Children'),
+    new Paragraph(box(caseData.programType === 'Youth') + ' Youth (SAVES)'),
+    new Paragraph(box(caseData.programType === 'Mother') + ' Mother/Short Crisis Intervention'),
+    sectionTitle('X. RECOMMENDATION/PLAN OF ACTION'),
+    new Paragraph(val(caseData.recommendation || '')),
+    new Paragraph(''),
+    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
+    new Paragraph({ children: [ new TextRun({ text: 'Intake Worker', color: textColor }) ], alignment: AlignmentType.RIGHT }),
+    new Paragraph(''),
+    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
+    new Paragraph({ children: [ new TextRun({ text: 'Head, DSWD', color: textColor }) ], alignment: AlignmentType.RIGHT }),
+    new Paragraph(''),
+    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
+    new Paragraph({ children: [ new TextRun({ text: 'Administrator', color: textColor }) ], alignment: AlignmentType.RIGHT })
+  ] }] });
+
+  const buffer = await Packer.toBlob(doc);
+  const fileName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}.docx`;
+  const url = window.URL.createObjectURL(buffer);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};

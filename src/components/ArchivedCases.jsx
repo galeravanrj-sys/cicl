@@ -5,7 +5,7 @@ import Pagination from './Pagination';
 import CaseDetailsModal from './CaseDetailsModal';
 import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
-import { downloadCaseReportWord, downloadAllCasesWord } from '../utils/wordGenerator';
+import { downloadIntakeFormWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -224,7 +224,7 @@ const ArchivedCases = () => {
   const exportSingleCaseToWord = async (caseItem) => {
     const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
     const caseData = fullDetails || caseItem;
-    await downloadCaseReportWord(caseData);
+    await downloadIntakeFormWord(caseData);
   };
 
   
@@ -602,7 +602,7 @@ const ArchivedCases = () => {
                                 exportSingleCaseToWord(caseItem);
                               }}
                             >
-                              <i className="fas fa-file-word me-2"></i>Word
+                              <i className="fas fa-file-word me-2"></i>Intake Form (Word)
                             </button>
                           </li>
                               
