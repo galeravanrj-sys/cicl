@@ -1882,31 +1882,29 @@ export const downloadIntakeFormWord = async (caseData) => {
   wordLink.click();
   document.body.removeChild(wordLink);
   window.URL.revokeObjectURL(wordUrl);
+};
 
-  try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-    const res = await fetch(`${API_BASE}/export/case/pdf-html`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-auth-token': token
-      },
-      body: JSON.stringify(caseData)
-    });
-    if (res.ok) {
-      const pdfBlob = await res.blob();
-      const pdfUrl = window.URL.createObjectURL(pdfBlob);
-      const pdfLink = document.createElement('a');
-      pdfLink.href = pdfUrl;
-      pdfLink.download = `${baseName}.pdf`;
-      document.body.appendChild(pdfLink);
-      pdfLink.click();
-      document.body.removeChild(pdfLink);
-      window.URL.revokeObjectURL(pdfUrl);
-    } else {
-      console.error('Failed to generate PDF from server:', await res.text());
-    }
-  } catch (err) {
-    console.error('Error converting Word export to PDF:', err);
+export const downloadIntakeFormPDF = async (caseData) => {
+  const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+  const res = await fetch(`${API_BASE}/export/case/pdf-template`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-token': token
+    },
+    body: JSON.stringify(caseData)
+  });
+  if (!res.ok) {
+    throw new Error(await res.text());
   }
+  const pdfBlob = await res.blob();
+  const pdfUrl = window.URL.createObjectURL(pdfBlob);
+  const pdfLink = document.createElement('a');
+  pdfLink.href = pdfUrl;
+  pdfLink.download = `${baseName}.pdf`;
+  document.body.appendChild(pdfLink);
+  pdfLink.click();
+  document.body.removeChild(pdfLink);
+  window.URL.revokeObjectURL(pdfUrl);
 };

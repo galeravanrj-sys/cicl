@@ -3,9 +3,9 @@ import { useCases } from '../context/CaseContext';
 import AddCaseForm from './AddCaseForm';
 import EditCaseForm from './EditCaseForm';
 import CaseDetailsModal from './CaseDetailsModal';
-import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
+import { downloadAllCasesPDF } from '../utils/pdfGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
-import { downloadIntakeFormWord, downloadAllCasesWord } from '../utils/wordGenerator';
+import { downloadIntakeFormWord, downloadIntakeFormPDF, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { API_BASE } from '../utils/apiBase';
 
@@ -285,7 +285,7 @@ const CaseManagement = () => {
     try {
       const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
       const caseData = fullDetails || caseItem;
-      await downloadCaseReportPDF(caseData);
+      await downloadIntakeFormPDF(caseData);
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Error generating PDF. Please try again.');
