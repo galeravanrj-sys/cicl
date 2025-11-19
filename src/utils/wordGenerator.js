@@ -1541,6 +1541,17 @@ export const downloadIntakeFormWord = async (caseData) => {
     new TableCell({ children: [ new Paragraph(String(ag.servicesReceived || ag.services_received || '')) ] })
   ] }));
 
+  const padRows = (rows, min, cols) => {
+    const out = [...rows];
+    while (out.length < min) {
+      out.push(new TableRow({ children: Array.from({ length: cols }).map(() => new TableCell({ children: [ new Paragraph('') ] })) }));
+    }
+    return out;
+  };
+  const familyRowsPadded = padRows(familyRows, 4, 8);
+  const extRowsPadded = padRows(extRows, 3, 8);
+  const agencyRowsPadded = padRows(agencyRows, 3, 3);
+
   const doc = new Document({
     styles: {
       default: {
@@ -1614,6 +1625,7 @@ export const downloadIntakeFormWord = async (caseData) => {
         new TableRow({
           children: [
             new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
               children: [
                 new Paragraph(`${box(marriedInChurch)} Married in church`),
                 new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`),
@@ -1622,11 +1634,12 @@ export const downloadIntakeFormWord = async (caseData) => {
               ],
             }),
             new TableCell({
+              width: { size: 50, type: WidthType.PERCENTAGE },
               children: [
                 new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }),
-                new Paragraph('____________________________'),
-                new Paragraph('____________________________'),
-                new Paragraph('____________________________'),
+                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
+                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
+                new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { before: 60, after: 60 } }),
               ],
             }),
           ],
@@ -1635,15 +1648,15 @@ export const downloadIntakeFormWord = async (caseData) => {
     }),
     sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
     tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
-      ...familyRows
+      ...familyRowsPadded
     ] ),
     sectionTitle('OTHERS EXTENDED FAMILY'),
     tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
-      ...extRows
+      ...extRowsPadded
     ] ),
     sectionTitle('SERVICES RECEIVED FROM OTHER AGENCIES/INDIVIDUALS'),
     tableWithHeader(['Name of agencies/persons','Address/date/duration','Services Received'], [
-      ...agencyRows
+      ...agencyRowsPadded
     ] ),
     sectionTitle('III. BRIEF DESCRIPTION OF THE CLIENT UPON INTAKE'),
     new Paragraph({ children: [ new TextRun({ text: 'Client:', bold: true }) ] }),
