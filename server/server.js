@@ -240,8 +240,34 @@ async function ensureActiveSessionsTable() {
   }
 }
 
+async function ensureSecretsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS app_secrets (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch (e) {
+    console.error('Failed to ensure app_secrets table:', e.message);
+  }
+}
+
+async function loadAppSecrets() {
+  try {
+    const cc = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['cloudconvert_api_key']);
+    if (cc.rows && cc.rows[0] && cc.rows[0].value) process.env.CLOUDCONVERT_API_KEY = cc.rows[0].value;
+    const lo = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['libreoffice_path']);
+    if (lo.rows && lo.rows[0] && lo.rows[0].value) process.env.LIBREOFFICE_PATH = lo.rows[0].value;
+  } catch (e) {
+    console.error('Failed to load app secrets:', e.message);
+  }
+}
+
 // Execute migration at startup
 ensureBaseSchema().then(() => {
   ensureUniqueNameIndex();
   ensureActiveSessionsTable();
+  ensureSecretsTable().then(loadAppSecrets);
 });

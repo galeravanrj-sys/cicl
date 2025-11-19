@@ -84,6 +84,38 @@ router.get('/verify-token', auth, (req, res) => {
   });
 });
 
+router.post('/admin/secrets/cloudconvert', auth, async (req, res) => {
+  try {
+    const apiKey = req.body && req.body.apiKey;
+    if (!apiKey) return res.status(400).json({ message: 'apiKey required' });
+    await db.query(
+      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      ['cloudconvert_api_key', apiKey]
+    );
+    process.env.CLOUDCONVERT_API_KEY = apiKey;
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ message: 'Failed to set CloudConvert key' });
+  }
+});
+
+router.post('/admin/secrets/libreoffice', auth, async (req, res) => {
+  try {
+    const p = req.body && req.body.path;
+    if (!p) return res.status(400).json({ message: 'path required' });
+    await db.query(
+      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      ['libreoffice_path', p]
+    );
+    process.env.LIBREOFFICE_PATH = p;
+    return res.json({ success: true });
+  } catch (e) {
+    return res.status(500).json({ message: 'Failed to set LibreOffice path' });
+  }
+});
+
 // Set or change password (authenticated)
 router.post('/set-password', auth, async (req, res) => {
   try {
