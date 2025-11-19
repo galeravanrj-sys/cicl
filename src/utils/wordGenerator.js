@@ -1841,8 +1841,24 @@ export const downloadIntakeFormWord = async (caseData) => {
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Approved by:' }) ] }) ] }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] }),
-          new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] }),
+          new TableCell({ children: [
+            new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } }, rows: [
+              new TableRow({ children: [
+                new TableCell({ children: [ new Paragraph('') ], width: { size: 20, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] , width: { size: 60, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [ new Paragraph('') ], width: { size: 20, type: WidthType.PERCENTAGE } })
+              ] })
+            ] })
+          ] }),
+          new TableCell({ children: [
+            new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } }, rows: [
+              new TableRow({ children: [
+                new TableCell({ children: [ new Paragraph('') ], width: { size: 20, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] , width: { size: 60, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [ new Paragraph('') ], width: { size: 20, type: WidthType.PERCENTAGE } })
+              ] })
+            ] })
+          ] })
         ] }),
         new TableRow({ children: [
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Head, DSWD' }) ] , alignment: AlignmentType.CENTER }) ] }),
