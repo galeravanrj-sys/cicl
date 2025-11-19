@@ -1643,11 +1643,13 @@ export const downloadIntakeFormWord = async (caseData) => {
           new TableCell({ children: [ new Paragraph(oneLine(val(birthplace))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Provincial/Permanent Address:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 45, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Provincial/Permanent', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 35, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address:', bold: true }) ] }) ] , width: { size: 10, type: WidthType.PERCENTAGE } }),
           new TableCell({ children: [ new Paragraph(oneLine(val(provincialAddress))) ] , width: { size: 55, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Present Address:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 45, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Present', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 35, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Address:', bold: true }) ] }) ] , width: { size: 10, type: WidthType.PERCENTAGE } }),
           new TableCell({ children: [ new Paragraph(oneLine(val(presentAddress))) ] , width: { size: 55, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
