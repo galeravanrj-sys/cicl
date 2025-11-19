@@ -1600,11 +1600,39 @@ export const downloadIntakeFormWord = async (caseData) => {
     inlineRowCustom(['Guardian','Relation to the client'], [10400], [20, 20]),
     inlineField('Address', guardian.address, 9600, 48),
     sectionTitle('CIVIL STATUS OF PARENTS'),
-    new Paragraph(box(marriedInChurch) + ' Married in church'),
-    new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law'),
-    new Paragraph(box(civilMarriage) + ' Civil Marriage'),
-    new Paragraph(box(separated) + ' Separated'),
-    inlineField('Date and Place', marriageDatePlace, 9600, 24),
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+        bottom: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+        left: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+        right: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+        insideHorizontal: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+        insideVertical: { style: BorderStyle.SINGLE, size: 2, color: textColor },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [
+                new Paragraph(`${box(marriedInChurch)} Married in church`),
+                new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`),
+                new Paragraph(`${box(civilMarriage)} Civil Marriage`),
+                new Paragraph(`${box(separated)} Separated`),
+              ],
+            }),
+            new TableCell({
+              children: [
+                new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }),
+                new Paragraph('____________________________'),
+                new Paragraph('____________________________'),
+                new Paragraph('____________________________'),
+              ],
+            }),
+          ],
+        }),
+      ],
+    }),
     sectionTitle('FAMILY COMPOSITION (Siblings/Children)'),
     tableWithHeader(['Name','Relation to the client','Age/DOB','Sex','Status','Edu. Attainment','Address','Occupation/Income'], [
       ...familyRows
