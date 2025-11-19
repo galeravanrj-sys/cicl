@@ -1409,16 +1409,19 @@ export const downloadIntakeFormWord = async (caseData) => {
   const val = (v) => (v === undefined || v === null ? '' : String(v));
 
   const sectionTitle = (t) => new Paragraph({ children: [ new TextRun({ text: t, bold: true, size: 24, color: primaryColor }) ], spacing: { before: 240, after: 120 } });
-  const inlineField = (label, value, position = 7000) => new Paragraph({
-    tabStops: [{ type: TabStopType.LEFT, position }],
-    children: [
-      new TextRun({ text: label + ':', bold: true, color: textColor }),
-      new Tab(),
-      new TextRun({ text: ' '.repeat(40), underline: true, color: textColor }),
-      new TextRun({ text: val(value), color: textColor })
-    ],
-    spacing: { after: 80 }
-  });
+  const inlineField = (label, _value, position = 7200) => {
+    const lineLength = 80;
+    return new Paragraph({
+      tabStops: [{ type: TabStopType.LEFT, position }],
+      indent: { left: 720 },
+      children: [
+        new TextRun({ text: label + ':', bold: true, color: textColor }),
+        new Tab(),
+        new TextRun({ text: '_'.repeat(lineLength), color: textColor })
+      ],
+      spacing: { after: 120 }
+    });
+  };
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
     new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
     ...bodyRows
