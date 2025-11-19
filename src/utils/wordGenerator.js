@@ -1516,8 +1516,33 @@ export const downloadIntakeFormWord = async (caseData) => {
     address: caseData.guardianAddress || caseData.guardian_address || ''
   };
 
-  const edu = caseData.educationalAttainment || {};
-  const sacr = caseData.sacramentalRecord || {};
+  const edu = caseData.educationalAttainment || caseData.educational_attainment || [];
+  const getEduRow = (key) => {
+    if (Array.isArray(edu)) {
+      const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
+      const item = edu.find(e => String(e.level || '').toLowerCase() === String(label).toLowerCase());
+      return {
+        schoolName: item?.school_name ?? item?.schoolName ?? '',
+        schoolAddress: item?.school_address ?? item?.schoolAddress ?? '',
+        year: item?.year_completed ?? item?.year ?? ''
+      };
+    }
+    const obj = (typeof edu === 'object' && edu) || {};
+    return obj[key] || {};
+  };
+  const sacrList = caseData.sacramentalRecords || caseData.sacramental_records || caseData.sacramentalRecord || [];
+  const getSacrRow = (key) => {
+    if (Array.isArray(sacrList)) {
+      const label = key === 'firstCommunion' ? 'First Communion' : key === 'confirmation' ? 'Confirmation' : key === 'baptism' ? 'Baptism' : 'Others';
+      const item = sacrList.find(s => String(s.sacrament || '').toLowerCase() === String(label).toLowerCase());
+      return {
+        dateReceived: item?.date_received ?? item?.dateReceived ?? '',
+        placeParish: item?.place_parish ?? item?.placeParish ?? ''
+      };
+    }
+    const obj = (typeof sacrList === 'object' && sacrList) || {};
+    return obj[key] || {};
+  };
   const familyRows = (Array.isArray(caseData.familyComposition) ? caseData.familyComposition : (Array.isArray(caseData.familyMembers) ? caseData.familyMembers : (caseData.family || []))).map((m, i) => new TableRow({ children: [
     new TableCell({ children: [ new Paragraph(String(m.name || i + 1)) ] }),
     new TableCell({ children: [ new Paragraph(String(m.relation || m.relationToClient || '')) ] }),
@@ -1631,25 +1656,25 @@ export const downloadIntakeFormWord = async (caseData) => {
     sectionTitle('EDUCATIONAL ATTAINMENT'),
     tableWithHeader(['LEVEL','NAME OF SCHOOL','SCHOOL ADDRESS','YEAR'], [
       ...['elementary','highSchool','seniorHighSchool','vocationalCourse','college','others'].map(key => {
-        const row = (edu && edu[key]) || {};
+        const row = getEduRow(key);
         const label = key === 'others' ? 'Others' : key === 'vocationalCourse' ? 'Vocational Course' : key === 'seniorHighSchool' ? 'Senior High School' : key === 'highSchool' ? 'High School' : key === 'elementary' ? 'Elementary' : 'College';
         return new TableRow({ children: [
           new TableCell({ children: [ new Paragraph(label) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.schoolName || '')) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.schoolAddress || '')) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.year || '')) ] })
+          new TableCell({ children: [ new Paragraph(val(row.schoolName)) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.schoolAddress)) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.year)) ] })
         ] });
       })
     ] ),
     sectionTitle('SACRAMENTAL RECORD'),
     tableWithHeader(['Sacrament','Date Received','Place/Parish'], [
       ...['baptism','firstCommunion','confirmation','others'].map(key => {
-        const row = (sacr && sacr[key]) || {};
+        const row = getSacrRow(key);
         const label = key === 'firstCommunion' ? 'First Communion' : key === 'confirmation' ? 'Confirmation' : key === 'baptism' ? 'Baptism' : 'Others';
         return new TableRow({ children: [
           new TableCell({ children: [ new Paragraph(label) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.dateReceived || '')) ] }),
-          new TableCell({ children: [ new Paragraph(val(row.placeParish || '')) ] })
+          new TableCell({ children: [ new Paragraph(val(row.dateReceived)) ] }),
+          new TableCell({ children: [ new Paragraph(val(row.placeParish)) ] })
         ] });
       })
     ] ),
