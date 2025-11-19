@@ -5,6 +5,8 @@ const auth = require('./middleware/auth');
 const db = require('./db');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
+const { spawn } = require('child_process');
+const os = require('os');
 
 const router = express.Router();
 
@@ -1111,7 +1113,7 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
 
     // Write temp DOCX
     const tmpDir = os.tmpdir();
-    const id = uuidv4();
+    const id = `${Date.now()}-${Math.floor(Math.random()*1e9)}`;
     const docxPath = path.join(tmpDir, `intake-${id}.docx`);
     const pdfPath = path.join(tmpDir, `intake-${id}.pdf`);
     fs.writeFileSync(docxPath, docxBuffer);
@@ -1231,6 +1233,3 @@ router.get('/sample/pdf', async (req, res) => {
 });
 
 module.exports = router;
-const { spawn } = require('child_process');
-const os = require('os');
-const { v4: uuidv4 } = require('uuid');
