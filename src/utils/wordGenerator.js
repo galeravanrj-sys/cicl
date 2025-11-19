@@ -1450,14 +1450,14 @@ export const downloadIntakeFormWord = async (caseData) => {
       spacing: { after: 120 }
     });
   };
-  const nameCheckboxLine = (label, nameLen = 24, living = false, indentLeft = 720) => {
+  const nameCheckboxLine = (label, nameLen = 24, living = false, indentLeft = 720, trailLen = 16) => {
     return new Paragraph({
       indent: { left: indentLeft },
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
         new TextRun({ text: ' ' + '_'.repeat(nameLen), color: textColor }),
         new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☑' : '☐') + ' Deceased ', color: textColor }),
-        new TextRun({ text: '_'.repeat(12), color: textColor })
+        new TextRun({ text: '_'.repeat(trailLen), color: textColor })
       ],
       spacing: { after: 120 }
     });
@@ -1590,16 +1590,16 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    nameCheckboxLine('Husband/Father', 24, father.living, 720),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [12, 6, 24]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
-    inlineField('Address and Tel. Nos.', father.address, 9600, 60),
-    nameCheckboxLine('Mother/Wife', 24, mother.living, 720),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [12, 6, 24]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
-    inlineField('Address and Tel. Nos.', mother.address, 9600, 60),
-    inlineRowCustom(['Guardian','Relation to the client'], [10400], [24, 24]),
-    inlineField('Address', guardian.address, 9600, 60),
+    nameCheckboxLine('Husband/Father', 22, father.living, 720, 14),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [10, 6, 22]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [20, 20, 14]),
+    inlineField('Address and Tel. Nos.', father.address, 9600, 48),
+    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 14),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [10, 6, 22]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [20, 20, 14]),
+    inlineField('Address and Tel. Nos.', mother.address, 9600, 48),
+    inlineRowCustom(['Guardian','Relation to the client'], [10400], [22, 22]),
+    inlineField('Address', guardian.address, 9600, 56),
     sectionTitle('CIVIL STATUS OF PARENTS'),
     new Paragraph(box(marriedInChurch) + ' Married in church'),
     new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law'),
