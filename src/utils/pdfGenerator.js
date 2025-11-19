@@ -781,9 +781,10 @@ export const downloadAllCasesPDF = async (inputItems = [], options = {}) => {
 };
 
 export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ orientation: 'landscape' });
   const pageWidth = doc.internal.pageSize.width;
   const margin = 20;
+  const theme = { colors: pdfTheme.colors, type: pdfTheme.type };
   const toDateOnly = (value) => {
     if (value === null || value === undefined || value === '') return '';
     const s = String(value).trim();
@@ -824,15 +825,27 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
     ['Last Update Date', toDateOnly(caseData.updated_at || caseData.lastUpdated)]
   ];
 
+  // Professional header
+  doc.setFillColor(...theme.colors.primary);
+  doc.rect(0, 0, pageWidth, 18, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(theme.type.h2);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Case Summary', pageWidth / 2, 10, { align: 'center' });
+
   autoTable(doc, {
-    startY: 20,
+    startY: 24,
     body: kvRows,
-    styles: { fontSize: 10, cellPadding: 4, halign: 'center' },
+    styles: { fontSize: 10, cellPadding: 5, halign: 'center' },
     headStyles: { halign: 'center' },
     alternateRowStyles: { fillColor: [248, 250, 252] },
     theme: 'grid',
     margin: { left: margin, right: margin },
-    tableWidth: pageWidth - margin * 2
+    tableWidth: pageWidth - margin * 2,
+    columnStyles: {
+      0: { cellWidth: 'wrap', halign: 'left' },
+      1: { cellWidth: 'wrap', halign: 'center' }
+    }
   });
 
   const addArrayTable = (title, columns, rows) => {
@@ -861,24 +874,26 @@ export const generateCleanCaseSummaryPDF = (caseData, opts = {}) => {
     columns.forEach((h, idx) => {
       const key = h.toLowerCase();
       let width;
-      if (key === 'name') width = 40;
-      else if (key === 'relationship' || key === 'relation') width = 32;
-      else if (key === 'address' || key === 'address_date_duration' || key === 'place_parish') width = 42;
-      else if (key === 'education' || key === 'occupation' || key === 'services_received') width = 36;
-      else if (key === 'notes') width = 42;
-      else if (key === 'income') width = 26;
-      else if (key === 'status') width = 28;
-      else if (key === 'sacrament') width = 32;
-      else if (key === 'school_name' || key === 'school_address') width = 40;
-      else width = 24;
+      if (key === 'name') width = 60;
+      else if (key === 'relationship' || key === 'relation') width = 40;
+      else if (key === 'address' || key === 'address_date_duration' || key === 'place_parish') width = 70;
+      else if (key === 'education' || key === 'occupation' || key === 'services_received') width = 55;
+      else if (key === 'notes') width = 70;
+      else if (key === 'income') width = 32;
+      else if (key === 'status') width = 30;
+      else if (key === 'sacrament') width = 40;
+      else if (key === 'school_name' || key === 'school_address') width = 60;
+      else if (key === 'year_completed' || key === 'date_completed' || key === 'date_received') width = 32;
+      else if (key === 'heart_rate' || key === 'temperature' || key === 'weight' || key === 'height' || key === 'blood_pressure') width = 32;
+      else width = 26;
       colStyles[idx] = { halign: 'center', cellWidth: width };
     });
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 10,
       head: [displayHeaders],
       body: rows.map((r) => columns.map((h) => normalizeCell(r[h] ?? r[h.replace(/\s+/g, '_').toLowerCase()] ?? '', h))),
-      styles: { fontSize: 10, cellPadding: 4, halign: 'center', valign: 'middle', overflow: 'linebreak' },
-      headStyles: { fillColor: [44, 72, 99], textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle' },
+      styles: { fontSize: 9, cellPadding: 5, halign: 'center', valign: 'middle', overflow: 'linebreak' },
+      headStyles: { fillColor: theme.colors.primary, textColor: 255, fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 9 },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       theme: 'grid',
       margin: { left: margin, right: margin },
