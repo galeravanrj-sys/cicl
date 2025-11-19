@@ -1435,6 +1435,33 @@ export const downloadIntakeFormWord = async (caseData) => {
       spacing: { after: 120 }
     });
   };
+  const inlineRowCustom = (labels = [], positions = [], lengths = [], indentLeft = 720) => {
+    return new Paragraph({
+      tabStops: positions.map(p => ({ type: TabStopType.LEFT, position: p })),
+      indent: { left: indentLeft },
+      children: labels.flatMap((lab, i) => {
+        const runs = [];
+        if (i > 0) runs.push(new Tab());
+        runs.push(new TextRun({ text: lab + ':', bold: true, color: textColor }));
+        const len = lengths[i] ?? 20;
+        runs.push(new TextRun({ text: ' ' + '_'.repeat(len), color: textColor }));
+        return runs;
+      }),
+      spacing: { after: 120 }
+    });
+  };
+  const nameCheckboxLine = (label, nameLen = 24, living = false, indentLeft = 720) => {
+    return new Paragraph({
+      indent: { left: indentLeft },
+      children: [
+        new TextRun({ text: label + ':', bold: true, color: textColor }),
+        new TextRun({ text: ' ' + '_'.repeat(nameLen), color: textColor }),
+        new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☐' : '☑') + ' Deceased ', color: textColor }),
+        new TextRun({ text: '_'.repeat(12), color: textColor })
+      ],
+      spacing: { after: 120 }
+    });
+  };
   const tableWithHeader = (headerTexts, bodyRows) => new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
     new TableRow({ children: headerTexts.map(h => new TableCell({ shading: { fill: headerShade }, children: [ new Paragraph({ children: [ new TextRun({ text: h, bold: true, color: primaryColor }) ] }), ], }) ) }),
     ...bodyRows
@@ -1563,27 +1590,16 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    inlineField('Husband/Father', father.name, 9600, 24),
-    new Paragraph(box(father.living) + ' Living      ' + box(false) + ' Deceased'),
-    inlineField('Birthdate', '', 9600, 20),
-    inlineField('Age', father.age, 9600, 12),
-    inlineField('Educational Attainment', father.education, 9600, 24),
-    inlineField('Occupation', father.occupation, 9600, 22),
-    inlineField('Other Skills', father.otherSkills, 9600, 22),
-    inlineField('Income', father.income, 9600, 18),
-    inlineField('Address and Tel. Nos.', father.address, 9600, 28),
-    inlineField('Mother/Wife', mother.name, 9600, 24),
-    new Paragraph(box(mother.living) + ' Living      ' + box(false) + ' Deceased'),
-    inlineField('Birthdate', '', 9600, 20),
-    inlineField('Age', mother.age, 9600, 12),
-    inlineField('Educational Attainment', mother.education, 9600, 24),
-    inlineField('Occupation', mother.occupation, 9600, 22),
-    inlineField('Other Skills', mother.otherSkills, 9600, 22),
-    inlineField('Income', mother.income, 9600, 18),
-    inlineField('Address and Tel. Nos.', mother.address, 9600, 28),
-    inlineField('Guardian', guardian.name, 9600, 24),
-    inlineField('Relation to the client', guardian.relation, 9600, 24),
-    inlineField('Address', guardian.address, 9600, 28),
+    nameCheckboxLine('Husband/Father', 24, father.living, 720),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [12, 6, 24]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
+    inlineField('Address and Tel. Nos.', father.address, 9600, 60),
+    nameCheckboxLine('Mother/Wife', 24, mother.living, 720),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [12, 6, 24]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
+    inlineField('Address and Tel. Nos.', mother.address, 9600, 60),
+    inlineRowCustom(['Guardian','Relation to the client'], [10400], [24, 24]),
+    inlineField('Address', guardian.address, 9600, 60),
     sectionTitle('CIVIL STATUS OF PARENTS'),
     new Paragraph(box(marriedInChurch) + ' Married in church'),
     new Paragraph(box(liveInCommonLaw) + ' Live-in/Common Law'),
