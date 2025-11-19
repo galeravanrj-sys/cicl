@@ -1624,26 +1624,26 @@ export const downloadIntakeFormWord = async (caseData) => {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: ' ', size: 1 }) ] }) ] }),
+            new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Status', bold: true }) ], alignment: AlignmentType.CENTER }) ] }),
             new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Date and Place', bold: true }) ], alignment: AlignmentType.CENTER }) ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(marriedInChurch)} Married in church`) ] }),
-            new TableCell({ children: [ new Paragraph('') ] }),
+            new TableCell({ children: [ new Paragraph(marriedInChurch ? marriageDatePlace : '') ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(liveInCommonLaw)} Live-in/Common Law`) ] }),
-            new TableCell({ children: [ new Paragraph('') ] }),
+            new TableCell({ children: [ new Paragraph(liveInCommonLaw ? marriageDatePlace : '') ] }),
           ],
         }),
         new TableRow({
           children: [
             new TableCell({ children: [ new Paragraph(`${box(civilMarriage)} Civil Marriage`) ] }),
-            new TableCell({ children: [ new Paragraph('') ] }),
+            new TableCell({ children: [ new Paragraph(civilMarriage ? marriageDatePlace : '') ] }),
           ],
         }),
         new TableRow({
@@ -1668,36 +1668,64 @@ export const downloadIntakeFormWord = async (caseData) => {
     ] ),
     sectionTitle('III. BRIEF DESCRIPTION OF THE CLIENT UPON INTAKE'),
     new Paragraph({ children: [ new TextRun({ text: 'Client:', bold: true }) ] }),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.clientDescription || caseData.client_description || '')),
     new Paragraph({ children: [ new TextRun({ text: 'Parents / Relatives / Guardian:', bold: true }) ] }),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.parentsDescription || caseData.parents_description || '')),
     sectionTitle('IV. PROBLEM PRESENTED'),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.problemPresented || caseData.problem_presented || '')),
     sectionTitle('V. BRIEF HISTORY OF THE PROBLEM'),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.briefHistory || caseData.brief_history || '')),
     sectionTitle('VI. MEDICAL HISTORY / HEALTH STATUS'),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.medicalHistory || caseData.medical_history || '')),
     sectionTitle('VII. ECONOMIC SITUATION'),
-    ...Array.from({ length: 4 }, () => new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 60 } })),
+    new Paragraph(val(caseData.economicSituation || caseData.economic_situation || '')),
     sectionTitle('VIII. FAMILY BACKGROUND'),
     new Paragraph(val(caseData.familyBackground || caseData.family_background || '')),
     sectionTitle('IX. ASSESSMENT'),
     new Paragraph(val(caseData.assessment || '')),
-    new Paragraph({ children: [ new TextRun({ text: 'Client is eligible for the following programs/services:', bold: true }) ] }),
-    new Paragraph(box(caseData.programType === 'Children') + ' Children'),
-    new Paragraph(box(caseData.programType === 'Youth') + ' Youth (SAVES)'),
-    new Paragraph(box(caseData.programType === 'Mother') + ' Mother/Short Crisis Intervention'),
+    new Paragraph({ children: [ new TextRun({ text: 'Client is eligible for the following program/services:', bold: true }) ] }),
+    new Paragraph('( ) Children'),
+    new Paragraph({ children: [
+      new TextRun({ text: '__________ ' }),
+      new TextRun({ text: 'Blessed Rosalie Rendu' }),
+      new TextRun({ text: ' __________ ' }),
+      new TextRun({ text: 'Blessed Margaret Rutan' }),
+      new TextRun({ text: ' __________ ' }),
+      new TextRun({ text: 'Blessed Martha Wiecka' })
+    ] }),
+    new Paragraph('( ) Youth (SAVES)'),
+    new Paragraph('( ) Mother Seton Crisis Intervention'),
     sectionTitle('X. RECOMMENDATION/PLAN OF ACTION'),
     new Paragraph(val(caseData.recommendation || '')),
     new Paragraph(''),
-    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
-    new Paragraph({ children: [ new TextRun({ text: 'Intake Worker', color: textColor }) ], alignment: AlignmentType.RIGHT }),
+    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ], alignment: AlignmentType.CENTER }),
+    new Paragraph({ children: [ new TextRun({ text: 'Intake Worker' }) ], alignment: AlignmentType.CENTER }),
     new Paragraph(''),
-    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
-    new Paragraph({ children: [ new TextRun({ text: 'Head, DSWD', color: textColor }) ], alignment: AlignmentType.RIGHT }),
-    new Paragraph(''),
-    new Paragraph({ children: [ new TextRun({ text: '____________________', bold: true }) ] , alignment: AlignmentType.RIGHT }),
-    new Paragraph({ children: [ new TextRun({ text: 'Administrator', color: textColor }) ], alignment: AlignmentType.RIGHT })
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.NONE },
+        bottom: { style: BorderStyle.NONE },
+        left: { style: BorderStyle.NONE },
+        right: { style: BorderStyle.NONE },
+        insideHorizontal: { style: BorderStyle.NONE },
+        insideVertical: { style: BorderStyle.NONE },
+      },
+      rows: [
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Recommending Approval:' }) ] }) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Approved by:' }) ] }) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] }),
+          new TableCell({ children: [ new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: textColor } }, spacing: { after: 60 } }) ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Head, DSWD' }) ] , alignment: AlignmentType.CENTER }) ] }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Administrator' }) ] , alignment: AlignmentType.CENTER }) ] }),
+        ] })
+      ]
+    })
   ] }] });
 
   const buffer = await Packer.toBlob(doc);
