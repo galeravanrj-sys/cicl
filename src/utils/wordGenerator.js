@@ -1436,7 +1436,7 @@ export const downloadIntakeFormWord = async (caseData) => {
       spacing: { after: 120 }
     });
   };
-  const inlineRowCustom = (labels = [], positions = [], lengths = [], indentLeft = 720) => {
+  const inlineRowCustom = (labels = [], positions = [], lengths = [], indentLeft = 720, values = []) => {
     return new Paragraph({
       tabStops: positions.map(p => ({ type: TabStopType.LEFT, position: p })),
       indent: { left: indentLeft },
@@ -1445,18 +1445,19 @@ export const downloadIntakeFormWord = async (caseData) => {
         if (i > 0) runs.push(new Tab());
         runs.push(new TextRun({ text: lab + ':', bold: true, color: textColor }));
         const len = lengths[i] ?? 20;
-        runs.push(new TextRun({ text: ' ' + '_'.repeat(len), color: textColor }));
+        const v = val(values[i]);
+        runs.push(new TextRun({ text: ' ' + (v || '_'.repeat(len)), color: textColor }));
         return runs;
       }),
       spacing: { after: 120 }
     });
   };
-  const nameCheckboxLine = (label, nameLen = 24, living = false, indentLeft = 720, trailLen = 16) => {
+  const nameCheckboxLine = (label, nameLen = 24, living = false, indentLeft = 720, trailLen = 16, nameValue = '') => {
     return new Paragraph({
       indent: { left: indentLeft },
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
-        new TextRun({ text: ' ' + '_'.repeat(nameLen), color: textColor }),
+        new TextRun({ text: ' ' + (val(nameValue) || '_'.repeat(nameLen)), color: textColor }),
         new TextRun({ text: '  ' + (living ? '☑' : '☐') + ' Living  ' + (!living ? '☑' : '☐') + ' Deceased ', color: textColor }),
         new TextRun({ text: '_'.repeat(trailLen), color: textColor })
       ],
@@ -1602,15 +1603,15 @@ export const downloadIntakeFormWord = async (caseData) => {
       })
     ] ),
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
-    nameCheckboxLine('Husband/Father', 22, father.living, 720, 14),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
+    nameCheckboxLine('Husband/Father', 22, father.living, 720, 14, father.name),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', father.age, father.education]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [father.occupation, father.otherSkills, father.income]),
     inlineField('Address and Tel. Nos.', father.address, 9600, 40),
-    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 14),
-    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20]),
-    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12]),
+    nameCheckboxLine('Mother/Wife', 22, mother.living, 720, 14, mother.name),
+    inlineRowCustom(['Birthdate','Age','Educational Attainment'], [7800, 9800, 12600], [9, 5, 20], 720, ['', mother.age, mother.education]),
+    inlineRowCustom(['Occupation','Other Skills','Income'], [7800, 9800, 12600], [18, 18, 12], 720, [mother.occupation, mother.otherSkills, mother.income]),
     inlineField('Address and Tel. Nos.', mother.address, 9600, 40),
-    inlineRowCustom(['Guardian','Relation to the client'], [10400], [20, 20]),
+    inlineRowCustom(['Guardian','Relation to the client'], [10400], [20, 20], 720, [guardian.name, guardian.relation]),
     inlineField('Address', guardian.address, 9600, 48),
     sectionTitle('CIVIL STATUS OF PARENTS'),
     new Table({
@@ -1724,6 +1725,10 @@ export const downloadIntakeFormWord = async (caseData) => {
         ] }),
         new TableRow({ children: [
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Head, DSWD' }) ] , alignment: AlignmentType.CENTER }) ] }),
+          new TableCell({ children: [ new Paragraph('') ] }),
+        ] }),
+        new TableRow({ children: [
+          new TableCell({ children: [ new Paragraph('') ] }),
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Administrator' }) ] , alignment: AlignmentType.CENTER }) ] }),
         ] })
       ]
