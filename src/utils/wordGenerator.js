@@ -1899,19 +1899,14 @@ export const downloadIntakeFormPDF = async (caseData) => {
     const docxBlob = await downloadIntakeFormWord(caseData, { noDownload: true });
     const res1 = await fetch(`${API_BASE}/export/case/pdf-from-docx`, {
       method: 'POST',
-      headers: { 'x-auth-token': token },
+      headers: { 'x-auth-token': token, 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
       body: docxBlob
     });
     if (!res1.ok) throw new Error(await res1.text());
     pdfBlob = await res1.blob();
   } catch (err) {
-    const res2 = await fetch(`${API_BASE}/export/case/pdf-intake`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-      body: JSON.stringify(caseData)
-    });
-    if (!res2.ok) throw new Error(await res2.text());
-    pdfBlob = await res2.blob();
+    alert('PDF conversion failed. Please contact admin to enable DOCX→PDF on the server.');
+    throw err;
   }
   const pdfUrl = window.URL.createObjectURL(pdfBlob);
   const pdfLink = document.createElement('a');
@@ -1928,17 +1923,16 @@ export const downloadAllCasesPDFFromWord = async (casesData = []) => {
   let pdfBlob;
   try {
     const docxBlob = await downloadAllCasesWord(casesData, { noDownload: true });
-    const res1 = await fetch(`${API_BASE}/export/cases/pdf-from-docx?listOnly=true`, {
+    const res1 = await fetch(`${API_BASE}/export/case/pdf-from-docx`, {
       method: 'POST',
-      headers: { 'x-auth-token': token },
+      headers: { 'x-auth-token': token, 'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
       body: docxBlob
     });
     if (!res1.ok) throw new Error(await res1.text());
     pdfBlob = await res1.blob();
   } catch (err) {
-    const { downloadAllCasesPDF } = await import('./pdfGenerator.js');
-    await downloadAllCasesPDF(casesData);
-    return;
+    alert('PDF conversion failed for All Cases. Please contact admin to enable DOCX→PDF on the server.');
+    throw err;
   }
   const url = window.URL.createObjectURL(pdfBlob);
   const a = document.createElement('a');
