@@ -604,7 +604,7 @@ const ArchivedCases = () => {
                                 exportSingleCaseToWord(caseItem);
                               }}
                             >
-                              <i className="fas fa-file-word me-2"></i>Intake Form (Word)
+                              <i className="fas fa-file-word me-2"></i>Export Word
                             </button>
                           </li>
                               

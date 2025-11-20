@@ -628,7 +628,7 @@ const CaseManagement = () => {
                               handleDownloadWord(caseItem);
                             }}
                           >
-                            <i className="fas fa-file-word me-2"></i>Export Intake Form (Word)
+                            <i className="fas fa-file-word me-2"></i>Export Word
                           </button>
                         </li>
                             <li>
