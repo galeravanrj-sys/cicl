@@ -6,8 +6,6 @@ const db = require('./db');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
-const Docxtemplater = require('docxtemplater');
-const PizZip = require('pizzip');
 const { spawn } = require('child_process');
 const os = require('os');
 
@@ -15,7 +13,6 @@ const router = express.Router();
 
 const TEMPLATE_PATH = path.join(__dirname, '..', 'public', 'template', 'GENERAL_INTAKEFORM_ASILO_fillable.pdf');
 const BASE_TEMPLATE_PATH = path.join(__dirname, '..', 'public', 'template', 'GENERAL_INTAKEFORM_ASILO.pdf');
-const DOCX_TEMPLATE_PATH = path.join(__dirname, '..', 'public', 'template', 'GENERAL_INTAKEFORM_ASILO.docx');
 
 async function ensureFillableTemplate() {
   try {
@@ -1104,69 +1101,6 @@ router.post('/case/pdf-intake', auth, async (req, res) => {
   } catch (err) {
     console.error('Intake PDF export error:', err);
     return res.status(500).json({ message: 'Failed to generate Intake PDF', error: err.message });
-  }
-});
-
-router.post('/case/word-intake', auth, async (req, res) => {
-  try {
-    if (!fs.existsSync(DOCX_TEMPLATE_PATH)) {
-      return res.status(404).json({ message: 'DOCX template not found' });
-    }
-    const b = fs.readFileSync(DOCX_TEMPLATE_PATH);
-    const zip = new PizZip(b);
-    const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => '' });
-    const d = req.body || {};
-    const map = {
-      last_name: d.lastName || d.last_name || '',
-      first_name: d.firstName || d.first_name || '',
-      middle_name: d.middleName || d.middle_name || '',
-      sex: d.sex || '',
-      birthdate: d.birthdate || '',
-      age: d.age || '',
-      civil_status: d.status || d.civil_status || '',
-      religion: d.religion || '',
-      present_address: d.presentAddress || d.present_address || d.address || '',
-      provincial_address: d.provincialAddress || d.provincial_address || '',
-      nationality: d.nationality || '',
-      birthplace: d.birthplace || d.birth_place || '',
-      nickname: d.nickname || '',
-      source_of_referral: d.sourceOfReferral || d.source_of_referral || '',
-      date_of_referral: d.dateOfReferral || d.date_of_referral || '',
-      address_and_tel: d.addressAndTel || d.address_and_tel || '',
-      relation_to_client: d.relationToClient || d.relation_to_client || '',
-      case_type: d.caseType || d.case_type || '',
-      assigned_house_parent: d.assignedHouseParent || d.assigned_house_parent || '',
-      father_name: d.fatherName || d.father_name || '',
-      father_occupation: d.fatherOccupation || d.father_occupation || '',
-      mother_name: d.motherName || d.mother_name || '',
-      mother_occupation: d.motherOccupation || d.mother_occupation || '',
-      guardian_name: d.guardianName || d.guardian_name || '',
-      guardian_relation: d.guardianRelation || d.guardian_relation || '',
-      married_in_church: d.marriedInChurch ? 'Yes' : 'No',
-      live_in_common_law: d.liveInCommonLaw ? 'Yes' : 'No',
-      civil_marriage: d.civilMarriage ? 'Yes' : 'No',
-      separated: d.separated ? 'Yes' : 'No',
-      marriage_date_place: d.marriageDatePlace || d.marriage_date_place || '',
-      brief_description: d.briefDescription || d.brief_description || '',
-      problem_presented: d.problemPresented || d.problem_presented || '',
-      brief_history: d.briefHistory || d.brief_history || '',
-      economic_situation: d.economicSituation || d.economic_situation || '',
-      medical_history: d.medicalHistory || d.medical_history || '',
-      family_background: d.familyBackground || d.family_background || '',
-      assessment: d.assessment || '',
-      recommendation: d.recommendation || '',
-      intake_date: d.intakeDate || d.date || '',
-      intake_time: d.intakeTime || d.time || '',
-      intake_site: d.intakeSite || d.siteOfIntake || ''
-    };
-    doc.setData(map);
-    doc.render();
-    const out = doc.getZip().generate({ type: 'nodebuffer' });
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    res.setHeader('Content-Disposition', 'attachment; filename="General_Intake_Form.docx"');
-    return res.send(out);
-  } catch (err) {
-    return res.status(500).json({ message: 'Failed to generate DOCX from template', error: err.message });
   }
 });
 

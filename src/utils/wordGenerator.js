@@ -1872,41 +1872,19 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
     })
   ] }] });
 
+  const buffer = await Packer.toBlob(doc);
   const baseName = `General_Intake_Form_${caseData.lastName || caseData.last_name || 'Unknown'}_${caseData.firstName || caseData.first_name || 'Unknown'}_${new Date().toISOString().split('T')[0]}`;
-  try {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-    const res = await fetch(`${API_BASE}/export/case/word-intake`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-      body: JSON.stringify(caseData)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const blob = await res.blob();
-    if (!options?.noDownload) {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${baseName}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    }
-    return blob;
-  } catch (_) {
-    const buffer = await Packer.toBlob(doc);
-    if (!options?.noDownload) {
-      const wordUrl = window.URL.createObjectURL(buffer);
-      const wordLink = document.createElement('a');
-      wordLink.href = wordUrl;
-      wordLink.download = `${baseName}.docx`;
-      document.body.appendChild(wordLink);
-      wordLink.click();
-      document.body.removeChild(wordLink);
-      window.URL.revokeObjectURL(wordUrl);
-    }
-    return buffer;
+  if (!options?.noDownload) {
+    const wordUrl = window.URL.createObjectURL(buffer);
+    const wordLink = document.createElement('a');
+    wordLink.href = wordUrl;
+    wordLink.download = `${baseName}.docx`;
+    document.body.appendChild(wordLink);
+    wordLink.click();
+    document.body.removeChild(wordLink);
+    window.URL.revokeObjectURL(wordUrl);
   }
+  return buffer;
 };
 
 export const downloadIntakeFormPDF = async (caseData) => {
