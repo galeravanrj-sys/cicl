@@ -62,14 +62,21 @@ vi.mock('../utils/exportHelpers', () => ({
 // Mock PDF generator utilities
 const {
   mockDownloadCaseReportPDF,
-  mockDownloadAllCasesPDF,
 } = vi.hoisted(() => ({
   mockDownloadCaseReportPDF: vi.fn(),
-  mockDownloadAllCasesPDF: vi.fn(),
 }));
 vi.mock('../utils/pdfGenerator', () => ({
   downloadCaseReportPDF: mockDownloadCaseReportPDF,
-  downloadAllCasesPDF: mockDownloadAllCasesPDF,
+}));
+
+// Mock Word-based PDF export for all cases
+const { mockDownloadAllCasesPDFFromWord } = vi.hoisted(() => ({
+  mockDownloadAllCasesPDFFromWord: vi.fn(),
+}));
+vi.mock('../utils/wordGenerator', () => ({
+  downloadAllCasesPDFFromWord: mockDownloadAllCasesPDFFromWord,
+  downloadAllCasesWord: vi.fn(),
+  downloadIntakeFormWord: vi.fn(),
 }));
 
 // Word export removed: no mocks needed
@@ -99,7 +106,7 @@ beforeEach(() => {
   mockUpdateCase.mockReset();
   mockFetchCaseDetailsForExport.mockReset();
   mockDownloadCaseReportPDF.mockReset();
-  mockDownloadAllCasesPDF.mockReset();
+  mockDownloadAllCasesPDFFromWord.mockReset();
   mockDownloadAllCasesCSV.mockReset();
   mockDownloadCaseReportCSV.mockReset();
   axios.put.mockReset();
@@ -291,8 +298,8 @@ describe('Discharged Cases - Export All', () => {
     fireEvent.click(screen.getByText(/Export All to PDF/i));
 
     await waitFor(() => {
-      expect(mockDownloadAllCasesPDF).toHaveBeenCalledTimes(1);
-      const [arg] = mockDownloadAllCasesPDF.mock.calls[0];
+      expect(mockDownloadAllCasesPDFFromWord).toHaveBeenCalledTimes(1);
+      const [arg] = mockDownloadAllCasesPDFFromWord.mock.calls[0];
       expect(Array.isArray(arg)).toBe(true);
       expect(arg.length).toBeGreaterThan(0);
     });

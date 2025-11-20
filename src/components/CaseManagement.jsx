@@ -3,7 +3,7 @@ import { useCases } from '../context/CaseContext';
 import AddCaseForm from './AddCaseForm';
 import EditCaseForm from './EditCaseForm';
 import CaseDetailsModal from './CaseDetailsModal';
-import { downloadAllCasesPDF } from '../utils/pdfGenerator';
+import { downloadAllCasesPDFFromWord } from '../utils/wordGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
 import { downloadIntakeFormWord, downloadIntakeFormPDF, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
@@ -64,20 +64,19 @@ const CaseManagement = () => {
 
 
 
-  // Handle Export All PDF function
   const handleExportAllPDF = async () => {
     if (sortedCases.length === 0) {
       alert('No cases to export');
       return;
     }
-
     try {
-      console.log('Starting PDF export for all cases...');
-      await downloadAllCasesPDF(sortedCases.map(c => c.id));
-      console.log('All cases summary PDF exported successfully');
+      const payload = await Promise.all(sortedCases.map(async (c) => {
+        const full = await fetchCaseDetailsForExport(c.id);
+        return full || c;
+      }));
+      await downloadAllCasesPDFFromWord(payload);
     } catch (error) {
       console.error('Error exporting PDFs:', error);
-      // Avoid intrusive alerts for success; keep error feedback minimal
     }
   };
 

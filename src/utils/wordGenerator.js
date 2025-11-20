@@ -1248,7 +1248,7 @@ export const downloadCaseReportWord = async (caseData) => {
 };
 
 // Professional consolidated Word export for all cases
-export const downloadAllCasesWord = async (casesData = []) => {
+export const downloadAllCasesWord = async (casesData = [], options = {}) => {
   const primaryColor = '297db9';
   const textColor = '2D3748';
 
@@ -1306,6 +1306,9 @@ export const downloadAllCasesWord = async (casesData = []) => {
 
   const buffer = await Packer.toBlob(doc);
   const fileName = `CICL_All_Cases_List_${new Date().toISOString().split('T')[0]}.docx`;
+  if (options?.noDownload) {
+    return buffer;
+  }
   const url = window.URL.createObjectURL(buffer);
   const link = document.createElement('a');
   link.href = url;
@@ -1918,4 +1921,31 @@ export const downloadIntakeFormPDF = async (caseData) => {
   pdfLink.click();
   document.body.removeChild(pdfLink);
   window.URL.revokeObjectURL(pdfUrl);
+};
+
+export const downloadAllCasesPDFFromWord = async (casesData = []) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+  let pdfBlob;
+  try {
+    const docxBlob = await downloadAllCasesWord(casesData, { noDownload: true });
+    const res1 = await fetch(`${API_BASE}/export/cases/pdf-from-docx?listOnly=true`, {
+      method: 'POST',
+      headers: { 'x-auth-token': token },
+      body: docxBlob
+    });
+    if (!res1.ok) throw new Error(await res1.text());
+    pdfBlob = await res1.blob();
+  } catch (err) {
+    const { downloadAllCasesPDF } = await import('./pdfGenerator.js');
+    await downloadAllCasesPDF(casesData);
+    return;
+  }
+  const url = window.URL.createObjectURL(pdfBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `HOPETRACK_All_Cases_Summary_${new Date().toISOString().split('T')[0]}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 };

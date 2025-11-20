@@ -3,7 +3,8 @@ import { useCases } from '../context/CaseContext';
 import { isArchivedStatus, getArchivedDisplayText } from '../utils/statusHelpers';
 import Pagination from './Pagination';
 import CaseDetailsModal from './CaseDetailsModal';
-import { downloadCaseReportPDF, downloadAllCasesPDF } from '../utils/pdfGenerator';
+import { downloadCaseReportPDF } from '../utils/pdfGenerator';
+import { downloadAllCasesPDFFromWord } from '../utils/wordGenerator';
 import { downloadAllCasesCSV, downloadCaseReportCSV } from '../utils/csvGenerator';
 import { downloadIntakeFormWord, downloadAllCasesWord } from '../utils/wordGenerator';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
@@ -241,16 +242,17 @@ const ArchivedCases = () => {
     }
   };
 
-  // PDF Export Function with comprehensive case information
   const exportToPDF = () => {
     if (filteredArchivedCases.length === 0) {
       alert('No archived cases to export');
       return;
     }
-
-    // Consolidated professional summary PDF for archived cases
     (async () => {
-      await downloadAllCasesPDF(filteredArchivedCases.map(c => c.id));
+      const payload = await Promise.all(filteredArchivedCases.map(async (c) => {
+        const full = await fetchCaseDetailsForExport(c.id);
+        return full || c;
+      }));
+      await downloadAllCasesPDFFromWord(payload);
     })();
   };
 
