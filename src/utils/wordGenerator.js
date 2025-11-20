@@ -1413,7 +1413,7 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
   const inlineField = (label, _value, position = 7200, lineLength = 28, indentLeft = 720) => {
     const valueText = val(_value);
     return new Paragraph({
-      tabStops: [{ type: TabStopType.LEFT, position }],
+      tabStops: [{ type: TabStopType.RIGHT, position }],
       indent: { left: indentLeft },
       children: [
         new TextRun({ text: label + ':', bold: true, color: textColor }),
@@ -1605,9 +1605,9 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: textColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 180 } }),
-    inlineField('Date', caseData.intakeDate || caseData.date || '', 7600, 24, 3600),
-    inlineField('Time', caseData.intakeTime || caseData.time || '', 7600, 24, 3600),
-    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 7600, 24, 3600),
+    inlineField('Date', caseData.intakeDate || caseData.date || '', 9000, 24, 720),
+    inlineField('Time', caseData.intakeTime || caseData.time || '', 9000, 24, 720),
+    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 9000, 24, 720),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
