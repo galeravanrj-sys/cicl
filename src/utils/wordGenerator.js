@@ -1605,9 +1605,9 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
     },
     sections: [{ properties: { page: { margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: [
     new Paragraph({ children: [ new TextRun({ text: 'GENERAL INTAKE FORM', bold: true, size: 32, color: textColor }) ], alignment: AlignmentType.CENTER, spacing: { after: 180 } }),
-    inlineField('Date', caseData.intakeDate || caseData.date || '', 9600, 35, 5400),
-    inlineField('Time', caseData.intakeTime || caseData.time || '', 9600, 35, 5400),
-    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 9600, 35, 5400),
+    inlineField('Date', caseData.intakeDate || caseData.date || '', 10000, 30, 5000),
+    inlineField('Time', caseData.intakeTime || caseData.time || '', 10000, 30, 5000),
+    inlineField('Site of Intake', caseData.intakeSite || caseData.siteOfIntake || '', 10000, 30, 5000),
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
