@@ -1,3 +1,9 @@
+/*
+This test covers the Programs page:
+- Renders the main categories
+- Simulates expanding a category and asserts the nested section appears
+It focuses on UI structure and interaction without backend calls.
+*/
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'

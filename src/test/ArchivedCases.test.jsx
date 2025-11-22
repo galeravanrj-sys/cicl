@@ -337,3 +337,11 @@ vi.mock('../context/NotificationContext.jsx', () => ({
     dismissedNotificationIds: new Set(),
   }),
 }));
+// This test file validates the Discharged/Archived cases module end-to-end:
+// - Navigation and access
+// - Viewing case record
+// - After Care workflow (status change + axios PUT)
+// - Single case export actions (PDF, CSV)
+// - Export All actions (PDF via Word-based path, CSV)
+// The approach uses mocks for CaseContext, export helpers, and generators
+// to isolate UI behavior while ensuring calls happen as expected.

@@ -329,3 +329,8 @@ describe('Login Integration (AuthProvider + axios)', () => {
     expect(navigateMock).not.toHaveBeenCalled();
   });
 });
+// This suite covers Login unit tests for:
+// - Valid login navigation via mocked AuthProvider
+// - Invalid credentials error handling
+// - Empty-field validation (ensuring no axios call)
+// It stubs react-router navigation and the context to isolate UI behavior.
