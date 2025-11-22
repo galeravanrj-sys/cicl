@@ -1473,7 +1473,7 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
 
   const name = [caseData.firstName || caseData.first_name || '', caseData.middleName || caseData.middle_name || '', caseData.lastName || caseData.last_name || ''].filter(Boolean).join(' ');
   const birthdate = caseData.birthdate || '';
-  const age = caseData.age || '';
+  const age = caseData.age ?? computeAge(caseData.birthdate);
   const sex = caseData.sex || '';
   const status = caseData.status || caseData.civil_status || '';
   const nationality = caseData.nationality || '';
