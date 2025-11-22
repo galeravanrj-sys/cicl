@@ -68,7 +68,7 @@ vi.mock('../utils/pdfGenerator', () => ({
   downloadCaseReportPDF: mockDownloadCaseReportPDF,
 }));
 
-// Mock Word-based PDF export for all cases
+// Fake export helper so "Export All" works
 const { mockDownloadAllCasesPDFFromWord } = vi.hoisted(() => ({
   mockDownloadAllCasesPDFFromWord: vi.fn(),
 }));
@@ -78,7 +78,7 @@ vi.mock('../utils/wordGenerator', () => ({
   downloadIntakeFormWord: vi.fn(),
 }));
 
-// Word export removed: no mocks needed
+// Not using Word export here
 
 // Mock CSV generator utilities
 const {
@@ -244,7 +244,7 @@ describe('Discharged Cases - Single case export actions', () => {
     });
   });
 
-  // Word export removed
+  // No Word export in this test
 
   it('exports a single discharged case to CSV (Excel)', async () => {
     mockFetchCaseDetailsForExport.mockResolvedValueOnce({ id: 301, name: 'Case 301 (Full)', status: 'archived' });
@@ -290,7 +290,7 @@ describe('Discharged Cases - Export All', () => {
     });
   });
 
-  // Word export removed
+  // No Word export in this test
 
   it('exports all discharged cases to CSV (Excel)', async () => {
     mockFetchCaseDetailsForExport.mockImplementation(async (id) => ({ id, name: `Full ${id}` }));
