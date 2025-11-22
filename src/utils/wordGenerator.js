@@ -1630,8 +1630,8 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Birthdate:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 16, type: WidthType.PERCENTAGE } }),
           new TableCell({ children: [ new Paragraph(oneLine(formatDateYYYYMMDD(birthdate))) ] , width: { size: 18, type: WidthType.PERCENTAGE } }),
           new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Age:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph(oneLine(val(age))) ] , width: { size: 14, type: WidthType.PERCENTAGE } }),
-          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 10, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph(oneLine(val(age))) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [ new Paragraph({ children: [ new TextRun({ text: 'Sex:', bold: true }) ], spacing: { after: 40 } }) ] , width: { size: 12, type: WidthType.PERCENTAGE } }),
           new TableCell({ children: [ new Paragraph(oneLine(val(sex))) ] , width: { size: 30, type: WidthType.PERCENTAGE } }),
         ] }),
         new TableRow({ children: [
