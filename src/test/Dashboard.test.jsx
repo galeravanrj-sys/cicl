@@ -2,14 +2,12 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import Dashboard from '../components/Dashboard.jsx'
+import { cases } from './fixtures/websiteData'
 import { MemoryRouter } from 'react-router-dom'
 
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
-    fetchAllCases: async () => ([
-      { id: 1, status: 'active', lastUpdated: new Date().toISOString() },
-      { id: 2, status: 'archived', lastUpdated: new Date().toISOString() },
-    ]),
+    fetchAllCases: async () => (cases),
     loading: false,
     error: null,
   }),
@@ -22,8 +20,7 @@ vi.mock('react-chartjs-2', () => ({
   Pie: () => <div data-testid="pie-chart" />,
 }))
 
-// Basic render test for Dashboard
-// Purpose: ensure the page mounts and shows the REPORTS/overview widgets header
+// Just making sure the dashboard shows up and has some headings/widgets
 describe('Dashboard page', () => {
   it('renders dashboard layout', () => {
     render(

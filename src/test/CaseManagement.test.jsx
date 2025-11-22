@@ -4,14 +4,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import CaseManagement from '../components/CaseManagement.jsx'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext.jsx'
+import { cases as websiteCases } from './fixtures/websiteData'
 
-const { sampleCases } = vi.hoisted(() => ({
-  sampleCases: [
-    { id: 1, name: 'Alice', status: 'active', programType: 'Children', birthdate: '2015-01-01', lastUpdated: '2025-10-10T00:00:00Z' },
-    { id: 2, name: 'Bob', status: 'active', programType: 'Youth', birthdate: '2008-01-01', lastUpdated: '2025-10-11T00:00:00Z' },
-    { id: 3, name: 'Charlie', status: 'archived', programType: 'Sanctuary', birthdate: '2010-01-01', lastUpdated: '2025-10-09T00:00:00Z' },
-  ],
-}))
+const sampleCases = websiteCases
 
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
@@ -44,26 +39,26 @@ describe('Cases page', () => {
 
     expect(screen.getByRole('heading', { level: 2, name: /Cases List/i })).toBeInTheDocument()
 
-    expect(screen.queryByText('Charlie')).not.toBeInTheDocument()
-    expect(screen.getByText('Alice')).toBeInTheDocument()
-    expect(screen.getByText('Bob')).toBeInTheDocument()
+    expect(screen.queryByText('Juan Dela Cruz')).not.toBeInTheDocument()
+    expect(screen.getByText('Maria Santos')).toBeInTheDocument()
+    expect(screen.getByText('Ana Reyes')).toBeInTheDocument()
 
     const search = screen.getByPlaceholderText(/Search cases/i)
-    fireEvent.change(search, { target: { value: 'alice' } })
-    expect(screen.getByText('Alice')).toBeInTheDocument()
-    expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+    fireEvent.change(search, { target: { value: 'maria' } })
+    expect(screen.getByText('Maria Santos')).toBeInTheDocument()
+    expect(screen.queryByText('Ana Reyes')).not.toBeInTheDocument()
 
     fireEvent.change(search, { target: { value: '' } })
     const programSelect = screen.getAllByRole('combobox')[0]
-    fireEvent.change(programSelect, { target: { value: 'Youth' } })
-    expect(screen.getByText('Bob')).toBeInTheDocument()
-    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    fireEvent.change(programSelect, { target: { value: 'Sanctuary' } })
+    expect(screen.getByText('Ana Reyes')).toBeInTheDocument()
+    expect(screen.queryByText('Maria Santos')).not.toBeInTheDocument()
 
     fireEvent.change(programSelect, { target: { value: '' } })
     const ageSelect = screen.getAllByRole('combobox')[1]
     fireEvent.change(ageSelect, { target: { value: '13-17' } })
-    expect(screen.getByText('Bob')).toBeInTheDocument()
-    expect(screen.queryByText('Alice')).not.toBeInTheDocument()
+    expect(screen.getByText('Ana Reyes')).toBeInTheDocument()
+    expect(screen.queryByText('Maria Santos')).not.toBeInTheDocument()
 
     const rows = container.querySelectorAll('tbody tr')
     expect(rows.length).toBeGreaterThan(0)

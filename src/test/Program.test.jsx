@@ -1,8 +1,8 @@
 /*
-This test covers the Programs page:
-- Renders the main categories
-- Simulates expanding a category and asserts the nested section appears
-It focuses on UI structure and interaction without backend calls.
+Quick check on the Programs page:
+- See the main categories
+- Click one and it expands
+Keeping it simple, no backend stuff here.
 */
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'

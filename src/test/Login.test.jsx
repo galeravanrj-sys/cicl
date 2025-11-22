@@ -1,19 +1,15 @@
 /*
-Simple overview of Login tests:
-Unit-like:
-- Valid credentials navigate to `/dashboard`.
-- Invalid credentials show error; no redirect.
-- "Sign in with Google" sets window.location to OAuth URL.
-- Validation errors when fields are missing (none, password-only, email-only).
-- Incorrect password shows error.
-- "Remember me" toggles Google OAuth `remember=1`.
-Integration (AuthProvider + axios):
-- Successful login sets token in axios headers and redirects.
-- Token stored in `sessionStorage` or `localStorage` based on Remember Me.
-- Failed login shows error and does not redirect.
+Quick notes: I'm just checking the login flow like a user.
+- Good creds should go to the dashboard.
+- Bad creds should show an error.
+- Google button should change the URL.
+- Empty fields should complain.
+- "Remember me" flips the remember flag.
+- When using the real provider, the token ends up in headers.
 */
 
 import React, { useState } from 'react';
+import { users as websiteUsers } from './fixtures/websiteData'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Login from '../components/Login.jsx';
@@ -97,10 +93,10 @@ describe('Login Page', () => {
   // Test: valid login → redirects to dashboard
   it('logs in with a valid account and navigates to dashboard', async () => {
     renderWithAuth(<Login />, {
-      loginImpl: ({ email, password }) => email === 'galeravanrj@gmail.com' && password === 'olddine15',
+      loginImpl: ({ email, password }) => email === websiteUsers.admin.email && password === 'olddine15',
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'galeravanrj@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.admin.email } });
     fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), { target: { value: 'olddine15' } });
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
 
@@ -169,7 +165,7 @@ describe('Login Page', () => {
   it('shows validation error when email is provided without password', async () => {
     renderWithAuth(<Login />, { loginImpl: () => false });
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'yukis4779@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.yuki.email } });
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
 
     expect(screen.getByText(/Please fill in all fields/i)).toBeInTheDocument();
@@ -179,10 +175,10 @@ describe('Login Page', () => {
   // Wrong password shows error
   it('shows error for incorrect password with valid email', async () => {
     renderWithAuth(<Login />, {
-      loginImpl: ({ email, password }) => email === 'olddine@gmail.com' && password === 'olddine15',
+      loginImpl: ({ email, password }) => email === websiteUsers.olddine.email && password === 'olddine15',
     });
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'olddine@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.olddine.email } });
     fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), { target: { value: 'wrongpass123' } });
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
 
@@ -220,7 +216,7 @@ describe('Login Integration (AuthProvider + axios)', () => {
     axios.post.mockResolvedValueOnce({
       data: {
         token: 'fake-token',
-        user: { email: 'yukis4779@gmail.com', first_name: 'Yuki', last_name: 'Dine', name: 'Yuki Dine' },
+        user: { email: websiteUsers.yuki.email, first_name: 'Yuki', last_name: 'Dine', name: 'Yuki Dine' },
       },
     });
 
@@ -232,7 +228,7 @@ describe('Login Integration (AuthProvider + axios)', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'yukis4779@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), { target: { value: 'olddine15' } });
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
 
@@ -248,7 +244,7 @@ describe('Login Integration (AuthProvider + axios)', () => {
     axios.post.mockResolvedValueOnce({
       data: {
         token: 'fake-token',
-        user: { email: 'yukis4779@gmail.com', first_name: 'Yuki', last_name: 'Dine' },
+        user: { email: websiteUsers.yuki.email, first_name: 'Yuki', last_name: 'Dine' },
       },
     });
 
@@ -260,7 +256,7 @@ describe('Login Integration (AuthProvider + axios)', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'yukis4779@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), { target: { value: 'olddine15' } });
     fireEvent.click(screen.getByLabelText(/Remember me/i));
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
@@ -304,7 +300,7 @@ describe('Login Integration (AuthProvider + axios)', () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: 'yukis4779@gmail.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Enter your email/i), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), { target: { value: 'wrongpass123' } });
     fireEvent.click(screen.getByRole('button', { name: /^Sign In$/i }));
 

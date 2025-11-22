@@ -5,8 +5,8 @@ import PrivateRoute from '../components/PrivateRoute.jsx'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext.jsx'
 
-// PrivateRoute behavior test
-// We simulate authenticated vs unauthenticated contexts and assert rendering/redirect behavior
+// Private route sanity check
+// If logged in, I should see the protected content
 describe('PrivateRoute', () => {
   it('renders children when authenticated', () => {
     const auth = { isAuthenticated: true, loading: false, user: { role: 'Admin' } }
@@ -22,4 +22,3 @@ describe('PrivateRoute', () => {
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
   })
 })
-

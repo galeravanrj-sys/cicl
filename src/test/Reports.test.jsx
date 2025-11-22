@@ -1,20 +1,8 @@
 /*
-Test Suite: Reports generation and chart correctness
-
-Scenarios covered:
-1) Generate reports with valid data
-   - Preconditions: user is logged in; system has existing records with required case details
-   - Steps: Login → Enter required case details (mocked) → Open Reports → View report types
-   - Test data: sample cases across Active/Archived statuses, months, and program types
-   - Expected: Charts render successfully with correct values for Active Cases, Admissions, Discharged, and Program distribution
-
-2) Verify report values and charts display correctly
-   - Steps: Go to Reports → Count records → Generate report → Compare values with mock dataset
-   - Expected: Chart datasets match counts derived from sample cases
-
-3) Reports performance
-   - Steps: Render Reports and measure time to visible charts
-   - Expected: Reports generate within 10–20 seconds (we assert much faster, <2000ms, and definitely <20000ms)
+Short version: I want charts to show and numbers to make sense.
+- Render Reports and see the charts.
+- Compare what the charts say to the data I gave them.
+- Make sure it’s quick.
 */
 
 import React from 'react';
@@ -24,23 +12,11 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
 import Reports from '../components/Reports.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
+import { cases as websiteCases } from './fixtures/websiteData'
 
-/* ------------------------------------------------------------------
- 🧩 HOISTED MOCKS: router navigate + sample dataset
------------------------------------------------------------------- */
-const { navigateMock, sampleCases } = vi.hoisted(() => ({
+/* Mocks: a navigate spy and a fixed dataset. */
+const { navigateMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
-  // Fixed sample dataset across statuses, months, and program types
-  sampleCases: [
-    // Active within last 30 days → counts toward New Admissions
-    { id: 1, status: 'active', lastUpdated: '2025-10-10T00:00:00Z', programType: 'Children' },
-    // Archived last month → counts toward Reintegration/Discharged and monthly reintegration for September
-    { id: 2, status: 'archived', lastUpdated: '2025-09-05T00:00:00Z', programType: 'Youth' },
-    // Active earlier this year → counts toward Admissions in February
-    { id: 3, status: 'active', lastUpdated: '2025-02-20T00:00:00Z', programType: 'Sanctuary' },
-    // Archived earlier this year → counts toward Reintegration and monthly reintegration in February
-    { id: 4, status: 'ARCHIVED', lastUpdated: '2025-02-21T00:00:00Z', programType: 'Crisis Intervention' },
-  ],
 }));
 
 // Replace react-router-dom's useNavigate with our mock spy
@@ -62,7 +38,7 @@ vi.mock('react-chartjs-2', () => ({
 // Mock CaseContext: fetchAllCases returns our sample dataset, loading false, error null
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
-    fetchAllCases: vi.fn().mockResolvedValue(sampleCases),
+    fetchAllCases: vi.fn().mockResolvedValue(websiteCases),
     loading: false,
     error: null,
   }),
@@ -83,9 +59,7 @@ vi.mock('../context/NotificationContext.jsx', () => ({
   }),
 }));
 
-/* ------------------------------------------------------------------
- 🔧 Render helper: wrap with AuthContext + MemoryRouter + Routes
------------------------------------------------------------------- */
+/* Helper: render Reports with a simple auth context. */
 function renderReports(initialRoute = '/reports') {
   const authValue = {
     isAuthenticated: true,
@@ -106,9 +80,7 @@ function renderReports(initialRoute = '/reports') {
   );
 }
 
-/* ------------------------------------------------------------------
- 🧪 TEST 1: Generate reports with valid data (charts render, values correct)
------------------------------------------------------------------- */
+/* Charts should render and the values should line up with data. */
 describe('Reports generation and chart correctness', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -180,22 +152,22 @@ describe('Reports values match derived counts', () => {
     const thirtyDaysAgo = new Date(now);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const derivedNewAdmissions = sampleCases.filter(c => {
+    const derivedNewAdmissions = websiteCases.filter(c => {
       const update = new Date(c.lastUpdated);
       const status = String(c.status || '').toLowerCase();
       return update >= thirtyDaysAgo && (status === 'active' || status === '' || status === 'true');
     }).length;
 
-    const derivedDischarged = sampleCases.filter(c => {
+    const derivedDischarged = websiteCases.filter(c => {
       const status = String(c.status || '').toLowerCase();
       return status.includes('archived');
     }).length;
 
     const derivedProgramCounts = {
-      Children: sampleCases.filter(c => String(c.programType).includes('Children')).length,
-      Youth: sampleCases.filter(c => String(c.programType).includes('Youth')).length,
-      Sanctuary: sampleCases.filter(c => String(c.programType).includes('Sanctuary')).length,
-      'Crisis Intervention': sampleCases.filter(c => String(c.programType).includes('Crisis Intervention')).length,
+      Children: websiteCases.filter(c => String(c.programType).includes('Children')).length,
+      Youth: websiteCases.filter(c => String(c.programType).includes('Youth')).length,
+      Sanctuary: websiteCases.filter(c => String(c.programType).includes('Sanctuary')).length,
+      'Crisis Intervention': websiteCases.filter(c => String(c.programType).includes('Crisis Intervention')).length,
     };
 
     const [newAdmissions, discharged] = doughnutData.datasets[0].data;

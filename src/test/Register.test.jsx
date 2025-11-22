@@ -1,21 +1,13 @@
 /*
-Simple overview of Register tests:
-Unit-like:
-- Valid details call register and navigate to `/dashboard`.
-- Duplicate email shows error; no redirect.
-- Empty required fields show validation; no redirect.
-- Missing required field (last name) shows validation; no redirect.
-Integration (AuthProvider + axios):
-- Successful registration sets token headers and redirects.
-- Backend duplicate email error shows message; no redirect.
-- Invalid email format error from backend displays; no redirect.
-
-Notes:
-- We mirror the style of Login.test.jsx for consistency.
-- Comments explain the scenario and the function/behavior under test.
+Simple: I'm making sure sign up feels right.
+- If details are valid, we go to the dashboard.
+- If the email already exists, show the error.
+- If fields are empty or missing, show a warning.
+- With the real provider, a token is set and we redirect.
 */
 
 import React, { useState } from 'react';
+import { users as websiteUsers } from './fixtures/websiteData'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Register from '../components/Register.jsx';
@@ -110,7 +102,7 @@ describe('Register Page (Unit-like)', () => {
     fireEvent.change(getInputByName(container, 'firstName'), { target: { value: 'Jazzent' } });
     fireEvent.change(getInputByName(container, 'middleName'), { target: { value: 'Nico' } });
     fireEvent.change(getInputByName(container, 'lastName'), { target: { value: 'Macaraeg' } });
-    fireEvent.change(getInputByName(container, 'email'), { target: { value: 'jazzentnico@gmail.com' } });
+    fireEvent.change(getInputByName(container, 'email'), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(getInputByName(container, 'password'), { target: { value: 'PaSSword123' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));
@@ -131,7 +123,7 @@ describe('Register Page (Unit-like)', () => {
     fireEvent.change(getInputByName(container, 'firstName'), { target: { value: 'Jazzent' } });
     fireEvent.change(getInputByName(container, 'middleName'), { target: { value: 'Nico' } });
     fireEvent.change(getInputByName(container, 'lastName'), { target: { value: 'Macaraeg' } });
-    fireEvent.change(getInputByName(container, 'email'), { target: { value: 'jazzentnico@gmail.com' } });
+    fireEvent.change(getInputByName(container, 'email'), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(getInputByName(container, 'password'), { target: { value: 'PaSSword123' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));
@@ -173,7 +165,7 @@ describe('Register Integration (AuthProvider + axios)', () => {
     axios.post.mockResolvedValueOnce({
       data: {
         token: 'fake-token',
-        user: { email: 'jazzentnico@gmail.com', first_name: 'Jazzent', last_name: 'Macaraeg', name: 'Jazzent Macaraeg' },
+        user: { email: websiteUsers.yuki.email, first_name: 'Yuki', last_name: 'Dine', name: 'Yuki Dine' },
       },
     });
 
@@ -188,7 +180,7 @@ describe('Register Integration (AuthProvider + axios)', () => {
     fireEvent.change(getInputByName(container, 'firstName'), { target: { value: 'Jazzent' } });
     fireEvent.change(getInputByName(container, 'middleName'), { target: { value: 'Nico' } });
     fireEvent.change(getInputByName(container, 'lastName'), { target: { value: 'Macaraeg' } });
-    fireEvent.change(getInputByName(container, 'email'), { target: { value: 'jazzentnico@gmail.com' } });
+    fireEvent.change(getInputByName(container, 'email'), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(getInputByName(container, 'password'), { target: { value: 'PaSSword123' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));
@@ -217,7 +209,7 @@ describe('Register Integration (AuthProvider + axios)', () => {
     fireEvent.change(getInputByName(container, 'firstName'), { target: { value: 'Jazzent' } });
     fireEvent.change(getInputByName(container, 'middleName'), { target: { value: 'Nico' } });
     fireEvent.change(getInputByName(container, 'lastName'), { target: { value: 'Macaraeg' } });
-    fireEvent.change(getInputByName(container, 'email'), { target: { value: 'jazzentnico@gmail.com' } });
+    fireEvent.change(getInputByName(container, 'email'), { target: { value: websiteUsers.yuki.email } });
     fireEvent.change(getInputByName(container, 'password'), { target: { value: 'PaSSword123' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Create Account/i }));

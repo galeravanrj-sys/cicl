@@ -1,18 +1,8 @@
 /*
-Test overview for Navigation and Access:
-- Dashboard loads successfully after login: nav bar visible, widgets visible.
-- Navigation bar links: Home, Discharged, Cases, Program, Report, Settings navigate to correct modules.
-- Settings access: clicking from nav opens Settings.
-- Cases access: clicking from nav opens Cases.
-- Discharged access: clicking from nav opens Discharged Cases and shows records area.
-- Programs access: clicking from nav opens Programs module.
-- Report access: clicking from nav opens Reports module.
-- Successful Sign Out: clicking Sign Out in Settings triggers logout and redirect to Landing Page.
-
-Notes:
-- We mock CaseContext and NotificationContext to avoid network calls.
-- We stub chart components to keep tests lightweight.
-- Comments explain each scenario and expected result.
+Quick pass: I click around the sidebar to make sure pages open.
+- Home, Discharged, Cases, Program, Report, Settings should all load.
+- Sign Out should kick me back to the landing page.
+Just keeping it simple and fast.
 */
 
 import React from 'react';
@@ -20,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Layout from '../components/Layout.jsx';
+import { cases as websiteCases } from './fixtures/websiteData'
 import Dashboard from '../components/Dashboard.jsx';
 import CaseManagement from '../components/CaseManagement.jsx';
 import ArchivedCases from '../components/ArchivedCases.jsx';
@@ -31,14 +22,11 @@ import { AuthContext } from '../context/AuthContext.jsx';
 /* ------------------------------------------------------------------
  🧩 HOISTED MOCKS: router navigate + contexts
 ------------------------------------------------------------------ */
-const { navigateMock, logoutMock, sampleCases } = vi.hoisted(() => ({
+const { navigateMock, logoutMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
   logoutMock: vi.fn(),
-  sampleCases: [
-    { id: 1, name: 'Active One', status: 'active', lastUpdated: '2025-01-10T00:00:00Z' },
-    { id: 2, name: 'Archived Two', status: 'archived', lastUpdated: '2024-12-15T00:00:00Z' },
-  ],
 }));
+const sampleCases = websiteCases
 
 // Replace react-router-dom's useNavigate with our mock spy
 vi.mock('react-router-dom', async () => {
@@ -86,9 +74,7 @@ vi.mock('../context/NotificationContext.jsx', () => ({
   }),
 }));
 
-/* ------------------------------------------------------------------
- 🔧 Render helper: wrap with AuthContext + MemoryRouter + Routes
------------------------------------------------------------------- */
+/* Small helper: render with auth + router so nav works. */
 function renderWithProviders(initialRoute = '/dashboard') {
   const authValue = {
     isAuthenticated: true,
@@ -114,11 +100,7 @@ function renderWithProviders(initialRoute = '/dashboard') {
   );
 }
 
-/* ------------------------------------------------------------------
- 🧭 TEST 1: Dashboard loads successfully after login
-- Steps: login → redirected to dashboard
-- Expected: nav bar visible, dashboard heading and widgets visible
------------------------------------------------------------------- */
+/* Dashboard opens and looks normal. */
 describe('Dashboard loads successfully', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -150,16 +132,7 @@ describe('Dashboard loads successfully', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🧭 TEST 2: Navigation Bar Display → correct modules open
-Steps:
-1. Click Home → Dashboard
-2. Click Discharged → Discharged Cases
-3. Click Cases → Cases List
-4. Click Program → Programs
-5. Click Report → REPORTS
-6. Click Settings → Settings
------------------------------------------------------------------- */
+/* Clicking each nav link should show the right page. */
 describe('Navigation Bar routes', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -198,12 +171,7 @@ describe('Navigation Bar routes', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- ⚙️ TEST 3: Settings Access from nav bar
-Steps:
-1. Click Settings in the navigation bar
-Expected: Settings module loads successfully
------------------------------------------------------------------- */
+/* Settings opens fine from the nav. */
 describe('Settings access from sidebar', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -218,12 +186,7 @@ describe('Settings access from sidebar', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 📂 TEST 4: Cases Access from nav bar
-Steps:
-1. Click Cases in nav bar
-Expected: Cases module loads successfully
------------------------------------------------------------------- */
+/* Cases page opens from the nav. */
 describe('Cases access from sidebar', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -238,12 +201,7 @@ describe('Cases access from sidebar', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- ✅ TEST 5: Discharged Access from nav bar
-Steps:
-1. Click Discharged in nav bar
-Expected: Discharged module loads and displays discharged case records area
------------------------------------------------------------------- */
+/* Discharged page opens and shows the records area. */
 describe('Discharged access from sidebar', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -260,12 +218,7 @@ describe('Discharged access from sidebar', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🗂️ TEST 6: Programs Access from nav bar
-Steps:
-1. Click Program in nav bar
-Expected: Programs module loads successfully
------------------------------------------------------------------- */
+/* Programs page opens from the nav. */
 describe('Programs access from sidebar', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -280,12 +233,7 @@ describe('Programs access from sidebar', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 📊 TEST 7: Report Access from nav bar
-Steps:
-1. Click Report in nav bar
-Expected: Report module loads successfully
------------------------------------------------------------------- */
+/* Reports page opens from the nav. */
 describe('Reports access from sidebar', () => {
   beforeEach(() => {
     navigateMock.mockReset();
@@ -301,13 +249,7 @@ describe('Reports access from sidebar', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🚪 TEST 8: Successful Sign Out
-Steps:
-1. Navigate to Settings
-2. Click Sign Out
-Expected: logout is called and user is redirected to Landing Page
------------------------------------------------------------------- */
+/* Sign Out should call logout and send me to the landing page. */
 describe('Successful Sign Out', () => {
   beforeEach(() => {
     navigateMock.mockReset();

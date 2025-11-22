@@ -7,14 +7,12 @@ import { AuthContext } from '../context/AuthContext.jsx';
 import { NotificationProvider } from '../context/NotificationContext.jsx';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
-/* ------------------------------------------------------------------
- 🧩 MOCK SETUP SECTION
------------------------------------------------------------------- */
+/* Setup: mocks I need for these tests. */
 
-// Mock for `useNavigate` hook to track navigation behavior
+// I want to spy on navigation so I can see where it goes
 const { navigateMock } = vi.hoisted(() => ({ navigateMock: vi.fn() }));
 
-// Replace react-router-dom's useNavigate with our mock
+// Swap in my navigate spy
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -23,7 +21,7 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock Axios for testing PUT requests (used in After Care update)
+// Fake axios so I can check the update call
 vi.mock('axios', () => {
   return {
     default: {
@@ -32,13 +30,14 @@ vi.mock('axios', () => {
   };
 });
 import axios from 'axios';
+import { cases as websiteCases } from './fixtures/websiteData'
 
 // Mock CaseContext (used by ArchivedCases to get and update case data)
-const { mockAllCases, mockFetchAllCases, mockUpdateCase } = vi.hoisted(() => ({
-  mockAllCases: [], // Fake case list that we control
-  mockFetchAllCases: vi.fn(), // Fake fetchAllCases function
-  mockUpdateCase: vi.fn(), // Fake updateCase function
+const { mockFetchAllCases, mockUpdateCase } = vi.hoisted(() => ({
+  mockFetchAllCases: vi.fn(),
+  mockUpdateCase: vi.fn(),
 }));
+const mockAllCases = websiteCases
 
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
@@ -94,9 +93,7 @@ vi.mock('../utils/csvGenerator', () => ({
   downloadCaseReportCSV: mockDownloadCaseReportCSV,
 }));
 
-/* ------------------------------------------------------------------
- 🧹 BEFORE & AFTER EACH TEST CLEANUP
------------------------------------------------------------------- */
+/* Clean up between tests so each one starts fresh. */
 beforeEach(() => {
   // Prevent pop-up alerts from breaking the test environment
   vi.spyOn(window, 'alert').mockImplementation(() => {});
@@ -119,9 +116,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-/* ------------------------------------------------------------------
- 🧪 HELPER FUNCTION: RENDER COMPONENT WITH CONTEXT PROVIDERS
------------------------------------------------------------------- */
+/* Small helper: render the page with auth + notifications + router. */
 function renderWithProviders(ui, initialPath = '/dashboard') {
   // Fake logged-in user context (used in components that depend on authentication)
   const authValue = { user: { name: 'Tester', role: 'CICL Officer' }, userProfile: { firstName: 'Tester' } };
@@ -141,9 +136,7 @@ function renderWithProviders(ui, initialPath = '/dashboard') {
   );
 }
 
-/* ------------------------------------------------------------------
- 🧭 TEST GROUP 1: Navigation
------------------------------------------------------------------- */
+/* Open Discharged from the nav and see the heading. */
 describe('Discharged Cases - Access via Navigation', () => {
   it('opens Discharged Cases from the navigation bar', async () => {
     // Add one mock case to the fake database
@@ -163,9 +156,7 @@ describe('Discharged Cases - Access via Navigation', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🔍 TEST GROUP 2: Viewing Case Record
------------------------------------------------------------------- */
+/* Click View Details should navigate to the case page. */
 describe('Discharged Cases - View record', () => {
   it('navigates to case details when clicking View Details', async () => {
     mockAllCases.splice(0, mockAllCases.length,
@@ -188,9 +179,7 @@ describe('Discharged Cases - View record', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🔁 TEST GROUP 3: After Care Status Update
------------------------------------------------------------------- */
+/* Clicking After Care should update the case and call axios.put. */
 describe('Discharged Cases - After Care status', () => {
   it('moves case to After Care when action is clicked', async () => {
     localStorage.setItem('token', 'fake-token');
@@ -226,9 +215,7 @@ describe('Discharged Cases - After Care status', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 📤 TEST GROUP 4: Single Case Export Actions
------------------------------------------------------------------- */
+/* Single case export buttons should trigger the right actions. */
 describe('Discharged Cases - Single case export actions', () => {
   beforeEach(() => {
     // Reset test data before each case
@@ -278,9 +265,7 @@ describe('Discharged Cases - Single case export actions', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🗂️ TEST GROUP 5: Export All Cases
------------------------------------------------------------------- */
+/* Export All should run the bulk export (PDF/CSV). */
 describe('Discharged Cases - Export All', () => {
   beforeEach(() => {
     mockAllCases.splice(0, mockAllCases.length,
@@ -321,9 +306,7 @@ describe('Discharged Cases - Export All', () => {
   });
 });
 
-/* ------------------------------------------------------------------
- 🔔 MOCK NOTIFICATION CONTEXT (Prevents render errors)
------------------------------------------------------------------- */
+/* Fake notifications provider so the page renders without fuss. */
 vi.mock('../context/NotificationContext.jsx', () => ({
   NotificationProvider: ({ children }) => <>{children}</>, // Dummy wrapper
   useNotifications: () => ({
@@ -337,11 +320,8 @@ vi.mock('../context/NotificationContext.jsx', () => ({
     dismissedNotificationIds: new Set(),
   }),
 }));
-// This test file validates the Discharged/Archived cases module end-to-end:
-// - Navigation and access
-// - Viewing case record
-// - After Care workflow (status change + axios PUT)
-// - Single case export actions (PDF, CSV)
-// - Export All actions (PDF via Word-based path, CSV)
-// The approach uses mocks for CaseContext, export helpers, and generators
-// to isolate UI behavior while ensuring calls happen as expected.
+// What I'm checking here:
+// - I can open the page and move around.
+// - View Details goes to the right place.
+// - After Care updates the status and hits the API.
+// - Export buttons (one case and all cases) call the right functions.

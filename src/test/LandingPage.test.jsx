@@ -4,8 +4,7 @@ import { describe, it, expect } from 'vitest'
 import LandingPage from '../components/LandingPage.jsx'
 import { MemoryRouter } from 'react-router-dom'
 
-// Landing page smoke test
-// Verifies that the initial CTA or title renders
+// Landing page: I expect to see the main CTAs
 describe('Landing page', () => {
   it('renders landing content', () => {
     render(

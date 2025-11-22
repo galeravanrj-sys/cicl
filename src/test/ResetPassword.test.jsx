@@ -4,9 +4,7 @@ import { describe, it, expect } from 'vitest'
 import ResetPassword from '../components/ResetPassword.jsx'
 import { MemoryRouter } from 'react-router-dom'
 
-// ResetPassword page smoke test
-// The ResetPassword component shows a form only when a valid token is present.
-// This smoke test validates the default message appears in absence of a token.
+// Reset password: without a token, it should say it's missing
 describe('ResetPassword page', () => {
   it('renders heading and token missing message', () => {
     render(

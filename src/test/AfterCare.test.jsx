@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AfterCare from '../components/AfterCare.jsx'
 import { MemoryRouter } from 'react-router-dom'
 import { useCases } from '../context/CaseContext'
+import { afterCareCases } from './fixtures/websiteData'
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers'
 import { downloadAllCasesPDF } from '../utils/pdfGenerator'
 
@@ -17,18 +18,16 @@ vi.mock('../utils/pdfGenerator', () => ({
   downloadAllCasesPDF: vi.fn(),
 }))
 
-// This test suite validates the AfterCare list page renders, filters,
-// and triggers the export-all action. The high-level flow:
-// 1) Provide a mocked CaseContext with a small dataset of after-care cases
-// 2) Render the page and assert core UI elements
-// 3) Click "Export All" → "Export All to PDF" and ensure the export util is called
+// Quick check: page shows the after-care list and the export works
+// Flow:
+// 1) Use a small after-care dataset
+// 2) Render the page and look for the header
+// 3) Click Export All → PDF and make sure it gets called
 describe('AfterCare page', () => {
   beforeEach(() => {
     (useCases).mockReturnValue({
-      cases: [
-        { id: 101, name: 'AC One', status: 'after care', programType: 'Residential', lastUpdated: '2025-10-01T00:00:00Z' },
-        { id: 102, name: 'AC Two', status: 'after care', programType: 'Residential', lastUpdated: '2025-10-02T00:00:00Z' },
-      ],
+      allCases: afterCareCases,
+      fetchAllCases: vi.fn(),
       loading: false,
       error: null,
     })
@@ -41,13 +40,13 @@ describe('AfterCare page', () => {
   it('renders and exports all After Care cases to PDF', async () => {
     render(
       <MemoryRouter>
-        <AfterCare />
+        <AfterCare /> 
       </MemoryRouter>
     )
 
     // Basic presence checks (header, export button)
-    expect(screen.getByText(/After Care/i)).toBeInTheDocument()
-    const exportBtn = screen.getByRole('button', { name: /Export All/i })
+    await screen.findByRole('heading', { name: /After Care/i })
+    const exportBtn = screen.getByTitle(/Export all After Care cases/i)
     fireEvent.click(exportBtn)
     fireEvent.click(screen.getByText(/Export All to PDF/i))
 
@@ -56,4 +55,3 @@ describe('AfterCare page', () => {
     })
   })
 })
-

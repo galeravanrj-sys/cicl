@@ -2,21 +2,20 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import Notifications from '../components/Notifications.jsx'
+import { notifications as websiteNotifications } from './fixtures/websiteData'
 import { MemoryRouter } from 'react-router-dom'
 
 vi.mock('../context/NotificationContext.jsx', () => ({
   useNotifications: () => ({
-    notifications: [
-      { id: 1, type: 'info', title: 'Sample', message: 'Hello', timestamp: new Date() },
-    ],
-    unreadCount: 1,
+    notifications: websiteNotifications,
+    unreadCount: websiteNotifications.length,
     markAsRead: () => {},
     markAllAsRead: () => {},
     resetNotifications: () => {},
   }),
 }))
 
-// Notifications component smoke test
+// Just checking the notifications box shows up
 describe('Notifications', () => {
   it('renders notifications container', () => {
     render(

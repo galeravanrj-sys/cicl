@@ -4,10 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import AfterCareDetails from '../components/AfterCareDetails.jsx'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
-// This suite covers the details page for an After Care case.
-// Strategy:
-// - Mock fetch responses for a case and its educational records
-// - Render at route /after-care/:id and assert fields and edit/save flows
+// After Care details: I load one case and poke the edit buttons
 describe('AfterCareDetails page', () => {
   beforeEach(() => {
     vi.spyOn(global, 'fetch').mockResolvedValue({
@@ -40,6 +37,9 @@ describe('AfterCareDetails page', () => {
 
     // Toggle school edit (first Edit button in the page)
     fireEvent.click(screen.getAllByRole('button', { name: /Edit/i })[0])
-    expect(screen.getByLabelText(/Grade Level/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/Grade Level/i)).toBeInTheDocument()
+      expect(screen.getByRole('combobox')).toBeInTheDocument()
+    })
   })
 })
