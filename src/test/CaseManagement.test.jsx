@@ -64,7 +64,5 @@ describe('Cases page', () => {
     expect(rows.length).toBeGreaterThan(0)
   })
 })
-// This test verifies the Cases list page renders and filters across search,
-// program, and age. It mounts the component with a mocked CaseContext,
-// passes an Admin user via AuthContext, and asserts the visible rows change
-// as filters are applied. It focuses on UI state rather than backend calls.
+// Quick sanity check: the cases page renders and filters work
+// I search, pick a program, pick an age, and the rows change
