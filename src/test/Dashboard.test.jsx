@@ -7,6 +7,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
+    // Pretend we fetched the website cases
     fetchAllCases: async () => (cases),
     loading: false,
     error: null,
@@ -15,6 +16,7 @@ vi.mock('../context/CaseContext', () => ({
 
 // Stub react-chartjs-2 to avoid Chart.js DOM usage in tests
 vi.mock('react-chartjs-2', () => ({
+  // Lightweight stubs so charts don't need a real canvas
   Bar: () => <div data-testid="bar-chart" />,
   Doughnut: () => <div data-testid="doughnut-chart" />,
   Pie: () => <div data-testid="pie-chart" />,

@@ -10,9 +10,11 @@ const sampleCases = websiteCases
 
 vi.mock('../context/CaseContext', () => ({
   useCases: () => ({
+    // Using the website cases, keep it simple
     cases: sampleCases,
     loading: false,
     error: null,
+    // These are placeholders; we only care about render + filters here
     addCase: vi.fn(),
     updateCase: vi.fn(),
     deleteCase: vi.fn(),

@@ -7,7 +7,9 @@ import { MemoryRouter } from 'react-router-dom'
 
 vi.mock('../context/NotificationContext.jsx', () => ({
   useNotifications: () => ({
+    // Use the website notifications
     notifications: websiteNotifications,
+    // Unread = all items here
     unreadCount: websiteNotifications.length,
     markAsRead: () => {},
     markAllAsRead: () => {},

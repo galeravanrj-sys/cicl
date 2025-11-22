@@ -46,6 +46,7 @@ vi.mock('../context/CaseContext', () => ({
 
 // Mock NotificationContext to prevent provider wiring via Layout/Sidebar
 vi.mock('../context/NotificationContext.jsx', () => ({
+  // Minimal provider: just pass children through
   NotificationProvider: ({ children }) => <>{children}</>,
   useNotifications: () => ({
     notifications: [],
@@ -61,6 +62,7 @@ vi.mock('../context/NotificationContext.jsx', () => ({
 
 /* Helper: render Reports with a simple auth context. */
 function renderReports(initialRoute = '/reports') {
+  // Simple auth so Reports renders like a logged-in user
   const authValue = {
     isAuthenticated: true,
     loading: false,
@@ -74,7 +76,7 @@ function renderReports(initialRoute = '/reports') {
 
   return render(
     <AuthContext.Provider value={authValue}>
-      {/* Render Reports directly without Layout/Router to avoid routing side-effects */}
+      {/* Render Reports directly to keep this focused */}
       <Reports />
     </AuthContext.Provider>
   );
