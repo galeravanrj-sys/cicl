@@ -1611,6 +1611,7 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
     sectionTitle("I. CLIENT'S IDENTIFYING INFORMATION"),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
+      alignment: AlignmentType.CENTER,
       borders: {
         top: { style: BorderStyle.NONE },
         bottom: { style: BorderStyle.NONE },
@@ -1698,6 +1699,7 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
     sectionTitle('II. FAMILY/HOUSEHOLD COMPOSITION'),
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
+      alignment: AlignmentType.CENTER,
       borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE } },
       rows: [
         new TableRow({ children: [
@@ -1905,8 +1907,15 @@ export const downloadIntakeFormPDF = async (caseData) => {
     if (!res1.ok) throw new Error(await res1.text());
     pdfBlob = await res1.blob();
   } catch (err) {
-    alert('PDF conversion failed. Please contact admin to enable DOCX→PDF on the server.');
-    throw err;
+    try {
+      // Fallback: generate a clean summary PDF client-side (no CloudConvert required)
+      const { downloadCleanCaseSummaryPDF } = await import('./pdfGenerator.js');
+      await downloadCleanCaseSummaryPDF(caseData, { filename: `${baseName}.pdf` });
+      return;
+    } catch (_) {
+      alert('PDF conversion failed. Please contact admin to enable DOCX→PDF on the server.');
+      throw err;
+    }
   }
   const pdfUrl = window.URL.createObjectURL(pdfBlob);
   const pdfLink = document.createElement('a');
