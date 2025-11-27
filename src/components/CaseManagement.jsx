@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useCases } from '../context/CaseContext';
 import AddCaseForm from './AddCaseForm';
 import EditCaseForm from './EditCaseForm';
@@ -10,7 +10,7 @@ import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { API_BASE } from '../utils/apiBase';
 
 import { isArchivedStatus } from '../utils/statusHelpers';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 
@@ -24,6 +24,7 @@ const CaseManagement = () => {
     deleteCase
   } = useCases();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
   const isAdmin = ((user?.role || '').toLowerCase()).includes('admin');
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,7 +32,13 @@ const CaseManagement = () => {
   const [filterAge, setFilterAge] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const prog = params.get('program');
+    if (prog) setFilterProgram(prog);
+  }, [location.search]);
 
+  
   const [editCase, setEditCase] = useState(null);
   const [showCaseDetailsModal, setShowCaseDetailsModal] = useState(false);
   const [selectedCaseForArchive, setSelectedCaseForArchive] = useState(null);

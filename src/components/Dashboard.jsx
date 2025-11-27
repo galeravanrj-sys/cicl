@@ -1,15 +1,20 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useCases } from '../context/CaseContext';
 import { isArchivedStatus } from '../utils/statusHelpers';
 import LoadingSpinner from './LoadingSpinner';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut, Pie } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const Dashboard = () => {
   const { fetchAllCases, loading, error } = useCases();
   const [allCases, setAllCases] = useState([]);
+  const navigate = useNavigate();
+  const activeDonutRef = useRef(null);
+  const programPieRef = useRef(null);
+  const admissionsBarRef = useRef(null);
   
   useEffect(() => {
     const loadAllCases = async () => {
@@ -441,8 +446,18 @@ const Dashboard = () => {
               <div className="card h-100 border-0 rounded-4" style={{ backgroundColor: '#e0f2fe' }}>
                 <div className="card-body p-4 text-dark">
                   <h5 className="card-title text-uppercase fw-bold" style={{ color: '#1f2937' }}>ACTIVE CASES</h5>
-                  <div style={{ height: '250px', position: 'relative' }}>
-                    <Doughnut data={activeCasesChartData} options={pieOptions} />
+                  <div style={{ height: '250px', position: 'relative' }}
+                       onDoubleClick={(e) => {
+                         const chart = activeDonutRef.current;
+                         if (!chart) return navigate('/archived-cases');
+                         const els = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                         if (!els?.length) return;
+                         const idx = els[0].index;
+                         if (idx === 1) navigate('/archived-cases');
+                         else if (idx === 0) navigate('/cases');
+                       }}
+                  >
+                    <Doughnut ref={activeDonutRef} data={activeCasesChartData} options={pieOptions} />
                   </div>
                 </div>
               </div>
@@ -453,8 +468,8 @@ const Dashboard = () => {
               <div className="card h-100 border-0 rounded-4" style={{ backgroundColor: '#e0f2fe' }}>
                 <div className="card-body p-4 text-dark">
                   <h5 className="card-title text-uppercase fw-bold" style={{ color: '#1f2937' }}>ADMISSION</h5>
-                  <div style={{ height: '250px', position: 'relative' }}>
-                    <Bar data={monthlyAdmissionsData} options={chartOptions} />
+                  <div style={{ height: '250px', position: 'relative' }} onClick={() => navigate('/cases')}>
+                    <Bar ref={admissionsBarRef} data={monthlyAdmissionsData} options={chartOptions} />
                   </div>
                 </div>
               </div>
@@ -465,8 +480,18 @@ const Dashboard = () => {
               <div className="card h-100 border-0 rounded-4" style={{ backgroundColor: '#e0f2fe' }}>
                 <div className="card-body p-4 text-dark">
                   <h5 className="card-title text-uppercase fw-bold" style={{ color: '#1f2937' }}>PROGRAM</h5>
-                  <div style={{ height: '250px', position: 'relative' }}>
-                    <Pie data={programDistributionData} options={pieOptions} />
+                  <div style={{ height: '250px', position: 'relative' }}
+                       onClick={(e) => {
+                         const chart = programPieRef.current;
+                         if (!chart) return;
+                         const els = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                         if (!els?.length) return;
+                         const idx = els[0].index;
+                         const label = programDistributionData.labels[idx];
+                         if (label) navigate(`/cases?program=${encodeURIComponent(label)}`);
+                       }}
+                  >
+                    <Pie ref={programPieRef} data={programDistributionData} options={pieOptions} />
                   </div>
                 </div>
               </div>
