@@ -23,6 +23,7 @@ const Settings = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   // Image constraints - updated to 10MB and 1000x1000 pixels
   const maxImageSize = 10 * 1024 * 1024; // 10MB
@@ -54,6 +55,7 @@ const Settings = () => {
   };
 
   const handleImageClick = () => {
+    if (!isEditing) return;
     fileInputRef.current.click();
   };
 
@@ -196,7 +198,17 @@ const Settings = () => {
 
   return (
     <div className="container-fluid p-0" style={{ backgroundColor: '#f8fafc', minHeight: '96vh' }}>
-      <h2 className="mb-3 border-bottom pb-2 text-dark p-3">Settings</h2>
+      <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2 p-3">
+        <h2 className="mb-0 text-dark">Settings</h2>
+        <button
+          type="button"
+          className="btn btn-outline-primary btn-sm"
+          onClick={() => setIsEditing((v) => !v)}
+          style={{ minWidth: '90px' }}
+        >
+          {isEditing ? 'Done' : 'Edit'}
+        </button>
+      </div>
       <div className="row justify-content-center mx-0">
         <div className="col-md-8">
           {/* Profile Settings Card */}
@@ -211,11 +223,11 @@ const Settings = () => {
                     onMouseEnter={() => setIsHovering(true)}
                     onMouseLeave={() => setIsHovering(false)}
                   >
-                    {profileImage ? (
-                      <img src={profileImage} alt="Profile" className="w-100 h-100 object-fit-cover" />
-                    ) : (
-                      <i className="fas fa-user fa-3x text-secondary"></i>
-                    )}
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" className="w-100 h-100 object-fit-cover" />
+                  ) : (
+                    <i className="fas fa-user fa-3x text-secondary"></i>
+                  )}
                     
                     {isHovering && (
                       <div className="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" 
@@ -231,13 +243,13 @@ const Settings = () => {
                       </div>
                     )}
                     
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="d-none" 
-                      accept={acceptedFileTypes.join(',')}
-                      onChange={handleImageChange}
-                    />
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="d-none" 
+                    accept={acceptedFileTypes.join(',')}
+                    onChange={handleImageChange}
+                  />
                   </div>
                   {imageError && <small className="text-danger d-block mt-2">{imageError}</small>}
                 </div>
@@ -265,6 +277,7 @@ const Settings = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
+                    disabled={!isEditing}
                   />
                 </div>
 
@@ -276,6 +289,7 @@ const Settings = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
+                    disabled={!isEditing}
                   />
                 </div>
 
@@ -287,6 +301,7 @@ const Settings = () => {
                     name="middleName"
                     value={formData.middleName}
                     onChange={handleChange}
+                    disabled={!isEditing}
                   />
                 </div>
 
@@ -298,9 +313,11 @@ const Settings = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    disabled={!isEditing}
                   />
                 </div>
 
+                {isEditing && (
                 <div className="col-12">
                   <label className="form-label small text-dark">Set Password</label>
                   <input
@@ -311,7 +328,8 @@ const Settings = () => {
                     onChange={handleChange}
                   />
                 </div>
-
+                )}
+                {isEditing && (
                 <div className="col-md-6">
                   <label className="form-label small text-dark">New Password</label>
                   <input
@@ -322,7 +340,8 @@ const Settings = () => {
                     onChange={handleChange}
                   />
                 </div>
-
+                )}
+                {isEditing && (
                 <div className="col-md-6">
                   <label className="form-label small text-dark">Confirm Password</label>
                   <input
@@ -333,6 +352,7 @@ const Settings = () => {
                     onChange={handleChange}
                   />
                 </div>
+                )}
 
                 <div className="col-12 d-flex justify-content-between align-items-center mt-4">
                   <button 
@@ -344,9 +364,11 @@ const Settings = () => {
                     Sign Out
                   </button>
 
-                  <button type="submit" className="btn btn-light btn-sm px-4">
-                    Save Changes
-                  </button>
+                  {isEditing && (
+                    <button type="submit" className="btn btn-light btn-sm px-4">
+                      Save Changes
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
