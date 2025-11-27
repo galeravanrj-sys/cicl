@@ -198,17 +198,7 @@ const Settings = () => {
 
   return (
     <div className="container-fluid p-0" style={{ backgroundColor: '#f8fafc', minHeight: '96vh' }}>
-      <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2 p-3">
-        <h2 className="mb-0 text-dark">Settings</h2>
-        <button
-          type="button"
-          className="btn btn-outline-primary btn-sm"
-          onClick={() => setIsEditing((v) => !v)}
-          style={{ minWidth: '90px' }}
-        >
-          {isEditing ? 'Done' : 'Edit'}
-        </button>
-      </div>
+      <h2 className="mb-3 border-bottom pb-2 text-dark p-3">Settings</h2>
       <div className="row justify-content-center mx-0">
         <div className="col-md-8">
           {/* Profile Settings Card */}
@@ -216,7 +206,7 @@ const Settings = () => {
             <div className="card-body p-3 position-relative">
               <button
                 type="button"
-                className="btn btn-outline-primary btn-sm position-absolute"
+                className="btn btn-link btn-sm position-absolute p-0 text-decoration-underline"
                 style={{ top: 10, right: 10 }}
                 onClick={() => setIsEditing((v) => !v)}
                 aria-label={isEditing ? 'Finish editing' : 'Edit settings'}
@@ -326,42 +316,7 @@ const Settings = () => {
                   />
                 </div>
 
-                {isEditing && (
-                <div className="col-12">
-                  <label className="form-label small text-dark">Set Password</label>
-                  <input
-                    type="password"
-                    className="form-control form-control-sm"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                </div>
-                )}
-                {isEditing && (
-                <div className="col-md-6">
-                  <label className="form-label small text-dark">New Password</label>
-                  <input
-                    type="password"
-                    className="form-control form-control-sm"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                  />
-                </div>
-                )}
-                {isEditing && (
-                <div className="col-md-6">
-                  <label className="form-label small text-dark">Confirm Password</label>
-                  <input
-                    type="password"
-                    className="form-control form-control-sm"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                  />
-                </div>
-                )}
+                
 
                 <div className="col-12 d-flex justify-content-between align-items-center mt-4">
                   <button 
