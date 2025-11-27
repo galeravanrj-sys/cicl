@@ -51,7 +51,8 @@ const AfterCare = () => {
     return Number.isFinite(d) ? (now - d) > THIRTY_DAYS_MS : true;
   }).length, [afterCareCases]);
   const ongoingCount = useMemo(() => afterCareCases.length - pendingCount, [afterCareCases.length, pendingCount]);
-  const dischargedCount = useMemo(() => allCases.filter(c => isArchivedStatus(c.status)).length, [allCases]);
+  // Discharged count available if needed elsewhere; not shown in filters per request
+  // const dischargedCount = useMemo(() => allCases.filter(c => isArchivedStatus(c.status)).length, [allCases]);
 
   // Status filter: 'all' | 'pending' | 'ongoing' | 'discharged'
   const [statusFilter, setStatusFilter] = useState('all');
@@ -77,11 +78,7 @@ const AfterCare = () => {
         return Number.isFinite(d) ? (now - d) <= THIRTY_DAYS_MS : false;
       });
     }
-    if (statusFilter === 'discharged') {
-      // When user selects Discharged, navigate to the discharged page
-      navigate('/archived-cases');
-      return [];
-    }
+    // 'discharged' filter removed from UI; keep only all/pending/ongoing here
     return sortedCases;
   }, [sortedCases, statusFilter]);
 
@@ -224,25 +221,30 @@ const AfterCare = () => {
 
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-        <h2 className="mb-0 text-dark">After Care ({totalItems})</h2>
-        <div className="btn-group" role="group" aria-label="After Care filters">
+      <div className="mb-2">
+        <h2 className="mb-1 text-dark">After Care</h2>
+        <div className="d-flex gap-2 align-items-center mb-3">
           <button
-            className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
             onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
-          >All</button>
+            aria-label="Show all After Care cases"
+          >
+            All
+          </button>
           <button
-            className={`btn btn-sm ${statusFilter === 'ongoing' ? 'btn-success' : 'btn-outline-success'}`}
+            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'ongoing' ? 'btn-success' : 'btn-outline-success'}`}
             onClick={() => { setStatusFilter('ongoing'); setCurrentPage(1); }}
-          >Ongoing ({ongoingCount})</button>
+            aria-label="Show ongoing After Care cases"
+          >
+            Ongoing <span className="opacity-75">({ongoingCount})</span>
+          </button>
           <button
-            className={`btn btn-sm ${statusFilter === 'pending' ? 'btn-warning' : 'btn-outline-warning'}`}
+            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'pending' ? 'btn-warning' : 'btn-outline-warning'}`}
             onClick={() => { setStatusFilter('pending'); setCurrentPage(1); }}
-          >Pending ({pendingCount})</button>
-          <button
-            className={`btn btn-sm ${statusFilter === 'discharged' ? 'btn-danger' : 'btn-outline-danger'}`}
-            onClick={() => { setStatusFilter('discharged'); }}
-          >Discharged ({dischargedCount})</button>
+            aria-label="Show pending After Care cases"
+          >
+            Pending <span className="opacity-75">({pendingCount})</span>
+          </button>
         </div>
       </div>
 
