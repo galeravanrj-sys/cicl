@@ -204,10 +204,10 @@ const Settings = () => {
           {/* Profile Settings Card */}
           <div className="card border-0 shadow-sm rounded-4 mb-4" style={{ backgroundColor: '#  ' }}>
             <div className="card-body p-3">
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-end w-100 mb-2">
                 <button
                   type="button"
-                  className="btn btn-link btn-sm p-0 text-decoration-underline"
+                  className="btn btn-outline-primary btn-sm"
                   onClick={() => setIsEditing((v) => !v)}
                 >
                   {isEditing ? 'Done' : 'Edit'}
