@@ -1423,6 +1423,16 @@ export const downloadIntakeFormWord = async (caseData, options = {}) => {
       spacing: { after: 120 }
     });
   };
+  const computeAge = (birthdate) => {
+    if (!birthdate) return '';
+    const bd = new Date(birthdate);
+    if (isNaN(bd.getTime())) return '';
+    const today = new Date();
+    let age = today.getFullYear() - bd.getFullYear();
+    const m = today.getMonth() - bd.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) age--;
+    return age;
+  };
   const inlineRow = (labels = [], positions = [], lineLength = 28, values = []) => {
     return new Paragraph({
       tabStops: positions.map(p => ({ type: TabStopType.LEFT, position: p })),
