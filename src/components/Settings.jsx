@@ -213,7 +213,16 @@ const Settings = () => {
         <div className="col-md-8">
           {/* Profile Settings Card */}
           <div className="card border-0 shadow-sm rounded-4 mb-4" style={{ backgroundColor: '#  ' }}>
-            <div className="card-body p-3">
+            <div className="card-body p-3 position-relative">
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm position-absolute"
+                style={{ top: 10, right: 10 }}
+                onClick={() => setIsEditing((v) => !v)}
+                aria-label={isEditing ? 'Finish editing' : 'Edit settings'}
+              >
+                {isEditing ? 'Done' : 'Edit'}
+              </button>
               <div className="text-center mb-3">
                 <div className="avatar-upload mb-2">
                   <div 
