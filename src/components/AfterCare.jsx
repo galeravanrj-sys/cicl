@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useCases } from '../context/CaseContext';
 import Pagination from './Pagination';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { API_BASE } from '../utils/apiBase';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
 import { downloadAllCasesPDF } from '../utils/pdfGenerator';
 import { downloadAllCasesCSV } from '../utils/csvGenerator';
+import { isArchivedStatus } from '../utils/statusHelpers';
 
 const AfterCare = () => {
   const { allCases, fetchAllCases, lastUpdate, updateCase } = useCases();
@@ -42,6 +43,19 @@ const AfterCare = () => {
   // Only include cases currently in After Care
   const afterCareCases = allCases.filter(c => isAfterCare(c.status));
 
+  // Derive counts for dashboard chips
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const pendingCount = useMemo(() => afterCareCases.filter(c => {
+    const d = new Date(c.lastUpdated || c.timestamp || 0).getTime();
+    return Number.isFinite(d) ? (now - d) > THIRTY_DAYS_MS : true;
+  }).length, [afterCareCases]);
+  const ongoingCount = useMemo(() => afterCareCases.length - pendingCount, [afterCareCases.length, pendingCount]);
+  const dischargedCount = useMemo(() => allCases.filter(c => isArchivedStatus(c.status)).length, [allCases]);
+
+  // Status filter: 'all' | 'pending' | 'ongoing' | 'discharged'
+  const [statusFilter, setStatusFilter] = useState('all');
+
   // Sort by latest update first
   const sortedCases = [...afterCareCases].sort((a, b) => {
     const dateA = new Date(a.lastUpdated || a.timestamp || 0);
@@ -49,12 +63,34 @@ const AfterCare = () => {
     return dateB - dateA;
   });
 
+  // Apply status filter to After Care cases
+  const filteredCases = useMemo(() => {
+    if (statusFilter === 'pending') {
+      return sortedCases.filter(c => {
+        const d = new Date(c.lastUpdated || c.timestamp || 0).getTime();
+        return Number.isFinite(d) ? (now - d) > THIRTY_DAYS_MS : true;
+      });
+    }
+    if (statusFilter === 'ongoing') {
+      return sortedCases.filter(c => {
+        const d = new Date(c.lastUpdated || c.timestamp || 0).getTime();
+        return Number.isFinite(d) ? (now - d) <= THIRTY_DAYS_MS : false;
+      });
+    }
+    if (statusFilter === 'discharged') {
+      // When user selects Discharged, navigate to the discharged page
+      navigate('/archived-cases');
+      return [];
+    }
+    return sortedCases;
+  }, [sortedCases, statusFilter]);
+
   // Pagination calculations
-  const totalItems = sortedCases.length;
+  const totalItems = filteredCases.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const pageItems = sortedCases.slice(startIndex, endIndex);
+  const pageItems = filteredCases.slice(startIndex, endIndex);
 
   // Update current page
   const handlePageChange = (p) => setCurrentPage(p);
@@ -188,7 +224,27 @@ const AfterCare = () => {
 
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      <h2 className="mb-4 border-bottom pb-3 text-dark">After Care ({totalItems})</h2>
+      <div className="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+        <h2 className="mb-0 text-dark">After Care ({totalItems})</h2>
+        <div className="btn-group" role="group" aria-label="After Care filters">
+          <button
+            className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
+            onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+          >All</button>
+          <button
+            className={`btn btn-sm ${statusFilter === 'ongoing' ? 'btn-success' : 'btn-outline-success'}`}
+            onClick={() => { setStatusFilter('ongoing'); setCurrentPage(1); }}
+          >Ongoing ({ongoingCount})</button>
+          <button
+            className={`btn btn-sm ${statusFilter === 'pending' ? 'btn-warning' : 'btn-outline-warning'}`}
+            onClick={() => { setStatusFilter('pending'); setCurrentPage(1); }}
+          >Pending ({pendingCount})</button>
+          <button
+            className={`btn btn-sm ${statusFilter === 'discharged' ? 'btn-danger' : 'btn-outline-danger'}`}
+            onClick={() => { setStatusFilter('discharged'); }}
+          >Discharged ({dischargedCount})</button>
+        </div>
+      </div>
 
       <div className="d-flex justify-content-end mb-3">
         <div className="dropdown">
