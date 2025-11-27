@@ -15,7 +15,6 @@ import Dashboard from '../components/Dashboard.jsx';
 import CaseManagement from '../components/CaseManagement.jsx';
 import ArchivedCases from '../components/ArchivedCases.jsx';
 import Program from '../components/Program.jsx';
-import Reports from '../components/Reports.jsx';
 import Settings from '../components/Settings.jsx';
 import { AuthContext } from '../context/AuthContext.jsx';
 
@@ -92,7 +91,7 @@ function renderWithProviders(initialRoute = '/dashboard') {
           <Route path="/cases" element={<Layout><CaseManagement /></Layout>} />
           <Route path="/archived-cases" element={<Layout><ArchivedCases /></Layout>} />
           <Route path="/program" element={<Layout><Program /></Layout>} />
-          <Route path="/reports" element={<Layout><Reports /></Layout>} />
+          
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
         </Routes>
       </MemoryRouter>
@@ -127,7 +126,7 @@ describe('Dashboard loads successfully', () => {
     expect(screen.getByRole('link', { name: /Cases/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Discharged/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Program/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Report/i })).toBeInTheDocument();
+    
     expect(screen.getByRole('link', { name: /Settings/i })).toBeInTheDocument();
   });
 });
@@ -161,9 +160,7 @@ describe('Navigation Bar routes', () => {
     fireEvent.click(screen.getByRole('link', { name: /Program/i }));
     expect(screen.getByRole('heading', { level: 2, name: /Programs/i })).toBeInTheDocument();
 
-    // Report → REPORTS
-    fireEvent.click(screen.getByRole('link', { name: /Report/i }));
-    expect(screen.getAllByRole('heading', { level: 2, name: /REPORTS/i }).length).toBeGreaterThan(0);
+    
 
     // Settings → Settings
     fireEvent.click(screen.getByRole('link', { name: /Settings/i }));
@@ -233,21 +230,7 @@ describe('Programs access from sidebar', () => {
   });
 });
 
-/* Reports page opens from the nav. */
-describe('Reports access from sidebar', () => {
-  beforeEach(() => {
-    navigateMock.mockReset();
-    logoutMock.mockReset();
-  });
-  afterEach(() => vi.clearAllMocks());
-
-  it('opens Reports from nav bar', async () => {
-    renderWithProviders('/dashboard');
-    fireEvent.click(screen.getByRole('link', { name: /Report/i }));
-    // Reports shows multiple REPORTS headings; ensure at least one
-    expect(screen.getAllByRole('heading', { level: 2, name: /REPORTS/i }).length).toBeGreaterThan(0);
-  });
-});
+ 
 
 /* Sign Out should call logout and send me to the landing page. */
 describe('Successful Sign Out', () => {

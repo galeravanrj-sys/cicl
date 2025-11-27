@@ -12,7 +12,6 @@ import Dashboard from './components/Dashboard';
 import CaseManagement from './components/CaseManagement';
 import ArchivedCases from './components/ArchivedCases';
 import Program from './components/Program';
-import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Notifications from './components/Notifications';
 import AfterCare from './components/AfterCare';
@@ -125,16 +124,6 @@ function App() {
                     <PrivateRoute>
                       <Layout>
                         <Program />
-                      </Layout>
-                    </PrivateRoute>
-                  } 
-                />
-                <Route 
-                  path="/reports" 
-                  element={
-                    <PrivateRoute>
-                      <Layout>
-                        <Reports />
                       </Layout>
                     </PrivateRoute>
                   } 

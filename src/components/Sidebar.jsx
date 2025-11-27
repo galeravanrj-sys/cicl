@@ -246,20 +246,7 @@ const Sidebar = () => {
             </Link>
           </li>
         )}
-        {isAdmin && (
-          <li className="w-100 mb-3 text-center">
-            <Link 
-              to="/reports"
-              className={`nav-link text-white w-100 ${isActiveLink('/reports') ? 'active' : ''}`} 
-              style={navLinkStyle}
-            >
-              <div style={iconStyle}>
-                <i className="fas fa-file-alt"></i>
-              </div>
-              <div style={labelStyle}>Report</div>
-            </Link>
-          </li>
-        )}
+        
         <li className="w-100 text-center mt-auto">
           <Link 
             to="/settings"
