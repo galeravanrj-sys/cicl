@@ -203,15 +203,16 @@ const Settings = () => {
         <div className="col-md-8">
           {/* Profile Settings Card */}
           <div className="card border-0 shadow-sm rounded-4 mb-4" style={{ backgroundColor: '#  ' }}>
-            <div className="card-body p-3 position-relative">
-              <button
-                type="button"
-                className="btn btn-link btn-sm position-absolute p-0 text-decoration-underline"
-                style={{ top: 10, right: 10 }}
-                onClick={() => setIsEditing((v) => !v)}
-              >
-                {isEditing ? 'Done' : 'Edit'}
-              </button>
+            <div className="card-body p-3">
+              <div className="d-flex justify-content-end">
+                <button
+                  type="button"
+                  className="btn btn-link btn-sm p-0 text-decoration-underline"
+                  onClick={() => setIsEditing((v) => !v)}
+                >
+                  {isEditing ? 'Done' : 'Edit'}
+                </button>
+              </div>
               <div className="text-center mb-3">
                 <div className="avatar-upload mb-2">
                   <div 
