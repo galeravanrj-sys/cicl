@@ -203,16 +203,16 @@ const Settings = () => {
         <div className="col-md-8">
           {/* Profile Settings Card */}
           <div className="card border-0 shadow-sm rounded-4 mb-4" style={{ backgroundColor: '#  ' }}>
-            <div className="card-body p-3">
-              <div className="d-flex justify-content-end w-100 mb-2">
-                <button
-                  type="button"
-                  className="btn btn-link btn-sm p-0 text-decoration-underline"
-                  onClick={() => setIsEditing((v) => !v)}
-                >
-                  {isEditing ? 'Done' : 'Edit'}
-                </button>
-              </div>
+            <div className="card-body p-3 position-relative">
+              <button
+                type="button"
+                className="btn p-0 d-flex align-items-center justify-content-center position-absolute"
+                style={{ top: 10, right: 10, width: 32, height: 32, border: '1px solid #cbd5e1', borderRadius: 6, backgroundColor: 'transparent' }}
+                onClick={() => setIsEditing((v) => !v)}
+                aria-label={isEditing ? 'Finish editing' : 'Edit settings'}
+              >
+                <i className="fas fa-edit text-secondary" />
+              </button>
               <div className="text-center mb-3">
                 <div className="avatar-upload mb-2">
                   <div 
