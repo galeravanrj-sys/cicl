@@ -207,7 +207,7 @@ const Settings = () => {
               <div className="d-flex justify-content-end w-100 mb-2">
                 <button
                   type="button"
-                  className="btn btn-outline-primary btn-sm"
+                  className="btn btn-link btn-sm p-0 text-decoration-underline"
                   onClick={() => setIsEditing((v) => !v)}
                 >
                   {isEditing ? 'Done' : 'Edit'}
