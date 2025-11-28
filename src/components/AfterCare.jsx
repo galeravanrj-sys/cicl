@@ -222,10 +222,7 @@ const AfterCare = () => {
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div className="mb-2">
-        <div className="d-flex align-items-center justify-content-between">
-          <h2 className="mb-0 text-dark">After Care</h2>
-          <small className="text-muted">Showing {totalItems} {totalItems === 1 ? 'case' : 'cases'}</small>
-        </div>
+        <h2 className="mb-0 text-dark">After Care</h2>
         <ul className="nav nav-pills mt-2">
           <li className="nav-item">
             <button
