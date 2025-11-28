@@ -230,7 +230,7 @@ const AfterCare = () => {
               className={`nav-link ${statusFilter === 'all' ? 'active' : ''}`}
               onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
             >
-              All
+              All <span className="badge bg-secondary ms-1">{afterCareCases.length}</span>
             </button>
           </li>
           <li className="nav-item">
