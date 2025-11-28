@@ -222,30 +222,39 @@ const AfterCare = () => {
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div className="mb-2">
-        <h2 className="mb-1 text-dark">After Care</h2>
-        <div className="d-flex gap-2 align-items-center mb-3">
-          <button
-            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'all' ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
-            aria-label="Show all After Care cases"
-          >
-            All
-          </button>
-          <button
-            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'ongoing' ? 'btn-success' : 'btn-outline-success'}`}
-            onClick={() => { setStatusFilter('ongoing'); setCurrentPage(1); }}
-            aria-label="Show ongoing After Care cases"
-          >
-            Ongoing <span className="opacity-75">({ongoingCount})</span>
-          </button>
-          <button
-            className={`btn btn-sm rounded-pill px-3 ${statusFilter === 'pending' ? 'btn-warning' : 'btn-outline-warning'}`}
-            onClick={() => { setStatusFilter('pending'); setCurrentPage(1); }}
-            aria-label="Show pending After Care cases"
-          >
-            Pending <span className="opacity-75">({pendingCount})</span>
-          </button>
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="mb-0 text-dark">After Care</h2>
+          <small className="text-muted">Showing {totalItems} {totalItems === 1 ? 'case' : 'cases'}</small>
         </div>
+        <ul className="nav nav-pills mt-2">
+          <li className="nav-item">
+            <button
+              type="button"
+              className={`nav-link ${statusFilter === 'all' ? 'active' : ''}`}
+              onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
+            >
+              All
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              type="button"
+              className={`nav-link ${statusFilter === 'ongoing' ? 'active' : ''}`}
+              onClick={() => { setStatusFilter('ongoing'); setCurrentPage(1); }}
+            >
+              Ongoing <span className="badge bg-secondary ms-1">{ongoingCount}</span>
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              type="button"
+              className={`nav-link ${statusFilter === 'pending' ? 'active' : ''}`}
+              onClick={() => { setStatusFilter('pending'); setCurrentPage(1); }}
+            >
+              Pending <span className="badge bg-secondary ms-1">{pendingCount}</span>
+            </button>
+          </li>
+        </ul>
       </div>
 
       <div className="d-flex justify-content-end mb-3">
