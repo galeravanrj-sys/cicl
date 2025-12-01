@@ -321,6 +321,17 @@ const CaseManagement = () => {
     }
   };
 
+  const openCasePreview = async (caseItem) => {
+    try {
+      const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
+      setPreviewCase(fullDetails || caseItem);
+    } catch (_) {
+      setPreviewCase(caseItem);
+    } finally {
+      setShowPreviewModal(true);
+    }
+  };
+
   // Removed: previewServerHtmlPdf
 
   // Removed: previewServerTemplatePdf
@@ -525,7 +536,7 @@ const CaseManagement = () => {
                       }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
                       onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      onClick={() => { setPreviewCase(caseItem); setShowPreviewModal(true); }}
+                      onClick={() => { openCasePreview(caseItem); }}
                     >
                       <td className="px-4 py-3">
                         <div className="d-flex align-items-center">
