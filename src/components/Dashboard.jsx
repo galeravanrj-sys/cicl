@@ -51,12 +51,7 @@ const Dashboard = () => {
       return caseDate >= thirtyDaysAgo;
     }).length;
 
-    const afterCareCount = allCases.filter(c => {
-      const s = String(c?.status || '').toLowerCase();
-      return s === 'after care' || s === 'aftercare';
-    }).length;
-
-    return { activeCasesCount, archivedCount, newAdmissionsCount, afterCareCount };
+    return { activeCasesCount, archivedCount, newAdmissionsCount };
   }, [allCases]);
 
   // Calculate month over month changes with memoization
@@ -362,39 +357,9 @@ const Dashboard = () => {
     }
   };
 
-  const [showAfterCareSummary, setShowAfterCareSummary] = useState(false);
-
   return (
     <div className="container-fluid py-4">
-      <div className="d-flex align-items-center justify-content-between mb-2">
-        <h2 className="mb-0">Dashboard</h2>
-        <button
-          type="button"
-          className="btn btn-outline-secondary btn-sm"
-          onClick={() => setShowAfterCareSummary(v => !v)}
-          aria-expanded={showAfterCareSummary}
-        >
-          After Care Summary
-        </button>
-      </div>
-      {showAfterCareSummary && (
-        <div className="card border-0 shadow-sm rounded-3 mb-3" style={{ backgroundColor: '#f1f5f9' }}>
-          <div className="card-body py-2 px-3 d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-secondary">After Care</span>
-              <strong>{dashboardStats.afterCareCount}</strong>
-            </div>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => navigate('/after-care')}
-            >
-              View
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="border-bottom pb-3 mb-4"></div>
+      <h2 className="mb-4 border-bottom pb-3">Dashboard</h2>
       
       {loading ? (
         <LoadingSpinner message="Loading case data..." size="large" />
