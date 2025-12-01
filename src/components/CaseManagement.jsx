@@ -322,13 +322,14 @@ const CaseManagement = () => {
   };
 
   const openCasePreview = async (caseItem) => {
+    setPreviewCase(caseItem);
+    setShowPreviewModal(true);
     try {
       const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
-      setPreviewCase(fullDetails || caseItem);
-    } catch (_) {
-      setPreviewCase(caseItem);
-    }
-    setShowPreviewModal(true);
+      if (fullDetails) {
+        setPreviewCase(fullDetails);
+      }
+    } catch (_) {}
   };
 
   // Removed: previewServerHtmlPdf
