@@ -44,7 +44,6 @@ const CaseManagement = () => {
   const [selectedCaseForArchive, setSelectedCaseForArchive] = useState(null);
   const [previewCase, setPreviewCase] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(-1);
 
   // Helper functions for random data generation (keeping for compatibility)
   // eslint-disable-next-line no-unused-vars
@@ -328,25 +327,8 @@ const CaseManagement = () => {
       setPreviewCase(fullDetails || caseItem);
     } catch (_) {
       setPreviewCase(caseItem);
-    } finally {
-      const idx = sortedCases.findIndex(c => c.id === caseItem.id);
-      setCurrentPreviewIndex(idx >= 0 ? idx : -1);
-      setShowPreviewModal(true);
     }
-  };
-
-  const navigatePreview = async (direction) => {
-    if (currentPreviewIndex < 0) return;
-    const nextIndex = direction === 'next' ? currentPreviewIndex + 1 : currentPreviewIndex - 1;
-    if (nextIndex < 0 || nextIndex >= sortedCases.length) return;
-    const target = sortedCases[nextIndex];
-    try {
-      const fullDetails = await fetchCaseDetailsForExport(target.id);
-      setPreviewCase(fullDetails || target);
-    } catch (_) {
-      setPreviewCase(target);
-    }
-    setCurrentPreviewIndex(nextIndex);
+    setShowPreviewModal(true);
   };
 
   // Removed: previewServerHtmlPdf
@@ -707,61 +689,13 @@ const CaseManagement = () => {
       )}
 
       {showPreviewModal && previewCase && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-md modal-dialog-centered" role="document">
-            <div className="modal-content border-0 shadow" style={{ borderRadius: '12px' }}>
-              <div className="modal-header bg-primary text-dark" style={{ borderRadius: '12px 12px 0 0' }}>
-                <button
-                  type="button"
-                  className="btn btn-link text-dark"
-                  onClick={() => navigatePreview('prev')}
-                  disabled={currentPreviewIndex <= 0}
-                  aria-label="Previous"
-                  title="Previous"
-                >
-                  <i className="fas fa-chevron-left"></i>
-                </button>
-                <h6 className="modal-title fw-bold flex-grow-1 ms-2 me-2">
-                  {previewCase.name || `${previewCase.first_name || previewCase.firstName || ''} ${previewCase.last_name || previewCase.lastName || ''}`.trim() || 'N/A'}
-                </h6>
-                <button
-                  type="button"
-                  className="btn btn-link text-dark"
-                  onClick={() => navigatePreview('next')}
-                  disabled={currentPreviewIndex >= sortedCases.length - 1}
-                  aria-label="Next"
-                  title="Next"
-                >
-                  <i className="fas fa-chevron-right"></i>
-                </button>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowPreviewModal(false)}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body p-3">
-                <div className="row g-3">
-                  <div className="col-12">
-                    <div className="card border-0 bg-light">
-                      <div className="card-body p-3">
-                        <div className="mb-2"><strong>Sex:</strong> <span className="text-muted">{previewCase.sex || 'N/A'}</span></div>
-                        <div className="mb-2"><strong>Age:</strong> <span className="text-muted">{(() => { const a = calculateAge(previewCase.birthdate); return a === 'N/A' ? 'N/A' : `${a}`; })()}</span></div>
-                        <div className="mb-2"><strong>Program:</strong> <span className="text-muted">{previewCase.programType || previewCase.program || previewCase.case_type || previewCase.caseType || 'N/A'}</span></div>
-                        <div className="mb-2"><strong>Status:</strong> <span className="text-muted">{previewCase.status || 'N/A'}</span></div>
-                        <div className="mb-2"><strong>Last Updated:</strong> <span className="text-muted">{formatDate(previewCase.lastUpdated || previewCase.updated_at || previewCase.timestamp)}</span></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer bg-light" style={{ borderRadius: '0 0 12px 12px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowPreviewModal(false)}>Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CaseDetailsModal
+          caseData={previewCase}
+          isOpen={showPreviewModal}
+          onClose={() => setShowPreviewModal(false)}
+          viewOnly={true}
+          size="xl"
+        />
       )}
     </div>
   );
