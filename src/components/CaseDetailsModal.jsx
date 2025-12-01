@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CaseDetailsModal = ({ caseData, isOpen, onClose, onConfirmArchive, viewOnly = false }) => {
+const CaseDetailsModal = ({ caseData, isOpen, onClose, onConfirmArchive, viewOnly = false, size = 'lg' }) => {
   if (!isOpen || !caseData) return null;
 
   const formatDate = (dateString) => {
@@ -25,7 +25,7 @@ const CaseDetailsModal = ({ caseData, isOpen, onClose, onConfirmArchive, viewOnl
 
   return (
     <div className="modal show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div className={`modal-dialog modal-${size} modal-dialog-centered`} role="document">
         <div className="modal-content border-0 shadow" style={{ borderRadius: '12px' }}>
           <div className="modal-header bg-primary text-dark" style={{ borderRadius: '12px 12px 0 0' }}>
             <h5 className="modal-title fw-bold">

@@ -42,6 +42,8 @@ const CaseManagement = () => {
   const [editCase, setEditCase] = useState(null);
   const [showCaseDetailsModal, setShowCaseDetailsModal] = useState(false);
   const [selectedCaseForArchive, setSelectedCaseForArchive] = useState(null);
+  const [previewCase, setPreviewCase] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Helper functions for random data generation (keeping for compatibility)
   // eslint-disable-next-line no-unused-vars
@@ -523,6 +525,7 @@ const CaseManagement = () => {
                       }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
                       onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      onClick={() => { setPreviewCase(caseItem); setShowPreviewModal(true); }}
                     >
                       <td className="px-4 py-3">
                         <div className="d-flex align-items-center">
@@ -596,7 +599,7 @@ const CaseManagement = () => {
                           {isAdmin && (
                             <button
                               className="btn btn-outline-primary btn-sm"
-                              onClick={() => handleEdit(caseItem)}
+                              onClick={(e) => { e.stopPropagation(); handleEdit(caseItem); }}
                               title="Edit Case"
                             >
                               <i className="fas fa-edit me-1"></i>Edit
@@ -610,6 +613,7 @@ const CaseManagement = () => {
                               data-bs-toggle="dropdown"
                               aria-expanded="false"
                               title="Export Case"
+                              onClick={(e) => e.stopPropagation()}
                             >
                               <i className="fas fa-download me-1"></i>Export
                             </button>
@@ -667,9 +671,21 @@ const CaseManagement = () => {
       {showCaseDetailsModal && selectedCaseForArchive && (
         <CaseDetailsModal
           caseData={selectedCaseForArchive}
+          isOpen={showCaseDetailsModal}
           onClose={handleCloseArchiveModal}
           onConfirmArchive={handleConfirmArchive}
-          showArchiveButton={true}
+          viewOnly={false}
+        />
+      )}
+
+      {/* Quick View Details */}
+      {showPreviewModal && previewCase && (
+        <CaseDetailsModal
+          caseData={previewCase}
+          isOpen={showPreviewModal}
+          onClose={() => setShowPreviewModal(false)}
+          viewOnly={true}
+          size="md"
         />
       )}
     </div>
