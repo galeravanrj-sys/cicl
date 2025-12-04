@@ -6,6 +6,7 @@ const db = require('./db');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
+const FormData = require('form-data');
 const { spawn } = require('child_process');
 const os = require('os');
 
@@ -1111,6 +1112,20 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     if (!docxBuffer || !docxBuffer.length) {
       return res.status(400).json({ message: 'No DOCX payload provided' });
     }
+    const jodUrl = process.env.JODCONVERTER_URL;
+    const tryJod = async () => {
+      if (!jodUrl) throw new Error('JODCONVERTER_URL not set');
+      const form = new FormData();
+      form.append('file', docxBuffer, { filename: 'intake.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      form.append('outputFormat', 'pdf');
+      const resp = await axios.post(`${jodUrl.replace(/\/$/, '')}/converter/convert`, form, {
+        headers: form.getHeaders(),
+        responseType: 'arraybuffer',
+        timeout: 20000
+      });
+      if (resp.status !== 200) throw new Error(`JODConverter HTTP ${resp.status}`);
+      return Buffer.from(resp.data);
+    };
     const tmpDir = os.tmpdir();
     const id = `${Date.now()}-${Math.floor(Math.random()*1e9)}`;
     const docxPath = path.join(tmpDir, `intake-${id}.docx`);
@@ -1152,11 +1167,21 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     };
     let pdfBytes;
     try {
-      pdfBytes = await tryLibre();
-    } catch (_) {
-      const suggestion = process.platform === 'win32'
-        ? 'LibreOffice not found. Install it and set LIBREOFFICE_PATH to C\\Program Files\\LibreOffice\\program\\soffice.exe (or x86).'
-        : 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH to the soffice binary path.';
+      if (jodUrl) {
+        try {
+          pdfBytes = await tryJod();
+        } catch (e) {
+          pdfBytes = await tryLibre();
+        }
+      } else {
+        pdfBytes = await tryLibre();
+      }
+    } catch (e) {
+      const suggestion = jodUrl
+        ? `JODConverter failed and LibreOffice fallback also failed: ${e.message}`
+        : (process.platform === 'win32'
+            ? 'LibreOffice not found. Install it and set LIBREOFFICE_PATH to C\\Program Files\\LibreOffice\\program\\soffice.exe (or x86).'
+            : 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH to the soffice binary path.');
       return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: suggestion });
     }
     res.setHeader('Content-Type', 'application/pdf');
