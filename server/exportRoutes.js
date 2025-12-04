@@ -1112,6 +1112,51 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     if (!docxBuffer || !docxBuffer.length) {
       return res.status(400).json({ message: 'No DOCX payload provided' });
     }
+    const tryCloudConvert = async () => {
+      const apiKey = process.env.CLOUDCONVERT_API_KEY;
+      if (!apiKey) throw new Error('CLOUDCONVERT_API_KEY not set');
+      const base64 = docxBuffer.toString('base64');
+      const jobSpec = {
+        tasks: {
+          'import-my-file': {
+            operation: 'import/base64',
+            file: base64,
+            filename: 'intake.docx'
+          },
+          'convert-my-file': {
+            operation: 'convert',
+            input: 'import-my-file',
+            input_format: 'docx',
+            output_format: 'pdf',
+            engine: 'office',
+            timeout: 180
+          },
+          'export-my-file': {
+            operation: 'export/url',
+            input: 'convert-my-file'
+          }
+        }
+      };
+      const headers = { Authorization: `Bearer ${apiKey}` };
+      const createResp = await axios.post('https://api.cloudconvert.com/v2/jobs', jobSpec, { headers, timeout: 15000 });
+      const jobId = createResp?.data?.data?.id;
+      if (!jobId) throw new Error('CloudConvert: job id missing');
+      let exportUrl = null, attempts = 0;
+      while (attempts++ < 60) {
+        const jobResp = await axios.get(`https://api.cloudconvert.com/v2/jobs/${jobId}`, { headers, timeout: 10000 });
+        const tasks = jobResp?.data?.data?.tasks || [];
+        const exportTask = tasks.find(t => t.name === 'export-my-file' || t.operation === 'export/url');
+        if (exportTask && exportTask.status === 'finished' && exportTask.result && Array.isArray(exportTask.result.files) && exportTask.result.files.length) {
+          exportUrl = exportTask.result.files[0].url;
+          break;
+        }
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      if (!exportUrl) throw new Error('CloudConvert: export URL not available');
+      const pdfResp = await axios.get(exportUrl, { responseType: 'arraybuffer', timeout: 60000 });
+      if (pdfResp.status !== 200) throw new Error(`CloudConvert export fetch failed: HTTP ${pdfResp.status}`);
+      return Buffer.from(pdfResp.data);
+    };
     const jodUrl = process.env.JODCONVERTER_URL;
     const tryJod = async () => {
       if (!jodUrl) throw new Error('JODCONVERTER_URL not set');
@@ -1176,12 +1221,18 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     };
     let pdfBytes;
     try {
-      if (jodUrl) {
+      if (process.env.CLOUDCONVERT_API_KEY) {
         try {
-          pdfBytes = await tryJod();
-        } catch (e) {
-          pdfBytes = await tryLibre();
+          pdfBytes = await tryCloudConvert();
+        } catch (eCloud) {
+          if (jodUrl) {
+            try { pdfBytes = await tryJod(); } catch (eJod) { pdfBytes = await tryLibre(); }
+          } else {
+            pdfBytes = await tryLibre();
+          }
         }
+      } else if (jodUrl) {
+        try { pdfBytes = await tryJod(); } catch (eJod) { pdfBytes = await tryLibre(); }
       } else {
         pdfBytes = await tryLibre();
       }

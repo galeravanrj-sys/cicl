@@ -14,6 +14,8 @@ services:
         value: /usr/bin/soffice
       - key: JODCONVERTER_URL
         value: https://jodconverter.onrender.com
+      - key: CLOUDCONVERT_API_KEY
+        value: REPLACE_WITH_CLOUDCONVERT_API_KEY
 
   - type: web
     name: jodconverter
