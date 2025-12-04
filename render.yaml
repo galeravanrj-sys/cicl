@@ -1,39 +1,30 @@
 services:
   - type: web
-    name: cicl-backend
-    env: node
-    rootDir: server
-    buildCommand: npm install --omit=dev
-    startCommand: npm start
+    name: cicl-server
+    env: docker
     plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
     autoDeploy: true
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: "18"
-      - key: PGSSLMODE
-        value: require
+      - key: LIBREOFFICE_PATH
+        value: /usr/bin/soffice
       - key: JWT_SECRET
-        generateValue: true
-      - key: DB_HOST
-        sync: false
-      - key: DB_PORT
-        value: "5432"
-      - key: DB_NAME
-        sync: false
-      - key: DB_USER
-        sync: false
-      - key: DB_PASSWORD
-        sync: false
-      - key: PGPASSWORD
-        sync: false
+        value: CHANGE_ME_SECRET
       - key: FRONTEND_URL
-        sync: false
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-      - key: GOOGLE_REDIRECT_URI
-        sync: false
+        value: https://your-frontend.vercel.app
+      - key: DATABASE_URL
+        value: postgres://USER:PASSWORD@HOST:5432/auth_system
+      - key: DB_HOST
+        value: HOST
+      - key: DB_NAME
+        value: auth_system
+      - key: DB_USER
+        value: USER
+      - key: DB_PASSWORD
+        value: PASSWORD
+      - key: DB_PORT
+        value: 5432

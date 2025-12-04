@@ -84,21 +84,7 @@ router.get('/verify-token', auth, (req, res) => {
   });
 });
 
-router.post('/admin/secrets/cloudconvert', auth, async (req, res) => {
-  try {
-    const apiKey = req.body && req.body.apiKey;
-    if (!apiKey) return res.status(400).json({ message: 'apiKey required' });
-    await db.query(
-      `INSERT INTO app_secrets(key, value, updated_at) VALUES($1, $2, NOW())
-       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
-      ['cloudconvert_api_key', apiKey]
-    );
-    process.env.CLOUDCONVERT_API_KEY = apiKey;
-    return res.json({ success: true });
-  } catch (e) {
-    return res.status(500).json({ message: 'Failed to set CloudConvert key' });
-  }
-});
+// CloudConvert secret route removed: conversion now relies on local LibreOffice.
 
 router.post('/admin/secrets/libreoffice', auth, async (req, res) => {
   try {

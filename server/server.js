@@ -256,8 +256,6 @@ async function ensureSecretsTable() {
 
 async function loadAppSecrets() {
   try {
-    const cc = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['cloudconvert_api_key']);
-    if (cc.rows && cc.rows[0] && cc.rows[0].value) process.env.CLOUDCONVERT_API_KEY = cc.rows[0].value;
     const lo = await db.query('SELECT value FROM app_secrets WHERE key = $1', ['libreoffice_path']);
     if (lo.rows && lo.rows[0] && lo.rows[0].value) process.env.LIBREOFFICE_PATH = lo.rows[0].value;
   } catch (e) {

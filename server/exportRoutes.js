@@ -1131,41 +1131,12 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
       try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
       return pdfBytes;
     };
-    const tryCloudConvert = async () => {
-      const apiKey = process.env.CLOUDCONVERT_API_KEY;
-      if (!apiKey) throw new Error('CloudConvert API key missing');
-      const jobRes = await axios.post('https://api.cloudconvert.com/v2/jobs', {
-        tasks: {
-          'import-1': { operation: 'import/base64', file: Buffer.from(docxBuffer).toString('base64'), filename: 'intake.docx' },
-          'convert-1': { operation: 'convert', input: 'import-1', input_format: 'docx', output_format: 'pdf' },
-          'export-1': { operation: 'export/url', input: 'convert-1' }
-        }
-      }, { headers: { Authorization: `Bearer ${apiKey}` } });
-      const jobId = jobRes.data?.data?.id;
-      const wait = async (ms) => new Promise(r => setTimeout(r, ms));
-      for (let i = 0; i < 30; i++) {
-        const poll = await axios.get(`https://api.cloudconvert.com/v2/jobs/${jobId}`, { headers: { Authorization: `Bearer ${apiKey}` } });
-        const tasks = poll.data?.data?.tasks || [];
-        const exp = tasks.find(t => t.operation === 'export/url');
-        if (exp?.result?.files?.length) {
-          const url = exp.result.files[0].url;
-          const dl = await axios.get(url, { responseType: 'arraybuffer' });
-          return Buffer.from(dl.data);
-        }
-        await wait(2000);
-      }
-      throw new Error('CloudConvert timeout');
-    };
     let pdfBytes;
     try {
       pdfBytes = await tryLibre();
     } catch (_) {
-      try {
-        pdfBytes = await tryCloudConvert();
-      } catch (e2) {
-        console.error('CloudConvert error:', e2?.message || e2);
-        return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: e2.message || String(e2) });
-      }
+      const suggestion = 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH env variable to its soffice binary.';
+      return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: suggestion });
     }
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
