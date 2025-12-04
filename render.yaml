@@ -12,6 +12,8 @@ services:
         value: production
       - key: LIBREOFFICE_PATH
         value: /usr/bin/soffice
+      - key: JODCONVERTER_URL
+        value: https://your-jodconverter.onrender.com
       - key: JWT_SECRET
         value: CHANGE_ME_SECRET
       - key: FRONTEND_URL
