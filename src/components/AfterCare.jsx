@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_BASE } from '../utils/apiBase';
 import { fetchCaseDetailsForExport } from '../utils/exportHelpers';
-import { downloadAllCasesPDF } from '../utils/pdfGenerator';
+import { downloadAllCasesPDFFromWord } from '../utils/wordGenerator';
 import { downloadAllCasesCSV } from '../utils/csvGenerator';
 import { isArchivedStatus } from '../utils/statusHelpers';
 
@@ -103,7 +103,7 @@ const AfterCare = () => {
       return;
     }
     try {
-      await downloadAllCasesPDF(sortedCases.map(c => c.id));
+      await downloadAllCasesPDFFromWord(sortedCases);
     } catch (err) {
       console.error('Error exporting After Care list to PDF:', err);
     }
