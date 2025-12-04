@@ -13,7 +13,18 @@ services:
       - key: LIBREOFFICE_PATH
         value: /usr/bin/soffice
       - key: JODCONVERTER_URL
-        value: https://your-jodconverter.onrender.com
+        value: https://jodconverter.onrender.com
+
+  - type: web
+    name: jodconverter
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./jodconverter/Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: SERVER_PORT
+        value: 8080
       - key: JWT_SECRET
         value: CHANGE_ME_SECRET
       - key: FRONTEND_URL

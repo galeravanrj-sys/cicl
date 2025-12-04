@@ -1117,14 +1117,23 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
       if (!jodUrl) throw new Error('JODCONVERTER_URL not set');
       const form = new FormData();
       form.append('file', docxBuffer, { filename: 'intake.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-      form.append('outputFormat', 'pdf');
-      const resp = await axios.post(`${jodUrl.replace(/\/$/, '')}/converter/convert`, form, {
-        headers: form.getHeaders(),
-        responseType: 'arraybuffer',
-        timeout: 20000
+      const base = jodUrl.replace(/\/$/, '');
+      // Try JODConverter Online sample endpoint
+      try {
+        const f1 = new FormData();
+        f1.append('file', docxBuffer, { filename: 'intake.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        f1.append('outputFormat', 'pdf');
+        const resp1 = await axios.post(`${base}/converter/convert`, f1, {
+          headers: f1.getHeaders(), responseType: 'arraybuffer', timeout: 20000
+        });
+        if (resp1.status === 200) return Buffer.from(resp1.data);
+      } catch (e1) {}
+      // Try common REST variant `/conversion?format=pdf` with 'file' field
+      const resp2 = await axios.post(`${base}/conversion?format=pdf`, form, {
+        headers: form.getHeaders(), responseType: 'arraybuffer', timeout: 20000
       });
-      if (resp.status !== 200) throw new Error(`JODConverter HTTP ${resp.status}`);
-      return Buffer.from(resp.data);
+      if (resp2.status !== 200) throw new Error(`JODConverter HTTP ${resp2.status}`);
+      return Buffer.from(resp2.data);
     };
     const tmpDir = os.tmpdir();
     const id = `${Date.now()}-${Math.floor(Math.random()*1e9)}`;
