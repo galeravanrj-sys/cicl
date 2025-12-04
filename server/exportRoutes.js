@@ -1124,13 +1124,13 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
         f1.append('file', docxBuffer, { filename: 'intake.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
         f1.append('outputFormat', 'pdf');
         const resp1 = await axios.post(`${base}/converter/convert`, f1, {
-          headers: f1.getHeaders(), responseType: 'arraybuffer', timeout: 20000
+          headers: { ...f1.getHeaders(), Accept: 'application/pdf' }, responseType: 'arraybuffer', timeout: 60000, maxContentLength: Infinity, maxBodyLength: Infinity
         });
         if (resp1.status === 200) return Buffer.from(resp1.data);
       } catch (e1) {}
       // Try common REST variant `/conversion?format=pdf` with 'file' field
       const resp2 = await axios.post(`${base}/conversion?format=pdf`, form, {
-        headers: form.getHeaders(), responseType: 'arraybuffer', timeout: 20000
+        headers: { ...form.getHeaders(), Accept: 'application/pdf' }, responseType: 'arraybuffer', timeout: 60000, maxContentLength: Infinity, maxBodyLength: Infinity
       });
       if (resp2.status !== 200) throw new Error(`JODConverter HTTP ${resp2.status}`);
       return Buffer.from(resp2.data);
