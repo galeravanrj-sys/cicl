@@ -6,8 +6,6 @@ const db = require('./db');
 const { PDFDocument, StandardFonts } = require('pdf-lib');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
-const FormData = require('form-data');
-const { spawn } = require('child_process');
 const os = require('os');
 
 const router = express.Router();
@@ -1157,7 +1155,7 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
       if (pdfResp.status !== 200) throw new Error(`CloudConvert export fetch failed: HTTP ${pdfResp.status}`);
       return Buffer.from(pdfResp.data);
     };
-    const jodUrl = process.env.JODCONVERTER_URL;
+    
     const tryJod = async () => {
       if (!jodUrl) throw new Error('JODCONVERTER_URL not set');
       const form = new FormData();
@@ -1221,28 +1219,9 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     };
     let pdfBytes;
     try {
-      if (process.env.CLOUDCONVERT_API_KEY) {
-        try {
-          pdfBytes = await tryCloudConvert();
-        } catch (eCloud) {
-          if (jodUrl) {
-            try { pdfBytes = await tryJod(); } catch (eJod) { pdfBytes = await tryLibre(); }
-          } else {
-            pdfBytes = await tryLibre();
-          }
-        }
-      } else if (jodUrl) {
-        try { pdfBytes = await tryJod(); } catch (eJod) { pdfBytes = await tryLibre(); }
-      } else {
-        pdfBytes = await tryLibre();
-      }
+      pdfBytes = await tryCloudConvert();
     } catch (e) {
-      const suggestion = jodUrl
-        ? `JODConverter failed and LibreOffice fallback also failed: ${e.message}`
-        : (process.platform === 'win32'
-            ? 'LibreOffice not found. Install it and set LIBREOFFICE_PATH to C\\Program Files\\LibreOffice\\program\\soffice.exe (or x86).'
-            : 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH to the soffice binary path.');
-      return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: suggestion });
+      return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: e.message });
     }
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="case-intake.pdf"');
@@ -1253,24 +1232,7 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
   }
 });
 
-// Simple health endpoint to verify JODConverter connectivity
-router.get('/jod/ping', auth, async (req, res) => {
-  try {
-    const base = (process.env.JODCONVERTER_URL || '').replace(/\/$/, '');
-    if (!base) return res.status(400).json({ ok: false, message: 'JODCONVERTER_URL not set' });
-    let info = {};
-    try {
-      const h1 = await axios.get(`${base}/actuator/health`, { timeout: 5000 });
-      info.health = h1.data || { status: h1.status };
-    } catch (_) {
-      info.health = 'no actuator';
-    }
-    const r = await axios.get(base, { timeout: 5000 });
-    return res.json({ ok: true, status: r.status, url: base, info });
-  } catch (err) {
-    return res.status(500).json({ ok: false, message: 'Ping failed', error: err.message });
-  }
-});
+ 
 
 // POST: HTML-rendered consolidated PDF for multiple cases (Puppeteer)
 router.post('/cases/pdf-html', auth, async (req, res) => {
