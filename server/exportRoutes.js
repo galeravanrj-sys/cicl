@@ -1115,27 +1115,48 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
     const id = `${Date.now()}-${Math.floor(Math.random()*1e9)}`;
     const docxPath = path.join(tmpDir, `intake-${id}.docx`);
     const pdfPath = path.join(tmpDir, `intake-${id}.pdf`);
-    const sofficeCmd = process.env.LIBREOFFICE_PATH || 'soffice';
+    const candidates = (() => {
+      const envPath = process.env.LIBREOFFICE_PATH;
+      const list = [];
+      if (envPath && String(envPath).trim()) list.push(envPath.trim());
+      list.push('soffice');
+      if (process.platform === 'win32') {
+        list.push('C\\\\Program Files\\\\LibreOffice\\\\program\\\\soffice.exe');
+        list.push('C\\\\Program Files (x86)\\\\LibreOffice\\\\program\\\\soffice.exe');
+      }
+      return list;
+    })();
     const tryLibre = async () => {
       fs.writeFileSync(docxPath, docxBuffer);
       const args = ['--headless', '--convert-to', 'pdf', '--outdir', tmpDir, docxPath];
-      await new Promise((resolve, reject) => {
-        const p = spawn(sofficeCmd, args, { stdio: 'ignore' });
-        p.on('error', reject);
-        p.on('exit', (code) => {
-          if (code === 0 && fs.existsSync(pdfPath)) return resolve();
-          reject(new Error(`LibreOffice conversion failed with code ${code}`));
-        });
-      });
-      const pdfBytes = fs.readFileSync(pdfPath);
-      try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
-      return pdfBytes;
+      let lastErr;
+      for (const cmd of candidates) {
+        try {
+          await new Promise((resolve, reject) => {
+            const p = spawn(cmd, args, { stdio: 'ignore' });
+            p.on('error', reject);
+            p.on('exit', (code) => {
+              if (code === 0 && fs.existsSync(pdfPath)) return resolve();
+              reject(new Error(`LibreOffice conversion failed (cmd=${cmd}) with code ${code}`));
+            });
+          });
+          const pdfBytes = fs.readFileSync(pdfPath);
+          try { fs.unlinkSync(docxPath); fs.unlinkSync(pdfPath); } catch (_) {}
+          return pdfBytes;
+        } catch (err) {
+          lastErr = err;
+          try { if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath); } catch (_) {}
+        }
+      }
+      throw lastErr || new Error('LibreOffice conversion failed');
     };
     let pdfBytes;
     try {
       pdfBytes = await tryLibre();
     } catch (_) {
-      const suggestion = 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH env variable to its soffice binary.';
+      const suggestion = process.platform === 'win32'
+        ? 'LibreOffice not found. Install it and set LIBREOFFICE_PATH to C\\Program Files\\LibreOffice\\program\\soffice.exe (or x86).'
+        : 'LibreOffice not available. Install LibreOffice and set LIBREOFFICE_PATH to the soffice binary path.';
       return res.status(500).json({ message: 'Failed DOCX→PDF conversion', error: suggestion });
     }
     res.setHeader('Content-Type', 'application/pdf');
