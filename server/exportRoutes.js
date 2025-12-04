@@ -1202,6 +1202,25 @@ router.post('/case/pdf-from-docx', auth, express.raw({ type: '*/*', limit: '20mb
   }
 });
 
+// Simple health endpoint to verify JODConverter connectivity
+router.get('/jod/ping', auth, async (req, res) => {
+  try {
+    const base = (process.env.JODCONVERTER_URL || '').replace(/\/$/, '');
+    if (!base) return res.status(400).json({ ok: false, message: 'JODCONVERTER_URL not set' });
+    let info = {};
+    try {
+      const h1 = await axios.get(`${base}/actuator/health`, { timeout: 5000 });
+      info.health = h1.data || { status: h1.status };
+    } catch (_) {
+      info.health = 'no actuator';
+    }
+    const r = await axios.get(base, { timeout: 5000 });
+    return res.json({ ok: true, status: r.status, url: base, info });
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: 'Ping failed', error: err.message });
+  }
+});
+
 // POST: HTML-rendered consolidated PDF for multiple cases (Puppeteer)
 router.post('/cases/pdf-html', auth, async (req, res) => {
   try {
