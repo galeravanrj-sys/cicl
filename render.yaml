@@ -16,6 +16,16 @@ services:
         value: REPLACE_WITH_CLOUDCONVERT_API_KEY
       - key: DATABASE_URL
         value: postgresql://auth_system_pm9s_user:WHNtwtqja0JICjYCXCvbQLKtB9mNP6yG@dpg-d4stshpr0fns73f2hq00-a.oregon-postgres.render.com/auth_system_pm9s
+      - key: JWT_SECRET
+        value: CHANGE_ME_SECRET
+      - key: FRONTEND_URL
+        value: https://your-frontend.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        value: REPLACE_WITH_GOOGLE_CLIENT_ID
+      - key: GOOGLE_CLIENT_SECRET
+        value: REPLACE_WITH_GOOGLE_CLIENT_SECRET
+      - key: GOOGLE_REDIRECT_URI
+        value: https://cicl.onrender.com/api/auth/google/callback
 
   - type: web
     name: jodconverter

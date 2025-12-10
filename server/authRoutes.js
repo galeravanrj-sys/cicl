@@ -511,16 +511,16 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
         console.warn('Failed to record active session for Google login:', e.message);
       }
 
-      // Pull remember from OAuth state
       let rememberParam = '1';
       try {
         if (req.query.state) {
-          const parsed = JSON.parse(decodeURIComponent(req.query.state));
+          let s = req.query.state;
+          try { s = decodeURIComponent(s); } catch (_) {}
+          try { s = decodeURIComponent(s); } catch (_) {}
+          const parsed = JSON.parse(s);
           if (parsed && parsed.remember === '0') rememberParam = '0';
         }
-      } catch (e) {
-        // default to remember=1 on parse issues
-      }
+      } catch (_) {}
 
       // Redirect into SPA dashboard with token
       const redirectPath = '/dashboard';
@@ -537,7 +537,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
       const msg = error && error.message ? error.message : String(error);
       const details = error && error.response && error.response.data ? error.response.data : undefined;
       console.error('Google callback error:', msg, details ? `| details: ${JSON.stringify(details)}` : '');
-      return res.status(500).json({ message: 'Google authentication failed' });
+      return res.status(500).json({ message: 'Google authentication failed', error: msg, details });
     }
   });
 } else {
