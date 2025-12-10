@@ -44,7 +44,10 @@ const inferProto = (req) => {
   return xf || req.protocol || 'https';
 };
 const getRedirectUri = (req) => {
-  return GOOGLE_REDIRECT_URI || `${inferProto(req)}://${req.get('host')}/api/auth/google/callback`;
+  if (GOOGLE_REDIRECT_URI) return GOOGLE_REDIRECT_URI;
+  const xfHost = (req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const host = xfHost || req.get('host');
+  return `${inferProto(req)}://${host}/api/auth/google/callback`;
 };
 const createOAuthClient = (redirectUri) => new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectUri);
 
@@ -537,6 +540,11 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
       const msg = error && error.message ? error.message : String(error);
       const details = error && error.response && error.response.data ? error.response.data : undefined;
       console.error('Google callback error:', msg, details ? `| details: ${JSON.stringify(details)}` : '');
+      if (details && (details.error === 'invalid_grant' || details.error_description === 'invalid_grant')) {
+        const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const q = new URLSearchParams({ oauth: 'invalid_grant' }).toString();
+        return res.redirect(`${baseUrl}/login?${q}`);
+      }
       return res.status(500).json({ message: 'Google authentication failed', error: msg, details });
     }
   });
