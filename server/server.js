@@ -206,15 +206,6 @@ server.listen(PORT, () => {
 // Ensure base schema exists before enforcing indexes/tables
 async function ensureBaseSchema() {
   try {
-    const existsRes = await db.query(`
-      SELECT 
-        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='users') AS has_users,
-        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='cases') AS has_cases
-    `);
-    const { has_users, has_cases } = existsRes.rows[0] || {};
-    if (has_users && has_cases) {
-      return; // base tables present
-    }
     const fs = require('fs');
     const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
     if (!fs.existsSync(schemaPath)) {
