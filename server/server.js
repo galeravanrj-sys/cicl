@@ -6,6 +6,7 @@ const compression = require('compression');
 const authRoutes = require('./authRoutes');
 const caseRoutes = require('./caseRoutes');
 const exportRoutes = require('./exportRoutes');
+const auth = require('./middleware/auth');
 
 const db = require('./db');
 
@@ -68,6 +69,33 @@ app.use('/api/auth', authRoutes);
 
 app.use('/api/cases', caseRoutes);
 app.use('/api/export', exportRoutes);
+
+app.post('/api/admin/db/init', auth, async (req, res) => {
+  try {
+    await ensureBaseSchema();
+    await ensureUniqueNameIndex();
+    await ensureActiveSessionsTable();
+    await ensureSecretsTable();
+    return res.json({ ok: true });
+  } catch (e) {
+    return res.status(500).json({ message: 'DB init failed', error: e.message });
+  }
+});
+
+app.get('/api/admin/db/status', auth, async (req, res) => {
+  try {
+    const r = await db.query(`
+      SELECT 
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='users') AS users,
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='cases') AS cases,
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='active_sessions') AS active_sessions,
+        EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='app_secrets') AS app_secrets
+    `);
+    return res.json(r.rows[0] || {});
+  } catch (e) {
+    return res.status(500).json({ message: 'DB status failed', error: e.message });
+  }
+});
 
 // --- Simple Server-Sent Events (SSE) for realtime case updates ---
 const sseClients = new Set();
