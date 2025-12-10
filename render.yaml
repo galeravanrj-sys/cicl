@@ -10,9 +10,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      
+      - key: PGSSLMODE
+        value: require
       - key: CLOUDCONVERT_API_KEY
         value: REPLACE_WITH_CLOUDCONVERT_API_KEY
+      - key: DATABASE_URL
+        value: postgresql://auth_system_pm9s_user:WHNtwtqja0JICjYCXCvbQLKtB9mNP6yG@dpg-d4stshpr0fns73f2hq00-a.oregon-postgres.render.com/auth_system_pm9s
 
   - type: web
     name: jodconverter
@@ -24,19 +27,3 @@ services:
     envVars:
       - key: SERVER_PORT
         value: 8080
-      - key: JWT_SECRET
-        value: CHANGE_ME_SECRET
-      - key: FRONTEND_URL
-        value: https://your-frontend.vercel.app
-      - key: DATABASE_URL
-        value: postgres://USER:PASSWORD@HOST:5432/auth_system
-      - key: DB_HOST
-        value: HOST
-      - key: DB_NAME
-        value: auth_system
-      - key: DB_USER
-        value: USER
-      - key: DB_PASSWORD
-        value: PASSWORD
-      - key: DB_PORT
-        value: 5432
