@@ -217,7 +217,7 @@ const ArchivedCases = () => {
   const exportSingleCaseToPDF = async (caseItem) => {
     const fullDetails = await fetchCaseDetailsForExport(caseItem.id);
     const caseData = fullDetails || caseItem;
-    await downloadIntakeFormPDF(caseData);
+    await downloadIntakeFormPDF(caseData); 
   };
 
   const exportSingleCaseToWord = async (caseItem) => {

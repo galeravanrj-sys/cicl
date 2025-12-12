@@ -161,7 +161,7 @@ const Login = () => {
           
           <form onSubmit={onSubmit} style={{ width: '100%' }}>
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ 
+              <label htmlFor="login-email" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -171,6 +171,7 @@ const Login = () => {
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 value={email}
@@ -191,7 +192,7 @@ const Login = () => {
             </div>
             
             <div style={{ marginBottom: '10px' }}>
-              <label style={{ 
+              <label htmlFor="login-password" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -202,6 +203,7 @@ const Login = () => {
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={password}

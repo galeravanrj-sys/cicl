@@ -168,7 +168,7 @@ const Register = () => {
           
           <form onSubmit={onSubmit} style={{ width: '100%' }}>
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ 
+              <label htmlFor="register-firstName" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -178,6 +178,7 @@ const Register = () => {
                 First Name
               </label>
               <input
+                id="register-firstName"
                 type="text"
                 name="firstName"
                 value={firstName}
@@ -196,7 +197,7 @@ const Register = () => {
             </div>
             
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ 
+              <label htmlFor="register-middleName" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -206,6 +207,7 @@ const Register = () => {
                 Middle Name
               </label>
               <input
+                id="register-middleName"
                 type="text"
                 name="middleName"
                 value={middleName}
@@ -224,7 +226,7 @@ const Register = () => {
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ 
+              <label htmlFor="register-lastName" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -234,6 +236,7 @@ const Register = () => {
                 Last Name
               </label>
               <input
+                id="register-lastName"
                 type="text"
                 name="lastName"
                 value={lastName}
@@ -252,7 +255,7 @@ const Register = () => {
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ 
+              <label htmlFor="register-email" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -262,6 +265,7 @@ const Register = () => {
                 Email
               </label>
               <input
+                id="register-email"
                 type="email"
                 name="email"
                 value={email}
@@ -280,7 +284,7 @@ const Register = () => {
             </div>
 
             <div style={{ marginBottom: '10px' }}>
-              <label style={{ 
+              <label htmlFor="register-password" style={{ 
                 display: 'block', 
                 marginBottom: '8px', 
                 fontWeight: '500',
@@ -291,6 +295,7 @@ const Register = () => {
               </label>
               <div style={{ position: 'relative' }}>
                 <input
+                  id="register-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={password}

@@ -269,8 +269,9 @@ const Settings = () => {
 
               <form onSubmit={handleSubmit} className="row g-2">
                 <div className="col-md-6">
-                  <label className="form-label small text-dark">First Name</label>
+                  <label className="form-label small text-dark" htmlFor="settings-firstName">First Name</label>
                   <input
+                    id="settings-firstName"
                     type="text"
                     className="form-control form-control-sm"
                     name="firstName"
@@ -281,8 +282,9 @@ const Settings = () => {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label small text-dark">Last Name</label>
+                  <label className="form-label small text-dark" htmlFor="settings-lastName">Last Name</label>
                   <input
+                    id="settings-lastName"
                     type="text"
                     className="form-control form-control-sm"
                     name="lastName"
@@ -293,8 +295,9 @@ const Settings = () => {
                 </div>
 
                 <div className="col-12">
-                  <label className="form-label small text-dark">Middle Name</label>
+                  <label className="form-label small text-dark" htmlFor="settings-middleName">Middle Name</label>
                   <input
+                    id="settings-middleName"
                     type="text"
                     className="form-control form-control-sm"
                     name="middleName"
@@ -305,8 +308,9 @@ const Settings = () => {
                 </div>
 
                 <div className="col-12">
-                  <label className="form-label small text-dark">Email</label>
+                  <label className="form-label small text-dark" htmlFor="settings-email">Email</label>
                   <input
+                    id="settings-email"
                     type="email"
                     className="form-control form-control-sm"
                     name="email"
@@ -318,8 +322,9 @@ const Settings = () => {
 
                 
                 <div className="col-12">
-                  <label className="form-label small text-dark">Set Password</label>
+                  <label className="form-label small text-dark" htmlFor="settings-password">Set Password</label>
                   <input
+                    id="settings-password"
                     type="password"
                     className="form-control form-control-sm"
                     name="password"
@@ -330,8 +335,9 @@ const Settings = () => {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label small text-dark">New Password</label>
+                  <label className="form-label small text-dark" htmlFor="settings-newPassword">New Password</label>
                   <input
+                    id="settings-newPassword"
                     type="password"
                     className="form-control form-control-sm"
                     name="newPassword"
@@ -342,8 +348,9 @@ const Settings = () => {
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label small text-dark">Confirm Password</label>
+                  <label className="form-label small text-dark" htmlFor="settings-confirmPassword">Confirm Password</label>
                   <input
+                    id="settings-confirmPassword"
                     type="password"
                     className="form-control form-control-sm"
                     name="confirmPassword"
